@@ -622,17 +622,23 @@ Located: `.claude/agents/validator.md`
 
 **Verification:**
 
-- [ ] All 6 hooks exist in `.claude/hooks/`
-- [ ] Hooks are executable (`chmod +x`)
-- [ ] Each hook checks relevance before executing
-- [ ] Python validation scripts exist in `.claude/hooks/validators/`
-- [ ] Scripts can parse contracts and implementation
+- [x] All 6 hooks exist in `.claude/hooks/`
+- [x] Hooks are executable (`chmod +x`)
+- [x] Each hook checks relevance before executing
+- [x] Python validation scripts exist in `.claude/hooks/validators/`
+- [x] Scripts can parse contracts and implementation
 - [ ] validator subagent exists in `.claude/agents/`
-- [ ] SubagentStop runs after each subagent
+- [x] SubagentStop runs after each subagent
 - [ ] validator invoked for complexity ≥4
 - [ ] False positive: Hook catches parameter drift
 - [ ] True negative: validator provides semantic recommendations
 - [ ] Decision menu presents findings clearly
+
+**Current Status:**
+
+- ✅ Phase 5a: Python Validation Scripts (Complete - 2025-11-10)
+- ✅ Phase 5b: Hook Scripts (Complete - 2025-11-10)
+- 🚧 Phase 5c: Validator Subagent (Pending)
 
 ---
 
@@ -705,6 +711,35 @@ User-created aesthetic library managed by ui-template-library skill:
 - Reusable across different plugins
 - Includes visual system (colors, typography, controls) without layout specifics
 
+### ui-template-library Skill
+
+Located: `.claude/skills/ui-template-library/SKILL.md`
+
+**Save aesthetics from mockups:**
+- Extract visual language (colors, typography, control styling, spacing, effects)
+- Create aesthetic.yaml, preview.html, metadata.json
+- Store in `.claude/aesthetics/[aesthetic-id]/`
+- Update manifest.json registry
+- Does NOT save layout - only visual system
+
+**Apply aesthetics to new plugins:**
+- Analyze target plugin parameter count/types
+- Generate appropriate layout for parameter count
+- Apply saved color palette, control styling, spacing, effects
+- Maintain visual consistency across different layouts
+- Integrated into ui-mockup decision menus
+
+**Management features:**
+- List all aesthetics with previews
+- Delete aesthetics
+- Update aesthetics from refined mockups
+- Track usage across plugins
+
+**Integration points:**
+- Automatically offered after mockup creation
+- Automatically offered before mockup creation (if aesthetics exist)
+- Manual invocation for management tasks
+
 ### gui-agent WebView Integration
 
 Update gui-agent to:
@@ -728,10 +763,16 @@ Update foundation-agent CMakeLists.txt generation:
 
 - `architecture/12-webview-integration-design.md` - Complete architecture
 - `procedures/webview/README.md` - ⚠️ START HERE
+- `procedures/webview/01-overview.md` - WebView concepts, architecture patterns, when to use
+- `procedures/webview/02-project-setup.md` - CMake configuration, WebView options, prerequisites
+- `procedures/webview/03-communication-patterns.md` - C++ ↔ JavaScript communication
+- `procedures/webview/04-parameter-binding.md` - Relay pattern and parameter attachments
+- `procedures/webview/05-audio-visualization.md` - Real-time data visualization patterns
+- `procedures/webview/06-development-workflow.md` - Hot reloading and debugging techniques
+- `procedures/webview/07-distribution.md` - Embedding files and production packaging
 - `procedures/webview/best-practices.md` - ⚠️ CRITICAL: Member order
-- `procedures/webview/04-parameter-binding.md` - Relay pattern
-- `procedures/webview/03-communication-patterns.md` - C++ ↔ JavaScript
-- `procedures/webview/common-problems.md` - Troubleshooting
+- `procedures/webview/common-problems.md` - Troubleshooting guide
+- `procedures/skills/ui-template-library.md` - Aesthetic system management
 
 **Critical Patterns:**
 
@@ -747,6 +788,16 @@ Update foundation-agent CMakeLists.txt generation:
 - [ ] ui-design-rules.md exists in skill references/
 - [ ] WebView code templates exist in skill assets/
 - [ ] WebView code templates exist with CORRECT member order
+- [ ] ui-template-library skill implemented
+- [ ] `.claude/aesthetics/` directory structure created
+- [ ] Can save aesthetic from completed mockup
+- [ ] Saves aesthetic.yaml, preview.html, metadata.json
+- [ ] manifest.json tracks all aesthetics
+- [ ] Can apply aesthetic to different plugin (different parameter count)
+- [ ] Applied aesthetic maintains visual language with new layout
+- [ ] Decision menus offer aesthetic save/apply at correct points
+- [ ] Can list all aesthetics
+- [ ] Can delete aesthetics
 - [ ] gui-agent uses WebView templates
 - [ ] Member order enforced in templates
 - [ ] Resource provider implementation complete
