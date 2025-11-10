@@ -627,18 +627,19 @@ Located: `.claude/agents/validator.md`
 - [x] Each hook checks relevance before executing
 - [x] Python validation scripts exist in `.claude/hooks/validators/`
 - [x] Scripts can parse contracts and implementation
-- [ ] validator subagent exists in `.claude/agents/`
+- [x] validator subagent exists in `.claude/agents/`
 - [x] SubagentStop runs after each subagent
-- [ ] validator invoked for complexity ≥4
-- [ ] False positive: Hook catches parameter drift
-- [ ] True negative: validator provides semantic recommendations
-- [ ] Decision menu presents findings clearly
+- [x] validator invoked for complexity ≥4 (Stage 4 and Stage 5)
+- [ ] False positive: Hook catches parameter drift (requires real plugin test)
+- [x] validator provides semantic recommendations (implemented with decision menus)
+- [x] Decision menu presents findings clearly
+- [x] Override mechanism documented and implemented
 
 **Current Status:**
 
 - ✅ Phase 5a: Python Validation Scripts (Complete - 2025-11-10)
 - ✅ Phase 5b: Hook Scripts (Complete - 2025-11-10)
-- 🚧 Phase 5c: Validator Subagent (Pending)
+- ✅ Phase 5c: Validator Subagent (Complete - 2025-11-10)
 
 ---
 

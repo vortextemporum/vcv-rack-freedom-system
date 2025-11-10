@@ -435,7 +435,33 @@ overrides:
     date: "2025-11-08"
 ```
 
-Suppress matching errors with logged reason.
+**How to handle overrides:**
+
+1. At the start of validation, check if `plugins/[PluginName]/.validator-overrides.yaml` exists
+2. If it exists, parse the YAML file and load the overrides array
+3. For each check you perform, see if there's a matching override:
+   - Match on `stage` (must equal current stage)
+   - Match on `check_type` (must equal the check's name/identifier)
+   - Optionally match on `pattern` (if specified, check if it appears in your check message)
+4. If a check matches an override:
+   - Mark the check as `passed: true`
+   - Set `message` to: `"Check suppressed: [reason from override]"`
+   - Set `severity` to `"info"`
+   - Include the suppression in your report so the user knows it was overridden
+5. If no override file exists, or no matching override, perform the check normally
+
+**Example suppressed check in report:**
+
+```json
+{
+  "name": "missing_dsp_component",
+  "passed": true,
+  "message": "Check suppressed: Using custom reverb, not juce::dsp::Reverb",
+  "severity": "info"
+}
+```
+
+This allows users to suppress false positives while maintaining visibility.
 
 ## Best Practices
 

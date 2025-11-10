@@ -1864,7 +1864,123 @@ Choose (1-4): _
 console.log("✓ All Stage 4 tests passed")
 ```
 
-### 6. Decision Menu (After Tests Pass)
+### 6. Invoke validator for Complexity ≥4 Plugins
+
+**For complexity ≥4 plugins, run semantic validation:**
+
+```typescript
+if (complexityScore >= 4) {
+  console.log("\n━━━ Running semantic validation (complexity ≥4) ━━━\n")
+
+  // Read contracts
+  const paramSpecContent = readFile(`plugins/${pluginName}/.ideas/parameter-spec.md`)
+  const architectureContent = readFile(`plugins/${pluginName}/.ideas/architecture.md`)
+  const planContent = readFile(`plugins/${pluginName}/.ideas/plan.md`)
+
+  const validationResult = Task({
+    subagent_type: "validator",
+    description: `Validate ${pluginName} Stage 4`,
+    prompt: `
+Validate Stage 4 completion for ${pluginName}.
+
+**Stage:** 4
+**Plugin:** ${pluginName}
+**Contracts:**
+- parameter-spec.md: ${paramSpecContent}
+- architecture.md: ${architectureContent}
+- plan.md: ${planContent}
+
+**Expected outputs for Stage 4:**
+- All DSP components from architecture.md implemented
+- processBlock() contains real-time safe audio processing
+- Parameters modulate DSP components correctly
+- prepareToPlay() allocates buffers
+- No heap allocations in processBlock
+- ScopedNoDenormals used
+- Edge cases handled (zero-length buffers)
+
+Return JSON validation report with status, checks, and recommendation.
+    `
+  })
+
+  // Parse JSON report (robust handling)
+  let validationReport
+  try {
+    // Try extracting JSON from markdown code blocks first
+    const jsonMatch = validationResult.match(/```json\n([\s\S]*?)\n```/) ||
+                      validationResult.match(/```\n([\s\S]*?)\n```/)
+
+    if (jsonMatch) {
+      validationReport = JSON.parse(jsonMatch[1])
+    } else {
+      // Try parsing entire response as JSON
+      validationReport = JSON.parse(validationResult)
+    }
+  } catch (error) {
+    console.log(`
+⚠️ Warning: Could not parse validator report as JSON
+
+Raw validator output:
+${validationResult}
+
+Continuing workflow (validation is advisory, not blocking).
+    `)
+    validationReport = null
+  }
+
+  // Present findings if report parsed successfully
+  if (validationReport) {
+    const { status, checks, recommendation, continue_to_next_stage } = validationReport
+
+    console.log(`
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${status === "PASS" ? "✓" : "✗"} Validator ${status}: Stage 4 Review
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    `)
+
+    // Group checks by severity
+    const errors = checks.filter(c => c.severity === "error")
+    const warnings = checks.filter(c => c.severity === "warning")
+    const info = checks.filter(c => c.severity === "info")
+
+    if (errors.length > 0) {
+      console.log("\n❌ Errors:")
+      errors.forEach(e => console.log(`  - ${e.message}`))
+    }
+
+    if (warnings.length > 0) {
+      console.log("\n⚠️  Warnings:")
+      warnings.forEach(w => console.log(`  - ${w.message}`))
+    }
+
+    if (info.length > 0 && info.length <= 5) {
+      console.log("\nℹ️  Info:")
+      info.forEach(i => console.log(`  - ${i.message}`))
+    }
+
+    console.log(`\nRecommendation: ${recommendation}`)
+
+    // Present decision menu with validation findings
+    console.log(`
+
+What's next?
+1. Continue to Stage 5 (implement UI) ${continue_to_next_stage ? "(recommended by validator)" : ""}
+2. Address validator ${errors.length > 0 ? "errors" : "warnings"} first
+3. Review validator report details
+4. Test audio manually in DAW
+5. Review DSP code
+6. Other
+
+Choose (1-6): _
+    `)
+
+    // User decides next action based on findings
+    // (Advisory layer - user makes final call)
+  }
+}
+```
+
+### 7. Decision Menu (After Tests Pass)
 
 ```
 ✓ Stage 4 complete: Audio processing operational
@@ -2278,7 +2394,123 @@ Choose (1-4): _
 console.log("✓ All Stage 5 tests passed (including UI validation)")
 ```
 
-### 7. Decision Menu (After Tests Pass)
+### 7. Invoke validator for Complexity ≥4 Plugins
+
+**For complexity ≥4 plugins, run semantic validation:**
+
+```typescript
+if (complexityScore >= 4) {
+  console.log("\n━━━ Running semantic validation (complexity ≥4) ━━━\n")
+
+  // Read contracts
+  const paramSpecContent = readFile(`plugins/${pluginName}/.ideas/parameter-spec.md`)
+  const architectureContent = readFile(`plugins/${pluginName}/.ideas/architecture.md`)
+  const planContent = readFile(`plugins/${pluginName}/.ideas/plan.md`)
+
+  const validationResult = Task({
+    subagent_type: "validator",
+    description: `Validate ${pluginName} Stage 5`,
+    prompt: `
+Validate Stage 5 completion for ${pluginName}.
+
+**Stage:** 5
+**Plugin:** ${pluginName}
+**Contracts:**
+- parameter-spec.md: ${paramSpecContent}
+- architecture.md: ${architectureContent}
+- plan.md: ${planContent}
+
+**Expected outputs for Stage 5:**
+- Member declaration order correct (Relays → WebView → Attachments)
+- All parameters from spec have UI bindings
+- HTML element IDs match relay names
+- UI aesthetic matches mockup
+- Visual feedback (knobs respond to parameter changes)
+- WebView initialization includes error handling
+- Binary data embedded correctly
+
+Return JSON validation report with status, checks, and recommendation.
+    `
+  })
+
+  // Parse JSON report (robust handling)
+  let validationReport
+  try {
+    // Try extracting JSON from markdown code blocks first
+    const jsonMatch = validationResult.match(/```json\n([\s\S]*?)\n```/) ||
+                      validationResult.match(/```\n([\s\S]*?)\n```/)
+
+    if (jsonMatch) {
+      validationReport = JSON.parse(jsonMatch[1])
+    } else {
+      // Try parsing entire response as JSON
+      validationReport = JSON.parse(validationResult)
+    }
+  } catch (error) {
+    console.log(`
+⚠️ Warning: Could not parse validator report as JSON
+
+Raw validator output:
+${validationResult}
+
+Continuing workflow (validation is advisory, not blocking).
+    `)
+    validationReport = null
+  }
+
+  // Present findings if report parsed successfully
+  if (validationReport) {
+    const { status, checks, recommendation, continue_to_next_stage } = validationReport
+
+    console.log(`
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${status === "PASS" ? "✓" : "✗"} Validator ${status}: Stage 5 Review
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    `)
+
+    // Group checks by severity
+    const errors = checks.filter(c => c.severity === "error")
+    const warnings = checks.filter(c => c.severity === "warning")
+    const info = checks.filter(c => c.severity === "info")
+
+    if (errors.length > 0) {
+      console.log("\n❌ Errors:")
+      errors.forEach(e => console.log(`  - ${e.message}`))
+    }
+
+    if (warnings.length > 0) {
+      console.log("\n⚠️  Warnings:")
+      warnings.forEach(w => console.log(`  - ${w.message}`))
+    }
+
+    if (info.length > 0 && info.length <= 5) {
+      console.log("\nℹ️  Info:")
+      info.forEach(i => console.log(`  - ${i.message}`))
+    }
+
+    console.log(`\nRecommendation: ${recommendation}`)
+
+    // Present decision menu with validation findings
+    console.log(`
+
+What's next?
+1. Continue to Stage 6 (final validation) ${continue_to_next_stage ? "(recommended by validator)" : ""}
+2. Address validator ${errors.length > 0 ? "errors" : "warnings"} first
+3. Review validator report details
+4. Test UI manually in DAW
+5. Review UI code
+6. Other
+
+Choose (1-6): _
+    `)
+
+    // User decides next action based on findings
+    // (Advisory layer - user makes final call)
+  }
+}
+```
+
+### 8. Decision Menu (After Tests Pass)
 
 ```
 ✓ Stage 5 complete: UI operational
