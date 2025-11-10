@@ -340,20 +340,20 @@ phase_6_clear_daw_caches() {
     info "Phase 6: Clear DAW Caches"
     echo "Phase 6: Clear DAW Caches" >> "$LOG_FILE"
 
-    local ableton_cache="$HOME/Library/Caches/Ableton/Plugin Scanner"
+    local ableton_prefs="$HOME/Library/Preferences/Ableton"
     local au_cache="$HOME/Library/Caches/AudioUnitCache"
 
-    # Clear Ableton plugin scanner cache
-    info "  - Clearing Ableton cache..."
+    # Clear Ableton plugin database (forces rescan)
+    info "  - Clearing Ableton plugin database..."
     if [ "$DRY_RUN" = true ]; then
-        echo "[DRY-RUN] rm -rf \"$ableton_cache\"/*"
+        echo "[DRY-RUN] rm -f \"$ableton_prefs\"/*/PluginScanDb.txt"
     else
-        if [ -d "$ableton_cache" ]; then
-            rm -rf "$ableton_cache"/* 2>/dev/null || true
-            echo "Cleared Ableton cache" >> "$LOG_FILE"
+        if [ -d "$ableton_prefs" ]; then
+            rm -f "$ableton_prefs"/*/PluginScanDb.txt 2>/dev/null || true
+            echo "Cleared Ableton plugin database" >> "$LOG_FILE"
         else
-            info "  - Ableton cache directory not found (skipping)"
-            echo "Ableton cache not found" >> "$LOG_FILE"
+            info "  - Ableton preferences directory not found (skipping)"
+            echo "Ableton preferences not found" >> "$LOG_FILE"
         fi
     fi
 
