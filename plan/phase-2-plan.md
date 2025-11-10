@@ -6,8 +6,13 @@
 
 **Deliverables Check:**
 - ✅ `.claude/commands/` - 9 slash commands exist (dream.md, implement.md, improve.md, continue.md, test.md, install-plugin.md, show-standalone.md, troubleshoot-juce.md, doc-fix.md)
-- ✅ `.claude/skills/` - 7 skill directories exist (plugin-workflow, plugin-ideation, plugin-improve, context-resume, ui-mockup, plugin-testing, plugin-lifecycle)
-- ✅ `templates/` - 4 contract templates exist (creative-brief.md, parameter-spec.md, architecture.md, plan.md)
+- ✅ `.claude/skills/` - 7 skills with modular structure (SKILL.md + references/ + assets/ subdirectories)
+  - plugin-workflow, plugin-ideation, plugin-improve, context-resume, ui-mockup (two-phase workflow), plugin-testing, plugin-lifecycle
+- ✅ Skill templates - Contract templates migrated to skill-specific assets/ directories:
+  - `.claude/skills/ui-mockup/assets/parameter-spec-template.md`
+  - `.claude/skills/plugin-workflow/assets/architecture-template.md`
+  - `.claude/skills/plugin-workflow/assets/plan-template.md`
+  - `.claude/skills/plugin-ideation/assets/creative-brief-template.md`
 - ✅ `PLUGINS.md` - Registry file exists with status legend
 - ✅ `.claude/CLAUDE.md` - Navigation index exists
 - ✅ `plugins/`, `logs/`, `backups/`, `scripts/` - Core directories exist
@@ -133,7 +138,7 @@ This phase splits into 3 sub-phases based on architectural dependencies:
 **Dependencies**: None (foundational task)
 
 **Implementation Steps:**
-1. Create handoff file template in `templates/.continue-here-template.md` with exact format from checkpoint-system.md lines 110-185:
+1. Create handoff file template in `.claude/skills/plugin-workflow/assets/continue-here-template.md` with exact format from checkpoint-system.md lines 110-185:
    ```yaml
    ---
    plugin: PluginName
@@ -166,7 +171,7 @@ This phase splits into 3 sub-phases based on architectural dependencies:
    - Test markdown section parsing (Resume Point, Completed, Next Steps, etc.)
 
 **Expected Output:**
-- `templates/.continue-here-template.md` created with exact spec format
+- `.claude/skills/plugin-workflow/assets/continue-here-template.md` created with exact spec format
 - Handoff functions implemented in plugin-workflow skill
 - Checkpoint type classification logic
 - Integration verified with context-resume
@@ -214,7 +219,7 @@ This phase splits into 3 sub-phases based on architectural dependencies:
 3. Implement state machine constraints:
    - **Single 🚧 constraint:** Only ONE plugin can be 🚧 at a time (prevents concurrent modification)
    - **Sequential stage enforcement:** Cannot skip from 🚧 Stage 0 to 🚧 Stage 6
-   - **Contract-based transitions:** Stage 1 transition requires parameter-spec.md and architecture.md
+   - **Contract-based transitions:** Stage 1 transition requires parameter-spec.md and architecture.md (generated via ui-mockup two-phase workflow)
 4. Create PLUGINS.md entry structure (from state-architecture.md lines 42-83):
    ```markdown
    ### [PluginName]
@@ -241,7 +246,7 @@ This phase splits into 3 sub-phases based on architectural dependencies:
 
 **Verification:**
 - Automated: `scripts/test-state-machine.sh` - Tests legal/illegal transitions, single 🚧 constraint
-- Manual: STOP AND ASK LEX: "Please verify the state machine prevents: (1) skipping from 💡 directly to ✅, (2) starting a second plugin when one is already 🚧, and (3) transitioning to Stage 1 without parameter-spec.md and architecture.md"
+- Manual: STOP AND ASK LEX: "Please verify the state machine prevents: (1) skipping from 💡 directly to ✅, (2) starting a second plugin when one is already 🚧, and (3) transitioning to Stage 1 without parameter-spec.md and architecture.md (which come from ui-mockup two-phase workflow)"
 
 ---
 
@@ -555,7 +560,7 @@ Choose (1-${options.length}): _`
            "parameter-spec.md": paramSpecExists ? "✓ exists" : "✗ MISSING (required)",
            "architecture.md": archSpecExists ? "✓ exists" : "✗ MISSING (required)"
          },
-         action: "Finalize UI mockup to generate parameter-spec.md, then create architecture.md"
+         action: "Complete ui-mockup two-phase workflow (design approval generates parameter-spec.md), then create architecture.md"
        }
      }
 
@@ -565,7 +570,7 @@ Choose (1-${options.length}): _`
 2. **BLOCK execution if contracts missing** (non-negotiable per ROADMAP.md line 252):
    - Display clear error message explaining WHY blocked
    - Show which contracts exist vs missing
-   - Suggest: "Finalize a UI mockup to generate parameter-spec.md"
+   - Suggest: "Complete ui-mockup two-phase workflow (Phase 4.5 design approval generates parameter-spec.md)"
    - Do NOT proceed to planning without contracts
 3. Implement complexity scoring algorithm (plugin-workflow.md lines 170-180):
    ```typescript
@@ -600,7 +605,7 @@ Choose (1-${options.length}): _`
    }
    ```
 4. Implement planning logic:
-   - Read contracts: parameter-spec.md, architecture.md, research.md
+   - Read contracts: parameter-spec.md (from ui-mockup Phase 4.5), architecture.md, research.md
    - Calculate complexity score
    - If score ≥3: Generate phase breakdown for Stage 4 (DSP) and Stage 5 (GUI)
    - If score ≤2: Single-pass implementation (one commit per stage)
@@ -616,7 +621,7 @@ Choose (1-${options.length}): _`
        - If phased: Stage 5.1, 5.2 with test criteria
      - Stage 6: Validation (pluginval, presets)
    - **Contract References:**
-     - parameter-spec.md: [N] parameters defined
+     - parameter-spec.md: [N] parameters defined (from ui-mockup two-phase workflow)
      - architecture.md: [M] DSP components
 6. Update state:
    - Update PLUGINS.md: Add timeline entry "Stage 1: Planning - Complexity X.Y"
@@ -636,7 +641,7 @@ Choose (1-${options.length}): _`
    ```
 
 **Expected Output:**
-- **Contract enforcement BLOCKS** if parameter-spec.md or architecture.md missing
+- **Contract enforcement BLOCKS** if parameter-spec.md (from ui-mockup) or architecture.md missing
 - Complexity score calculated correctly
 - `plan.md` generated with phase breakdown if complexity ≥3
 - Handoff includes complexity_score and phased_implementation
@@ -646,7 +651,7 @@ Choose (1-${options.length}): _`
 **Verification:**
 - Automated: `scripts/test-stage1-contracts.sh` - Validates contract enforcement blocks without specs
 - Automated: `scripts/test-complexity-scoring.sh` - Tests complexity calculation with various inputs
-- Manual: STOP AND ASK LEX: "Please create a test plugin without parameter-spec.md and verify Stage 1 BLOCKS with error message listing missing contracts. Then add both contracts and verify Stage 1 proceeds, calculates complexity score correctly (show breakdown), and generates plan.md with appropriate phasing for score ≥3"
+- Manual: STOP AND ASK LEX: "Please create a test plugin without parameter-spec.md and verify Stage 1 BLOCKS with error message listing missing contracts and suggesting ui-mockup workflow. Then add both contracts (parameter-spec.md from ui-mockup two-phase workflow, architecture.md manually) and verify Stage 1 proceeds, calculates complexity score correctly (show breakdown), and generates plan.md with appropriate phasing for score ≥3"
 
 ---
 
@@ -1693,7 +1698,7 @@ git log --grep="feat:.*Stage" --format="%s" | grep -E "feat: \w+ Stage [0-6]"
 # After complete workflow, verify all expected files:
 
 # Handoff template
-ls -la templates/.continue-here-template.md
+ls -la .claude/skills/plugin-workflow/assets/continue-here-template.md
 
 # Test plugin outputs
 ls -la plugins/TestWorkflowPhase2/.ideas/research.md
@@ -1905,15 +1910,15 @@ Phase 2 is COMPLETE when:
 **Enables:** Phase 3 (Implementation Subagents)
 
 **Key Files Created:**
-- `templates/.continue-here-template.md` (handoff template)
+- `.claude/skills/plugin-workflow/assets/continue-here-template.md` (handoff template)
 - `.claude/agents/validator.md` (validator subagent)
 - `.claude/hooks/UserPromptSubmit.sh` (context injection hook)
 - `.claude/hooks/Stop.sh` (stage enforcement hook)
 - `.claude/hooks/PreCompact.sh` (contract preservation hook)
-- `research.md` (Stage 0 output)
-- `plan.md` (Stage 1 output)
-- `CHANGELOG.md` (Stage 6 output)
-- `Presets/` (Stage 6 factory presets)
+- `plugins/[Name]/.ideas/research.md` (Stage 0 output)
+- `plugins/[Name]/.ideas/plan.md` (Stage 1 output)
+- `plugins/[Name]/CHANGELOG.md` (Stage 6 output)
+- `plugins/[Name]/Presets/` (Stage 6 factory presets)
 - Test scripts: 14 scripts in `scripts/`
 
 **Key Files Modified:**
