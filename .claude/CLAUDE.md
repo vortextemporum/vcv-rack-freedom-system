@@ -74,7 +74,7 @@ After subagent completes:
 This ensures consistent checkpoint behavior and clean separation of concerns.
 
 ## Workflow Entry Points
-- New plugin: `/dream` → `/implement`
+- New plugin: `/dream` → `/plan` → `/implement`
 - Resume work: `/continue [PluginName]`
 - Modify existing: `/improve [PluginName]`
 - Test plugin: `/test [PluginName]`

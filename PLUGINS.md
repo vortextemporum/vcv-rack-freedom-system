@@ -29,6 +29,7 @@
 | ClapMachine | 💡 Ideated | - | 2025-11-10 |
 | DriveVerb | 🚧 Stage 2 | - | 2025-11-11 |
 | FlutterVerb | 📦 Installed | 1.0.0 | 2025-11-11 |
+| LushVerb | 💡 Ideated | - | 2025-11-11 |
 
 ### GainKnob
 
@@ -304,6 +305,43 @@ Tape-driven plate reverb with extreme wow and flutter modulation for textured, a
 - **2025-11-11 (Stage 6):** Validation complete - 7 factory presets created, CHANGELOG.md generated, ready for installation
 - **2025-11-11 (v1.0.0):** Installed to system folders (VST3 + AU)
 - **2025-11-11 (v1.0.1):** Bug fixes - decay independence, drive latency compensation, age scaling, MOD_MODE toggle, VU meter
+
+**Known Issues:**
+- None
+
+**Last Updated:** 2025-11-11
+
+### LushVerb
+
+**Status:** 💡 **Ideated**
+**Created:** 2025-11-11
+**Type:** Audio Effect (Reverb)
+
+**Description:**
+Stunning, lush algorithmic reverb inspired by Strymon BigSky. Four simple controls deliver consistently gorgeous ambient/ethereal reverb with infinite tails, built-in modulation, and subtle shimmer.
+
+**Parameters (4 total):**
+- Size: 0.5s-20s+, default 2.5s (reverb tail length)
+- Damping: 0-100%, default 30% (high-frequency rolloff)
+- Shimmer: Always-on subtle (ethereal +1 octave sparkle)
+- Mix: 0-100%, default 30% (dry/wet blend)
+
+**DSP:** High-quality algorithmic reverb (multi-tap delay network or velvet noise preferred for maximum lushness). Built-in chorus modulation for depth. Clean pitch-shifting for shimmer (+1 octave). Smooth damping control for tail character.
+
+**GUI:** Four horizontal rotary knobs with value displays. Clean, modern, elegant aesthetic. Premium feel.
+
+**Use Cases:**
+- Versatile mixing tool (vocals, instruments)
+- Creative ambient soundscapes
+- Instant inspiration—always sounds gorgeous
+
+**Inspirations:**
+- Strymon BigSky (lush algorithmic reverb)
+- Valhalla VintageVerb (smooth, musical)
+- Eventide Blackhole (infinite tails)
+
+**Lifecycle Timeline:**
+- **2025-11-11:** Creative brief completed
 
 **Known Issues:**
 - None
