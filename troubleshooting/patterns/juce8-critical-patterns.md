@@ -181,6 +181,209 @@ slider.setBounds(x, y, w, h);  // OK in resized()
 
 ---
 
+## 8. WebView Resource Provider - Explicit URL Mapping (ALWAYS REQUIRED)
+
+### ❌ WRONG (Generic loop - breaks resource loading)
+```cpp
+std::optional<juce::WebBrowserComponent::Resource>
+getResource(const juce::String& url)
+{
+    auto path = url.substring(1);  // Remove leading slash
+
+    // Generic loop - hard to debug, easy to break
+    for (int i = 0; i < BinaryData::namedResourceListSize; ++i) {
+        if (path == BinaryData::namedResourceList[i]) {
+            // ... conversion logic ...
+        }
+    }
+    return std::nullopt;
+}
+```
+
+**Problem:** BinaryData flattens paths (`js/juce/index.js` → `index_js`), but HTML requests `/js/juce/index.js`. Generic loop can't match.
+
+### ✅ CORRECT (Explicit URL mapping)
+```cpp
+std::optional<juce::WebBrowserComponent::Resource>
+getResource(const juce::String& url)
+{
+    auto makeVector = [](const char* data, int size) {
+        return std::vector<std::byte>(
+            reinterpret_cast<const std::byte*>(data),
+            reinterpret_cast<const std::byte*>(data) + size
+        );
+    };
+
+    // Explicit mapping - clear, debuggable, reliable
+    if (url == "/" || url == "/index.html") {
+        return juce::WebBrowserComponent::Resource {
+            makeVector(BinaryData::index_html, BinaryData::index_htmlSize),
+            juce::String("text/html")
+        };
+    }
+
+    if (url == "/js/juce/index.js") {
+        return juce::WebBrowserComponent::Resource {
+            makeVector(BinaryData::index_js, BinaryData::index_jsSize),
+            juce::String("text/javascript")
+        };
+    }
+
+    return std::nullopt;  // 404
+}
+```
+
+**Why:**
+- BinaryData converts paths to valid C++ identifiers (`index.js` → `index_js`)
+- HTML/JS use original paths (`./js/juce/index.js`)
+- Explicit mapping bridges this gap clearly
+- Easy to debug (can log URL mismatches)
+
+**Placement:** PluginEditor.cpp private method
+
+**Documented in:** `troubleshooting/gui-issues/webview-frame-load-interrupted-TapeAge-20251111.md`
+
+---
+
+## 9. CMakeLists.txt - NEEDS_WEB_BROWSER for VST3 (ALWAYS REQUIRED)
+
+### ❌ WRONG (VST3 won't appear in DAW)
+```cmake
+juce_add_plugin(MyPlugin
+    COMPANY_NAME "YourCompany"
+    PLUGIN_CODE Plug
+    FORMATS VST3 AU Standalone
+    PRODUCT_NAME "My Plugin"
+    # Missing NEEDS_WEB_BROWSER - VST3 will be built but won't load
+)
+```
+
+### ✅ CORRECT
+```cmake
+juce_add_plugin(MyPlugin
+    COMPANY_NAME "YourCompany"
+    PLUGIN_CODE Plug
+    FORMATS VST3 AU Standalone
+    PRODUCT_NAME "My Plugin"
+    NEEDS_WEB_BROWSER TRUE  # REQUIRED for VST3 WebView support
+)
+```
+
+**Why:** VST3 format requires explicit WebView flag even if AU works without it. Missing this flag causes:
+- VST3 builds successfully
+- Binary exists in build artifacts
+- But plugin doesn't appear in DAW VST3 scanner
+- Only AU format visible
+
+**When:** ANY plugin using WebBrowserComponent for UI
+
+**Documented in:** `troubleshooting/gui-issues/webview-frame-load-interrupted-TapeAge-20251111.md`
+
+---
+
+## 10. Testing GUI Changes - Always Install to System (CRITICAL WORKFLOW)
+
+### ❌ WRONG (Tests stale cached builds)
+```bash
+# Build but DON'T install
+./scripts/build-and-install.sh MyPlugin --no-install
+
+# Test in DAW → loads OLD version from system folders
+```
+
+**Result:** DAW loads stale plugins from `~/Library/Audio/Plug-Ins/`, not fresh builds.
+
+### ✅ CORRECT
+```bash
+# Build AND install to system folders
+./scripts/build-and-install.sh MyPlugin
+
+# Script automatically:
+# 1. Builds fresh binaries
+# 2. Removes old versions from system
+# 3. Installs new versions
+# 4. Clears DAW caches (Ableton DB, AU cache)
+# 5. Verifies installation
+```
+
+**Then restart DAW** - Required for plugin rescan after cache clear.
+
+**Why:**
+- DAWs load plugins from system folders (`~/Library/Audio/Plug-Ins/`), NOT build directories
+- Using `--no-install` means testing old builds while developing new code
+- All "fixes" appear broken when you're testing stale binaries
+
+**When:** ANY time you modify:
+- PluginEditor code (UI changes)
+- CMakeLists.txt (configuration)
+- Resource files (HTML/CSS/JS)
+- Parameter bindings
+
+**Documented in:** `troubleshooting/gui-issues/webview-frame-load-interrupted-TapeAge-20251111.md`
+
+---
+
+## 11. WebView Member Initialization - Use std::unique_ptr (REQUIRED)
+
+### ❌ WRONG (Raw members - initialization order issues)
+```cpp
+class MyPluginEditor : public juce::AudioProcessorEditor {
+private:
+    juce::WebSliderRelay gainRelay;
+    juce::WebBrowserComponent webView;
+    juce::WebSliderParameterAttachment gainAttachment;
+};
+```
+
+### ✅ CORRECT
+```cpp
+class MyPluginEditor : public juce::AudioProcessorEditor {
+private:
+    // Order: Relays → WebView → Attachments
+    std::unique_ptr<juce::WebSliderRelay> gainRelay;
+    std::unique_ptr<juce::WebBrowserComponent> webView;
+    std::unique_ptr<juce::WebSliderParameterAttachment> gainAttachment;
+};
+```
+
+**Constructor:**
+```cpp
+MyPluginEditor::MyPluginEditor(MyProcessor& p)
+    : AudioProcessorEditor(&p), processorRef(p)
+{
+    // 1. Create relays FIRST
+    gainRelay = std::make_unique<juce::WebSliderRelay>("GAIN");
+
+    // 2. Create WebView with relay options
+    webView = std::make_unique<juce::WebBrowserComponent>(
+        juce::WebBrowserComponent::Options{}
+            .withNativeIntegrationEnabled()
+            .withResourceProvider([this](auto& url) { return getResource(url); })
+            .withOptionsFrom(*gainRelay)
+    );
+
+    // 3. Create attachments LAST
+    gainAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
+        *processorRef.parameters.getParameter("GAIN"), *gainRelay
+    );
+
+    addAndMakeVisible(*webView);
+    webView->goToURL(juce::WebBrowserComponent::getResourceProviderRoot());
+}
+```
+
+**Why:**
+- Ensures correct construction order
+- Prevents release build crashes (90% of member order issues)
+- Destruction order is automatic (reverse of declaration)
+- Matches JUCE examples and GainKnob reference implementation
+
+**When:** ALL WebView-based plugin editors
+
+**Documented in:** `troubleshooting/gui-issues/webview-frame-load-interrupted-TapeAge-20251111.md`
+
+---
+
 ## Usage Instructions
 
 ### For Subagents (foundation-agent, shell-agent, dsp-agent, gui-agent)
