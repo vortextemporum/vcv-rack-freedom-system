@@ -816,6 +816,168 @@ tail -50 ~/Library/Logs/AudioUnitHosting/Logic*.log | grep -i error
 
 ---
 
+## 19. WebView Boolean Parameters - Use getToggleState (ALWAYS REQUIRED)
+
+### ❌ WRONG (Works but semantically incorrect)
+```javascript
+// Using slider API for boolean parameter (FlutterVerb v1.0.1)
+const modModeState = Juce.getSliderState("MOD_MODE");
+
+modModeToggle.addEventListener("click", () => {
+    const currentValue = modModeState.getValue();
+    const newValue = currentValue < 0.5 ? 1.0 : 0.0;  // Float threshold
+    modModeState.setValue(newValue);
+});
+
+modModeState.valueChangedEvent.addListener((value) => {
+    updateToggleVisual(value >= 0.5);  // Float comparison
+});
+```
+
+**Problem:** Boolean parameters ARE stored as 0.0/1.0 floats internally, so `getSliderState()` works but requires unnecessary float comparisons and is semantically wrong.
+
+### ✅ CORRECT
+```javascript
+// Use getToggleState for boolean parameters (FlutterVerb v1.0.2)
+const modModeState = Juce.getToggleState("MOD_MODE");
+
+modModeToggle.addEventListener("click", () => {
+    const currentValue = modModeState.getValue();
+    modModeState.setValue(!currentValue);  // Clean boolean toggle
+});
+
+modModeState.valueChangedEvent.addListener(() => {
+    updateToggleVisual(modModeState.getValue());  // Direct boolean
+});
+```
+
+**Why:** JUCE WebView bridge provides TWO distinct APIs:
+- `getSliderState()` - For continuous/ranged parameters (returns normalized float 0.0-1.0)
+- `getToggleState()` - For boolean parameters (returns true/false)
+
+**Benefits of correct API:**
+1. **Type safety:** Works with booleans, not floats pretending to be booleans
+2. **Cleaner code:** `!value` instead of `value < 0.5 ? 1.0 : 0.0`
+3. **Semantic correctness:** API name matches intent
+4. **No threshold ambiguity:** What if someone uses 0.3? With booleans, no confusion.
+
+**Decision tree:**
+```
+Parameter type in C++?
+├─ AudioParameterBool → getToggleState()
+├─ AudioParameterFloat → getSliderState()
+├─ AudioParameterInt → getSliderState()
+└─ AudioParameterChoice → getSliderState()
+```
+
+**When:** ALL WebView toggle switches/boolean parameters
+
+**Documented in:** `troubleshooting/gui-issues/toggle-switch-wrong-api-getsliderstate-flutterverb-20251111.md`
+
+---
+
+## 20. WebView VU Meters - requestAnimationFrame Loop (ALWAYS REQUIRED)
+
+### ❌ WRONG (Updates but jerky, no ballistic motion)
+```javascript
+// Direct CSS update in event callback (FlutterVerb v1.0.1)
+function updateVUMeter(dbLevel) {
+    const normalizedLevel = mapDBToNormalized(dbLevel);
+    const angle = -45 + (normalizedLevel * 90);
+
+    // Instant jump - no smooth animation
+    vuNeedle.style.transform = `rotate(${angle}deg)`;
+}
+
+Juce.addEventListener('VU_LEVEL', updateVUMeter);
+```
+
+**Problem:** Needle jumps instantly to target position. No smooth motion, no ballistic physics (fast attack/slow decay). Visually jarring and hard to read peaks.
+
+### ✅ CORRECT
+```javascript
+// Separate current/target with RAF loop (FlutterVerb v1.0.2)
+let currentNeedleAngle = -45;   // Visual state
+let targetNeedleAngle = -45;    // Audio data
+
+const ATTACK_SPEED = 0.4;   // Fast rise (responsive to peaks)
+const DECAY_SPEED = 0.15;   // Slow fall (readable fallback)
+
+// Event handler ONLY updates target
+function updateVUMeter(dbLevel) {
+    const normalizedLevel = mapDBToNormalized(dbLevel);
+    targetNeedleAngle = -45 + (normalizedLevel * 90);
+}
+
+// Animation loop interpolates current → target
+function animateVUMeter() {
+    // Ballistic motion: fast attack, slow decay
+    const speed = currentNeedleAngle < targetNeedleAngle ? ATTACK_SPEED : DECAY_SPEED;
+    currentNeedleAngle += (targetNeedleAngle - currentNeedleAngle) * speed;
+
+    // Update visual
+    vuNeedle.style.transform = `rotate(${currentNeedleAngle}deg)`;
+
+    // Update color based on level zones
+    const normalized = (currentNeedleAngle + 45) / 90;
+    if (normalized > 0.9) {
+        vuNeedle.style.background = 'linear-gradient(180deg, #ff6666 0%, #ff4444 100%)';
+    } else if (normalized > 0.75) {
+        vuNeedle.style.background = 'linear-gradient(180deg, #ffcc66 0%, #ffaa44 100%)';
+    } else {
+        vuNeedle.style.background = 'linear-gradient(180deg, #d4a574 0%, #c49564 100%)';
+    }
+
+    requestAnimationFrame(animateVUMeter);
+}
+
+// Start loop once
+Juce.addEventListener('VU_LEVEL', updateVUMeter);
+animateVUMeter();
+```
+
+**Why:** Canvas/DOM animations require continuous redraw loops. Simply updating a value in event callbacks doesn't create smooth motion.
+
+**Key architecture:**
+1. **Separate data from view:** Target (audio) vs current (visual)
+2. **Events only update target:** Decouples audio rate (~30-60Hz) from display rate (60fps)
+3. **Animation loop interpolates:** Smoothly moves current toward target
+4. **Ballistic speeds:** Different attack (0.4) vs decay (0.15) mimics analog VU meters
+5. **requestAnimationFrame:** Browser-optimized ~60fps, auto-pauses when tab hidden
+
+**Exponential interpolation formula:**
+```javascript
+current += (target - current) * speed
+```
+- Creates smooth easing (fast initially, slows near target)
+- Never overshoots target
+- Naturally converges without threshold checks
+
+**Ballistic motion physics:**
+- **Attack = 0.4:** Needle catches peaks quickly (responsive)
+- **Decay = 0.15:** Needle falls slowly (easier to read, less jittery)
+- **Industry standard:** Mimics physical VU meter with mass/spring/damper
+
+**When:** ALL WebView animated meters, level displays, visualizations
+
+**Speed tuning guide:**
+- 0.1 = Very smooth, sluggish (too slow for peaks)
+- 0.2 = Smooth decay (good for release)
+- 0.4 = Responsive attack (good for peaks)
+- 0.6 = Very fast (may feel twitchy)
+- 1.0 = Instant (defeats purpose of smoothing)
+
+**Pattern applies to:**
+- VU meters
+- Peak meters
+- Spectral analyzers
+- Waveform displays
+- Any real-time audio visualization
+
+**Documented in:** `troubleshooting/gui-issues/vu-meter-no-animation-loop-flutterverb-20251111.md`
+
+---
+
 All patterns documented with full context in:
 - `troubleshooting/build-failures/`
 - `troubleshooting/runtime-issues/`
