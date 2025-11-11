@@ -1,7 +1,7 @@
 #include "PluginEditor.h"
 
 DriveVerbAudioProcessorEditor::DriveVerbAudioProcessorEditor(DriveVerbAudioProcessor& p)
-    : AudioProcessorEditor(&p), processorRef(p)
+    : AudioProcessorEditor(p), processorRef(p)
 {
     setSize(400, 300);
 }
@@ -16,7 +16,12 @@ void DriveVerbAudioProcessorEditor::paint(juce::Graphics& g)
 
     g.setColour(juce::Colours::white);
     g.setFont(24.0f);
-    g.drawFittedText("DriveVerb - Stage 2", getLocalBounds(), juce::Justification::centred, 1);
+    g.drawFittedText("DriveVerb - Stage 3", getLocalBounds(), juce::Justification::centred, 1);
+
+    g.setFont(14.0f);
+    g.drawFittedText("6 parameters implemented",
+                     getLocalBounds().reduced(20).removeFromBottom(30),
+                     juce::Justification::centred, 1);
 }
 
 void DriveVerbAudioProcessorEditor::resized()

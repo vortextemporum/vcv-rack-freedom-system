@@ -1,5 +1,6 @@
 #pragma once
 #include <juce_audio_processors/juce_audio_processors.h>
+#include <juce_dsp/juce_dsp.h>
 
 class DriveVerbAudioProcessor : public juce::AudioProcessor
 {
@@ -30,5 +31,21 @@ public:
     void setStateInformation(const void* data, int sizeInBytes) override;
 
 private:
+    juce::AudioProcessorValueTreeState parameters;
+
+    // Parameter layout creation
+    static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
+
+    // DSP Components (Stage 4.1: Core reverb + dry/wet mixing)
+    juce::dsp::Reverb reverb;
+    juce::dsp::DryWetMixer<float> dryWetMixer;
+
+    // Stage 4.2: Drive saturation
+    juce::dsp::WaveShaper<float> driveShaper;
+
+    // Stage 4.3: DJ-style filter (low-pass/high-pass with center bypass)
+    juce::dsp::ProcessorDuplicator<juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float>> filterProcessor;
+    bool previousWasLowPass = false;  // Track filter type transitions
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DriveVerbAudioProcessor)
 };
