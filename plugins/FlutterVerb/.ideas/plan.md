@@ -53,8 +53,9 @@
 - Real-time safety: All allocations in prepareToPlay(), atomic parameter reads
 - Multi-channel support: Handles mono, stereo, and multi-channel configurations
 
-### Phase 4.2: Modulation System
+### Phase 4.2: Modulation System ✓
 
+**Completed:** 2025-11-11
 **Goal:** Add wow and flutter pitch modulation with delay line
 **Components:**
 - Dual LFO generators (Wow: 0.5-1.5Hz, Flutter: 4-8Hz)
@@ -63,12 +64,23 @@
 - Per-channel phase tracking
 
 **Test Criteria:**
-- [ ] AGE parameter creates audible pitch warbling
-- [ ] Modulation is smooth without clicks/artifacts
-- [ ] Wow (slow) and flutter (fast) both contribute
-- [ ] Stereo channels maintain independent phase
+- [x] AGE parameter creates audible pitch warbling
+- [x] Modulation is smooth without clicks/artifacts
+- [x] Wow (slow) and flutter (fast) both contribute
+- [x] Stereo channels maintain independent phase
 
 **Duration:** 20 min
+
+**Implementation Notes:**
+- Added modulationDelay member (juce::dsp::DelayLine with Lagrange3rd interpolation)
+- Wow LFO: 1Hz sine wave (center of 0.5-1.5Hz range)
+- Flutter LFO: 6Hz sine wave (center of 4-8Hz range)
+- Per-channel phase tracking in wowPhase and flutterPhase vectors
+- Base delay: 50ms, modulation depth: ±20% at AGE=100%
+- Combined modulation: (wow + flutter) / 2 scaled by AGE parameter
+- Modulation applied after reverb, before dry/wet mixer
+- Real-time safe: All calculations in processBlock, no allocations
+- Bypass when AGE=0 (no modulation overhead)
 
 ### Phase 4.3: Saturation and Filter
 

@@ -38,6 +38,12 @@ private:
     juce::dsp::Reverb reverb;
     juce::dsp::DryWetMixer<float> dryWetMixer;
 
+    // Phase 4.2: Modulation System
+    juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Lagrange3rd> modulationDelay { 9600 }; // 200ms at 48kHz
+    std::vector<float> wowPhase;    // Per-channel wow LFO phase (0-2π)
+    std::vector<float> flutterPhase; // Per-channel flutter LFO phase (0-2π)
+    double currentSampleRate = 44100.0; // Store sample rate for LFO calculations
+
     // APVTS comes AFTER DSP components
     juce::AudioProcessorValueTreeState parameters;
 

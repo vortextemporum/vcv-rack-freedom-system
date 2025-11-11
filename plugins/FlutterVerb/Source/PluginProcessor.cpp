@@ -83,6 +83,9 @@ FlutterVerbAudioProcessor::~FlutterVerbAudioProcessor()
 
 void FlutterVerbAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
+    // Store sample rate for LFO calculations
+    currentSampleRate = sampleRate;
+
     // Prepare DSP spec
     spec.sampleRate = sampleRate;
     spec.maximumBlockSize = static_cast<juce::uint32>(samplesPerBlock);
@@ -95,6 +98,15 @@ void FlutterVerbAudioProcessor::prepareToPlay(double sampleRate, int samplesPerB
     // Prepare reverb with ProcessSpec
     reverb.prepare(spec);
     reverb.reset();
+
+    // Phase 4.2: Prepare modulation system
+    modulationDelay.prepare(spec);
+    modulationDelay.reset();
+    modulationDelay.setMaximumDelayInSamples(static_cast<int>(sampleRate * 0.2)); // 200ms max
+
+    // Initialize per-channel LFO phase tracking
+    wowPhase.resize(spec.numChannels, 0.0f);
+    flutterPhase.resize(spec.numChannels, 0.0f);
 }
 
 void FlutterVerbAudioProcessor::releaseResources()
@@ -119,6 +131,10 @@ void FlutterVerbAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, j
     float sizeValue = sizeParam->load() / 100.0f;  // 0-100% → 0.0-1.0
     float decayValue = decayParam->load();          // 0.1-10.0 seconds
     float mixValue = mixParam->load() / 100.0f;     // 0-100% → 0.0-1.0
+
+    // Phase 4.2: Read AGE parameter for modulation depth
+    auto* ageParam = parameters.getRawParameterValue("AGE");
+    float ageValue = ageParam->load() / 100.0f;  // 0-100% → 0.0-1.0
 
     // Configure reverb parameters
     juce::Reverb::Parameters reverbParams;
@@ -148,6 +164,68 @@ void FlutterVerbAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, j
     // Process reverb using modern DSP API
     juce::dsp::ProcessContextReplacing<float> context(block);
     reverb.process(context);
+
+    // Phase 4.2: Apply modulation to reverb output (before dry/wet mixer)
+    if (ageValue > 0.0f)  // Only apply modulation if AGE > 0
+    {
+        const int numChannels = buffer.getNumChannels();
+        const int numSamples = buffer.getNumSamples();
+
+        // LFO configuration
+        const float wowFreqHz = 1.0f;      // Center frequency: 1Hz (range 0.5-1.5Hz)
+        const float flutterFreqHz = 6.0f;  // Center frequency: 6Hz (range 4-8Hz)
+        const float baseDelayMs = 50.0f;   // Base delay: 50ms
+        const float maxModDepth = 0.2f;    // ±20% at AGE=100%
+
+        // Calculate phase increments (radians per sample)
+        const float wowPhaseInc = (wowFreqHz * 2.0f * juce::MathConstants<float>::pi) / static_cast<float>(currentSampleRate);
+        const float flutterPhaseInc = (flutterFreqHz * 2.0f * juce::MathConstants<float>::pi) / static_cast<float>(currentSampleRate);
+
+        // Process each channel
+        for (int channel = 0; channel < numChannels; ++channel)
+        {
+            auto* channelData = buffer.getWritePointer(channel);
+
+            for (int sample = 0; sample < numSamples; ++sample)
+            {
+                // Calculate wow LFO output (sine wave)
+                float wowOutput = std::sin(wowPhase[channel]);
+
+                // Calculate flutter LFO output (sine wave)
+                float flutterOutput = std::sin(flutterPhase[channel]);
+
+                // Combine modulation signals (both contribute to pitch variation)
+                float totalModulation = (wowOutput + flutterOutput) * 0.5f;  // Average to keep in ±1.0 range
+
+                // Scale by AGE parameter
+                totalModulation *= ageValue;
+
+                // Calculate modulated delay time in samples
+                float baseDelaySamples = (baseDelayMs / 1000.0f) * static_cast<float>(currentSampleRate);
+                float modulationAmount = baseDelaySamples * maxModDepth * totalModulation;  // ±20% depth
+                float delayTimeSamples = baseDelaySamples + modulationAmount;
+
+                // Ensure delay time is within valid range
+                delayTimeSamples = juce::jlimit(1.0f, static_cast<float>(currentSampleRate * 0.2), delayTimeSamples);
+
+                // Set delay time for this channel
+                modulationDelay.setDelay(static_cast<float>(delayTimeSamples));
+
+                // Process sample through delay line
+                modulationDelay.pushSample(channel, channelData[sample]);
+                channelData[sample] = modulationDelay.popSample(channel);
+
+                // Update LFO phases with wrapping
+                wowPhase[channel] += wowPhaseInc;
+                if (wowPhase[channel] >= 2.0f * juce::MathConstants<float>::pi)
+                    wowPhase[channel] -= 2.0f * juce::MathConstants<float>::pi;
+
+                flutterPhase[channel] += flutterPhaseInc;
+                if (flutterPhase[channel] >= 2.0f * juce::MathConstants<float>::pi)
+                    flutterPhase[channel] -= 2.0f * juce::MathConstants<float>::pi;
+            }
+        }
+    }
 
     // Mix dry and wet samples
     dryWetMixer.mixWetSamples(block);
