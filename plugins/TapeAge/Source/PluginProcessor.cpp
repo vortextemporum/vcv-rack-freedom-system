@@ -36,6 +36,7 @@ TapeAgeAudioProcessor::TapeAgeAudioProcessor()
     : AudioProcessor(BusesProperties()
                         .withInput("Input", juce::AudioChannelSet::stereo(), true)
                         .withOutput("Output", juce::AudioChannelSet::stereo(), true))
+    , oversampler(2, 1, juce::dsp::Oversampling<float>::filterHalfBandFIREquiripple)  // 2x oversampling, 1 stage, FIR filters
     , parameters(*this, nullptr, "Parameters", createParameterLayout())
 {
 }
@@ -46,13 +47,20 @@ TapeAgeAudioProcessor::~TapeAgeAudioProcessor()
 
 void TapeAgeAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
-    // Initialization will be added in Stage 4
-    juce::ignoreUnused(sampleRate, samplesPerBlock);
+    // Prepare DSP spec
+    currentSpec.sampleRate = sampleRate;
+    currentSpec.maximumBlockSize = static_cast<juce::uint32>(samplesPerBlock);
+    currentSpec.numChannels = static_cast<juce::uint32>(getTotalNumOutputChannels());
+
+    // Phase 4.1: Prepare oversampling engine
+    oversampler.initProcessing(static_cast<size_t>(samplesPerBlock));
+    oversampler.reset();
 }
 
 void TapeAgeAudioProcessor::releaseResources()
 {
-    // Cleanup will be added in Stage 4
+    // Phase 4.1: Reset DSP components
+    oversampler.reset();
 }
 
 void TapeAgeAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
@@ -60,12 +68,60 @@ void TapeAgeAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce:
     juce::ScopedNoDenormals noDenormals;
     juce::ignoreUnused(midiMessages);
 
-    // Parameter access example (for Stage 4 DSP implementation):
-    // auto* driveParam = parameters.getRawParameterValue("drive");
-    // float driveValue = driveParam->load();  // Atomic read (real-time safe)
+    // Clear unused channels
+    for (int i = getTotalNumInputChannels(); i < getTotalNumOutputChannels(); ++i)
+        buffer.clear(i, 0, buffer.getNumSamples());
 
-    // Pass-through for Stage 3 (DSP implementation happens in Stage 4)
-    // Audio routing is already handled by JUCE
+    // Phase 4.1: Core Saturation Processing
+    // Processing chain:
+    // 1. Read drive parameter and calculate gain
+    // 2. Upsample 2x
+    // 3. Apply tanh saturation manually (drive controls gain scaling)
+    // 4. Downsample
+
+    // Read drive parameter (0.0 to 1.0)
+    auto* driveParam = parameters.getRawParameterValue("drive");
+    float drive = driveParam->load();
+
+    // Progressive curve mapping (architecture.md):
+    // 0-30%: Very subtle (multiply by 1-2 before tanh)
+    // 30-70%: Moderate warmth (multiply by 2-8)
+    // 70-100%: Heavy saturation (multiply by 8-20)
+    float gain;
+    if (drive <= 0.3f)
+    {
+        // Subtle range: linear interpolation from 1 to 2
+        gain = 1.0f + (drive / 0.3f) * 1.0f;
+    }
+    else if (drive <= 0.7f)
+    {
+        // Moderate range: linear interpolation from 2 to 8
+        gain = 2.0f + ((drive - 0.3f) / 0.4f) * 6.0f;
+    }
+    else
+    {
+        // Heavy range: linear interpolation from 8 to 20
+        gain = 8.0f + ((drive - 0.7f) / 0.3f) * 12.0f;
+    }
+
+    // Create AudioBlock for DSP processing
+    juce::dsp::AudioBlock<float> block(buffer);
+
+    // Upsample
+    auto oversampledBlock = oversampler.processSamplesUp(block);
+
+    // Apply tanh saturation manually in oversampled domain
+    for (size_t channel = 0; channel < oversampledBlock.getNumChannels(); ++channel)
+    {
+        auto* channelData = oversampledBlock.getChannelPointer(channel);
+        for (size_t sample = 0; sample < oversampledBlock.getNumSamples(); ++sample)
+        {
+            channelData[sample] = std::tanh(gain * channelData[sample]);
+        }
+    }
+
+    // Downsample back to original sample rate
+    oversampler.processSamplesDown(block);
 }
 
 juce::AudioProcessorEditor* TapeAgeAudioProcessor::createEditor()

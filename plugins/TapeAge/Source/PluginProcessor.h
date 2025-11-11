@@ -1,5 +1,6 @@
 #pragma once
 #include <juce_audio_processors/juce_audio_processors.h>
+#include <juce_dsp/juce_dsp.h>
 
 class TapeAgeAudioProcessor : public juce::AudioProcessor
 {
@@ -30,6 +31,13 @@ public:
     void setStateInformation(const void* data, int sizeInBytes) override;
 
 private:
+    // DSP Components (declared BEFORE parameters for initialization order)
+    juce::dsp::ProcessSpec currentSpec;
+
+    // Phase 4.1: Core Saturation Processing
+    juce::dsp::Oversampling<float> oversampler { 2, 1, juce::dsp::Oversampling<float>::filterHalfBandFIREquiripple };
+
+    // APVTS comes AFTER DSP components
     juce::AudioProcessorValueTreeState parameters;
 
     // Parameter layout creation
