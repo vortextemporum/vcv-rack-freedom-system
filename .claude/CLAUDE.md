@@ -23,6 +23,56 @@
 4. **Instructed routing** - Commands expand to prompts, Claude invokes skills
 5. **Required Reading injection** - Critical patterns (`juce8-critical-patterns.md`) are mandatory reading for all subagents to prevent repeat mistakes
 
+## Checkpoint Protocol (System-Wide)
+
+At every significant completion point (stage complete, phase complete, files generated, contract created):
+
+1. Auto-commit changes (if in workflow)
+2. Update state files (.continue-here.md, PLUGINS.md)
+3. ALWAYS present numbered decision menu:
+
+✓ [Completion statement]
+
+What's next?
+1. [Primary action] (recommended)
+2. [Secondary action]
+3. [Discovery option] ← User discovers [feature]
+4. [Alternative path]
+5. Other
+
+Choose (1-5): _
+
+4. WAIT for user response - NEVER auto-proceed
+5. Execute chosen action
+
+This applies to:
+- All workflow stages (0-6)
+- All subagent completions
+- Contract creation (creative-brief, mockups, parameter-spec)
+- Any point where user needs to decide next action
+
+Do NOT use AskUserQuestion tool for decision menus - use inline numbered lists as shown above.
+
+## Subagent Invocation Protocol
+
+Stages 2-5 use the dispatcher pattern:
+- Stage 2 → Invoke foundation-agent via Task tool
+- Stage 3 → Invoke shell-agent via Task tool
+- Stage 4 → Invoke dsp-agent via Task tool
+- Stage 5 → Invoke gui-agent via Task tool
+
+The plugin-workflow skill orchestrates, it does not implement.
+
+After subagent completes:
+1. Read subagent's return message
+2. Commit changes
+3. Update .continue-here.md
+4. Update PLUGINS.md
+5. Present numbered decision menu
+6. Wait for user response
+
+This ensures consistent checkpoint behavior and clean separation of concerns.
+
 ## Workflow Entry Points
 - New plugin: `/dream` → `/implement`
 - Resume work: `/continue [PluginName]`
