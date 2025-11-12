@@ -354,7 +354,7 @@ Update brief's "UI Vision" section to reflect current mockup (preserve original 
 
 ### Step 7: Route Back to ui-mockup
 
-**After user resolves drift (or confirms alignment), return to ui-mockup Phase 5.5 decision menu.**
+**After Step 6 actions complete (brief updated, mockup changed, or override logged), return to ui-mockup Phase 5.5 decision menu.**
 
 **Present this menu:**
 
