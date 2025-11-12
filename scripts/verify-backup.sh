@@ -19,9 +19,17 @@ if [[ ! -d "$BACKUP_PATH" ]]; then
   exit 1
 fi
 
-# Check critical files
+# Check critical files (handle both flat and Source/ structure)
 CRITICAL_FILES=(
   "CMakeLists.txt"
+  "Source/PluginProcessor.h"
+  "Source/PluginProcessor.cpp"
+  "Source/PluginEditor.h"
+  "Source/PluginEditor.cpp"
+)
+
+# Also check for flat structure (fallback)
+CRITICAL_FILES_FLAT=(
   "PluginProcessor.h"
   "PluginProcessor.cpp"
   "PluginEditor.h"
@@ -30,23 +38,30 @@ CRITICAL_FILES=(
 
 for file in "${CRITICAL_FILES[@]}"; do
   if [[ ! -f "${BACKUP_PATH}/${file}" ]]; then
-    echo -e "${RED}❌ Missing: ${file}${NC}"
-    exit 1
+    # Try flat structure
+    basename_file=$(basename "$file")
+    if [[ ! -f "${BACKUP_PATH}/${basename_file}" ]]; then
+      echo -e "${RED}❌ Missing: ${file}${NC}"
+      exit 1
+    else
+      echo -e "${GREEN}✓${NC} ${basename_file}"
+    fi
   else
     echo -e "${GREEN}✓${NC} ${file}"
   fi
 done
 
-# Verify CMakeLists.txt can be parsed
-if grep -q "project(" "${BACKUP_PATH}/CMakeLists.txt"; then
+# Verify CMakeLists.txt can be parsed (check for project() or juce_add_plugin())
+if grep -q "project(\|juce_add_plugin(" "${BACKUP_PATH}/CMakeLists.txt"; then
   echo -e "${GREEN}✓${NC} CMakeLists.txt valid"
 else
   echo -e "${RED}❌ CMakeLists.txt invalid${NC}"
   exit 1
 fi
 
-# Dry-run build test
+# Dry-run build test (clean any existing build dir first)
 cd "$BACKUP_PATH"
+rm -rf build
 if cmake -B build -G Ninja 2>/dev/null | grep -q "Build files"; then
   echo -e "${GREEN}✓${NC} Dry-run build successful"
 else

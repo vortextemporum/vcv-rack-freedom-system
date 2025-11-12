@@ -352,7 +352,8 @@ fi
 ```bash
 # See assets/backup-template.sh for complete script
 mkdir -p "backups/${PLUGIN_NAME}/v${CURRENT_VERSION}/"
-cp -r "plugins/${PLUGIN_NAME}/" "backups/${PLUGIN_NAME}/v${CURRENT_VERSION}/"
+rsync -a --exclude='build/' --exclude='build.log' \
+  "plugins/${PLUGIN_NAME}/" "backups/${PLUGIN_NAME}/v${CURRENT_VERSION}/"
 ```
 
 **Verify backup integrity:**
