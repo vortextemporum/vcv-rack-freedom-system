@@ -20,6 +20,39 @@ fi
 # Extract plugin name from context if available
 PLUGIN_NAME=$(echo "$INPUT" | jq -r '.plugin_name // empty' 2>/dev/null)
 
+# Layer 0: Contract integrity validation (MANDATORY for all stages)
+# Run before stage-specific validation
+if [ -n "$PLUGIN_NAME" ]; then
+  PLUGIN_PATH="plugins/$PLUGIN_NAME"
+  export PLUGIN_PATH
+
+  echo "Validating contract integrity for $PLUGIN_NAME..." >&2
+
+  # 1. Verify contract checksums (Stages 2-5 only)
+  python3 .claude/hooks/validators/validate-checksums.py "$PLUGIN_PATH"
+  CHECKSUM_RESULT=$?
+  if [ $CHECKSUM_RESULT -eq 1 ]; then
+    echo "❌ Contract checksum validation FAILED" >&2
+    exit 2  # Block workflow
+  elif [ $CHECKSUM_RESULT -eq 2 ]; then
+    echo "⚠️  Contract checksum validation: warnings detected" >&2
+    # Continue but warn
+  fi
+
+  # 2. Validate cross-contract consistency (all stages)
+  python3 .claude/hooks/validators/validate-cross-contract.py "$PLUGIN_PATH"
+  CROSS_RESULT=$?
+  if [ $CROSS_RESULT -eq 1 ]; then
+    echo "❌ Cross-contract validation FAILED" >&2
+    exit 2  # Block workflow
+  elif [ $CROSS_RESULT -eq 2 ]; then
+    echo "⚠️  Cross-contract validation: warnings detected" >&2
+    # Continue but warn
+  fi
+
+  echo "✓ Contract integrity validated" >&2
+fi
+
 # Execute hook logic based on subagent
 case "$SUBAGENT" in
   foundation-agent)

@@ -34,9 +34,26 @@ You ARE checking:
 ## Process
 
 1. Read contracts (creative-brief.md, parameter-spec.md, architecture.md)
-2. Read implementation files for the stage
-3. Evaluate semantic correctness and quality
-4. Return structured JSON with recommendations
+2. Validate cross-contract consistency using contract_validator.py
+3. Read implementation files for the stage
+4. Evaluate semantic correctness and quality
+5. Return structured JSON with recommendations
+
+## Contract Validation (MANDATORY)
+
+Before validating stage-specific semantics, ALWAYS run cross-contract consistency checks:
+
+```bash
+python3 .claude/hooks/validators/validate-cross-contract.py plugins/[PluginName]
+```
+
+This validates:
+- Parameter counts match across contracts
+- Parameter names referenced in architecture exist in parameter-spec
+- DSP components in architecture match plan.md
+- All contracts are internally consistent
+
+**CRITICAL:** If cross-contract validation fails, report errors in your JSON response and set `continue_to_next_stage: false`.
 
 ## Stage-Specific Validation
 
@@ -98,6 +115,8 @@ You ARE checking:
 
 **Checks:**
 
+- ✓ Cross-contract consistency validated (MANDATORY)
+- ✓ Parameter counts match across creative-brief, parameter-spec, architecture
 - ✓ Complexity score calculation correct? (params + algos + features from both contracts)
 - ✓ All contracts (parameter-spec.md, architecture.md) referenced in plan?
 - ✓ Phase breakdown appropriate for complexity ≥3?

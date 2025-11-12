@@ -13,6 +13,40 @@ fi
 
 FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null)
 
+# Layer 0: Contract immutability enforcement (CRITICAL)
+# Block modifications to contract files during Stages 2-5
+if [[ "$FILE_PATH" =~ plugins/([^/]+)/.ideas/(creative-brief|parameter-spec|architecture|plan)\.md$ ]]; then
+  # Extract plugin name from regex match
+  PLUGIN_NAME="${BASH_REMATCH[1]}"
+  PLUGIN_PATH="plugins/$PLUGIN_NAME"
+
+  # Check if .continue-here.md exists
+  if [ -f "$PLUGIN_PATH/.ideas/.continue-here.md" ]; then
+    # Extract current stage
+    STAGE=$(grep -E '^stage:' "$PLUGIN_PATH/.ideas/.continue-here.md" | head -1 | sed 's/stage: *//')
+
+    # Block if in implementation stages (2-5)
+    if [[ "$STAGE" =~ ^[2-5]$ ]]; then
+      CONTRACT_FILE=$(basename "$FILE_PATH")
+      echo "" >&2
+      echo "❌ CONTRACT IMMUTABILITY VIOLATION" >&2
+      echo "" >&2
+      echo "Cannot modify $CONTRACT_FILE during Stage $STAGE (implementation)." >&2
+      echo "" >&2
+      echo "Contracts are immutable during Stages 2-5 to prevent drift." >&2
+      echo "All implementation stages reference the same contract specifications." >&2
+      echo "" >&2
+      echo "If you need to modify contracts:" >&2
+      echo "  1. Return to Stage 0-1 (planning)" >&2
+      echo "  2. Update contracts" >&2
+      echo "  3. Restart implementation from Stage 2" >&2
+      echo "" >&2
+      echo "Alternatively, use /improve after Stage 6 to make changes with versioning." >&2
+      exit 1
+    fi
+  fi
+fi
+
 # Determine validation level based on file type
 PLUGIN_SOURCE=false
 PLUGIN_FILE=false

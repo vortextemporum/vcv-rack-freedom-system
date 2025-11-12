@@ -21,6 +21,9 @@
 ## Key Principles
 
 1. **Contracts are immutable during implementation** - All stages reference the same specs (zero drift)
+   - Technical enforcement via PostToolUse hook (blocks Edit/Write to contract files during Stages 2-5)
+   - Checksum validation in SubagentStop hook (detects unauthorized modifications)
+   - Cross-contract consistency validation (parameter counts, DSP components, complexity scores)
 2. **Dispatcher pattern** - Each subagent runs in fresh context (no accumulation)
 3. **Discovery through play** - Features found via slash command autocomplete and decision menus
 4. **Instructed routing** - Commands expand to prompts, Claude invokes skills
@@ -42,9 +45,15 @@ The system prevents late-stage failures through multi-layer validation:
 - Blocks implementation if contracts misaligned (missing features, scope creep, style mismatch)
 
 **During Implementation (PostToolUse hook):**
+- Contract immutability enforcement (blocks modifications to .ideas/*.md during Stages 2-5)
 - Real-time safety checks (processBlock validation)
 - Silent failure pattern detection (12+ known patterns from juce8-critical-patterns.md)
 - Blocks commits with patterns that compile but fail at runtime
+
+**After Subagent Completion (SubagentStop hook):**
+- Contract checksum validation (verifies contracts unchanged during Stages 2-5)
+- Cross-contract consistency checks (parameter counts, DSP components, references)
+- Stage-specific deterministic validation (foundation, parameters, DSP, GUI)
 
 **Checkpoint Completion (plugin-workflow):**
 - Verifies all checkpoint steps succeeded before presenting decision menu
