@@ -70,6 +70,9 @@ LushVerbAudioProcessor::~LushVerbAudioProcessor()
 
 void LushVerbAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
+    // Store sample rate for LFO calculations
+    currentSampleRate = sampleRate;
+
     // Prepare DSP spec (Pattern #17: Modern juce::dsp API)
     juce::dsp::ProcessSpec spec;
     spec.sampleRate = sampleRate;
@@ -79,6 +82,15 @@ void LushVerbAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBloc
     // Prepare DSP components
     reverb.prepare(spec);
     dryWetMixer.prepare(spec);
+
+    // Phase 4.2: Prepare modulation delay line
+    delayLine.prepare(spec);
+    delayLine.setMaximumDelayInSamples(static_cast<int>(sampleRate * 0.05)); // 50ms max delay
+    delayLine.reset();
+
+    // Initialize LFO phases
+    leftLFOPhase = 0.0f;
+    rightLFOPhase = 0.0f;
 
     // Reset components to initial state
     reverb.reset();
@@ -138,6 +150,56 @@ void LushVerbAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce
     // Process wet signal through reverb
     juce::dsp::ProcessContextReplacing<float> context(block);
     reverb.process(context);
+
+    // Phase 4.2: Apply modulation to reverb tail (post-reverb, pre-dry/wet mix)
+    const int numSamples = buffer.getNumSamples();
+    const int numChannels = buffer.getNumChannels();
+
+    // LFO frequencies (hardcoded per spec)
+    const float leftLFOFreq = 0.3f;   // Hz
+    const float rightLFOFreq = 0.5f;  // Hz
+    const float modulationDepth = 0.03f; // ±3% pitch variation
+
+    // Constants
+    const float twoPi = juce::MathConstants<float>::twoPi;
+    const float baseDelaySamples = 10.0f; // Center delay (10 samples)
+
+    // Process each channel with its own LFO
+    for (int channel = 0; channel < numChannels; ++channel)
+    {
+        auto* channelData = buffer.getWritePointer(channel);
+        float& lfoPhase = (channel == 0) ? leftLFOPhase : rightLFOPhase;
+        const float lfoFreq = (channel == 0) ? leftLFOFreq : rightLFOFreq;
+
+        // Calculate phase increment
+        const float phaseIncrement = (lfoFreq * twoPi) / static_cast<float>(currentSampleRate);
+
+        // Process each sample
+        for (int sample = 0; sample < numSamples; ++sample)
+        {
+            // Calculate LFO output (sine wave)
+            float lfoOutput = std::sin(lfoPhase);
+
+            // Modulate delay time (±3% around base delay)
+            float delayTimeSamples = baseDelaySamples + (lfoOutput * modulationDepth * baseDelaySamples);
+
+            // Write current sample to delay line
+            delayLine.pushSample(channel, channelData[sample]);
+
+            // Read modulated sample from delay line
+            float delayedSample = delayLine.popSample(channel, delayTimeSamples);
+
+            // Replace with modulated signal
+            channelData[sample] = delayedSample;
+
+            // Increment LFO phase
+            lfoPhase += phaseIncrement;
+
+            // Wrap phase to prevent accumulation
+            if (lfoPhase >= twoPi)
+                lfoPhase -= twoPi;
+        }
+    }
 
     // Mix dry and wet signals
     dryWetMixer.mixWetSamples(block);

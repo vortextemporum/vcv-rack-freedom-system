@@ -35,6 +35,12 @@ private:
     juce::dsp::Reverb reverb;
     juce::dsp::DryWetMixer<float> dryWetMixer;
 
+    // Phase 4.2: Built-in Modulation System
+    juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Lagrange3rd> delayLine { 9600 }; // 50ms at 192kHz
+    float leftLFOPhase = 0.0f;
+    float rightLFOPhase = 0.0f;
+    double currentSampleRate = 44100.0;
+
     // APVTS comes AFTER DSP components
     juce::AudioProcessorValueTreeState parameters;
 
