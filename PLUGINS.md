@@ -480,6 +480,7 @@ Global:
 - **2025-11-12 (Stage 3):** Shell complete - 6 parameters implemented
 - **2025-11-12 (Stage 4.1):** Voice architecture + noise generation (C1/D1 MIDI routing, ADSR envelopes)
 - **2025-11-12 (Stage 4.2):** Filtering + tone shaping (Tone filter 3-15kHz, Noise Color filter 5-10kHz, velocity modulation)
+- **2025-11-12 (Stage 4.3):** Resonators + choke logic (3 fixed peaks 7/10/13kHz, closed chokes open)
 
 **Known Issues:**
 - None
