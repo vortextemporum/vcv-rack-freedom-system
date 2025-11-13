@@ -4,6 +4,41 @@ All notable changes to TapeAge will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.1.0] - 2025-11-13
+
+### Added
+
+- **INPUT Trim Knob:** Gain staging control before tape saturation (-12dB to +12dB, default 0dB)
+  - Positioned above DRIVE knob, smaller screw-like appearance
+  - Allows driving signal into tape saturation for heavier effect
+  - Applied first in signal chain before all processing
+  - Independent from DRIVE parameter (DRIVE controls saturation character, INPUT controls signal level)
+
+- **OUTPUT Trim Knob:** Master output level control after all processing (-12dB to +12dB, default 0dB)
+  - Positioned above MIX knob, smaller screw-like appearance
+  - Allows compensating for volume changes or setting final output level
+  - Applied last in signal chain after dry/wet mixing
+  - VU meter reflects OUTPUT level (metering happens after output trim)
+
+### Technical Details
+
+- Signal flow: INPUT gain → DRIVE saturation → AGE degradation → MIX blend → OUTPUT gain
+- Both trim knobs use decibel scaling (Decibels::decibelsToGain)
+- Optimization: gain only applied if value != 1.0 (unity gain)
+- UI: 40px screw-style knobs with slot indicator (rotates -135° to +135°)
+- CSS: Positioned absolutely above main knobs (top: -50px, -65px for labels)
+- JavaScript: Full parameter binding with drag interaction (sensitivity: 0.005)
+- C++ bindings: WebSliderRelay + WebSliderParameterAttachment for each trim knob
+- Backward compatible: Existing presets load with INPUT=0dB, OUTPUT=0dB (unity gain)
+
+### Testing Notes
+
+- Built in Release mode
+- Manual DAW testing: All 5 parameters functional
+- Signal chain verified: INPUT affects saturation intensity, OUTPUT affects final level
+- VU meter correctly reflects post-OUTPUT level
+- Screw-like appearance matches tape machine aesthetic
+
 ## [1.0.4] - 2025-11-13
 
 ### Fixed

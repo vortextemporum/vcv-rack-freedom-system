@@ -243,8 +243,102 @@
             flex-direction: column;
             align-items: center;
             gap: 15px;
+            position: relative;
         }
 
+        /* Small trim knobs (input/output) - positioned above main knobs */
+        .trim-knob {
+            width: 40px;
+            height: 40px;
+            position: absolute;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            cursor: pointer;
+            transition: transform 0.05s ease;
+        }
+
+        .trim-knob:hover .trim-knob-body {
+            border-color: #c49564;
+        }
+
+        .trim-knob:active {
+            transform: translateX(-50%) scale(0.98);
+        }
+
+        .trim-knob-body {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid rgba(212, 165, 116, 0.25);
+            background: radial-gradient(circle at 35% 35%, #2a1a0a 0%, #1f1008 60%, #0a0000 100%);
+            transition: border-color 0.1s ease;
+            box-shadow:
+                0 4px 8px rgba(0, 0, 0, 0.8),
+                0 2px 4px rgba(0, 0, 0, 0.6),
+                inset 0 2px 4px rgba(0, 0, 0, 0.6),
+                inset 0 -1px 2px rgba(212, 165, 116, 0.1);
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        /* Screw-like appearance - flat head with slot */
+        .trim-knob-body::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60%;
+            height: 60%;
+            border-radius: 50%;
+            background: radial-gradient(circle at 40% 40%, #2a1a0a 0%, #1f1008 50%, #15100a 100%);
+            box-shadow:
+                inset 0 1px 2px rgba(0, 0, 0, 0.5),
+                inset 0 -1px 1px rgba(212, 165, 116, 0.15);
+        }
+
+        .trim-knob-rotatable {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            transform-origin: center center;
+            transition: transform 0.05s ease-out;
+        }
+
+        /* Screw slot indicator (rotates) */
+        .trim-knob-rotatable::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 14px;
+            height: 2px;
+            background: linear-gradient(90deg, #1a0a00 0%, #c49564 50%, #1a0a00 100%);
+            transform: translate(-50%, -50%);
+            border-radius: 1px;
+            box-shadow:
+                0 1px 2px rgba(0, 0, 0, 0.6),
+                0 0 4px rgba(212, 165, 116, 0.3);
+        }
+
+        .trim-knob-label {
+            position: absolute;
+            top: -65px;
+            font-size: 7px;
+            font-weight: 500;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: rgba(196, 149, 100, 0.7);
+            text-align: center;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+            white-space: nowrap;
+        }
+
+        /* Main knobs */
         .knob {
             width: 90px;
             height: 90px;
@@ -368,6 +462,13 @@
             <!-- Knobs Section -->
             <div class="knobs-section">
                 <div class="knob-container">
+                    <!-- Input trim knob (above DRIVE) -->
+                    <div class="trim-knob" id="inputTrimKnob">
+                        <div class="trim-knob-label">INPUT</div>
+                        <div class="trim-knob-body"></div>
+                        <div class="trim-knob-rotatable" id="inputTrimRotatable"></div>
+                    </div>
+                    <!-- Main DRIVE knob -->
                     <div class="knob" id="driveKnob">
                         <div class="knob-body"></div>
                         <div class="knob-rotatable" id="driveRotatable"></div>
@@ -382,6 +483,13 @@
                     <div class="knob-label">AGE</div>
                 </div>
                 <div class="knob-container">
+                    <!-- Output trim knob (above MIX) -->
+                    <div class="trim-knob" id="outputTrimKnob">
+                        <div class="trim-knob-label">OUTPUT</div>
+                        <div class="trim-knob-body"></div>
+                        <div class="trim-knob-rotatable" id="outputTrimRotatable"></div>
+                    </div>
+                    <!-- Main MIX knob -->
                     <div class="knob" id="mixKnob">
                         <div class="knob-body"></div>
                         <div class="knob-rotatable" id="mixRotatable"></div>
@@ -441,6 +549,51 @@
         }
 
         console.log("JUCE backend connected:", window.__JUCE__.backend);
+
+        // ----------------------------------------------------------------
+        // INPUT PARAMETER BINDING
+        // ----------------------------------------------------------------
+
+        const inputState = Juce.getSliderState("input");
+        const inputTrimKnob = document.getElementById("inputTrimKnob");
+        const inputTrimRotatable = document.getElementById("inputTrimRotatable");
+
+        let isDraggingInput = false;
+        let inputStartY = 0;
+        let inputStartValue = 0;
+
+        inputTrimKnob.addEventListener("mousedown", (e) => {
+            isDraggingInput = true;
+            inputStartY = e.clientY;
+            inputStartValue = inputState.getNormalisedValue();
+            e.preventDefault();
+        });
+
+        document.addEventListener("mousemove", (e) => {
+            if (!isDraggingInput) return;
+
+            const deltaY = inputStartY - e.clientY;
+            const sensitivity = 0.005;
+            let newValue = inputStartValue + (deltaY * sensitivity);
+            newValue = Math.max(0, Math.min(1, newValue));
+
+            inputState.setNormalisedValue(newValue);
+            updateKnobVisual(inputTrimRotatable, newValue);
+        });
+
+        document.addEventListener("mouseup", () => {
+            if (isDraggingInput) {
+                isDraggingInput = false;
+            }
+        });
+
+        window.__JUCE__.backend.emitEvent("jsLog", "Input listener registered");
+
+        inputState.valueChangedEvent.addListener(() => {
+            const value = inputState.getNormalisedValue();
+            window.__JUCE__.backend.emitEvent("jsLog", `Input valueChangedEvent fired, value: ${value}`);
+            updateKnobVisual(inputTrimRotatable, value);
+        });
 
         // ----------------------------------------------------------------
         // DRIVE PARAMETER BINDING
@@ -578,6 +731,51 @@
             const value = mixState.getNormalisedValue();
             window.__JUCE__.backend.emitEvent("jsLog", `Mix valueChangedEvent fired, value: ${value}`);
             updateKnobVisual(mixRotatable, value);
+        });
+
+        // ----------------------------------------------------------------
+        // OUTPUT PARAMETER BINDING
+        // ----------------------------------------------------------------
+
+        const outputState = Juce.getSliderState("output");
+        const outputTrimKnob = document.getElementById("outputTrimKnob");
+        const outputTrimRotatable = document.getElementById("outputTrimRotatable");
+
+        let isDraggingOutput = false;
+        let outputStartY = 0;
+        let outputStartValue = 0;
+
+        outputTrimKnob.addEventListener("mousedown", (e) => {
+            isDraggingOutput = true;
+            outputStartY = e.clientY;
+            outputStartValue = outputState.getNormalisedValue();
+            e.preventDefault();
+        });
+
+        document.addEventListener("mousemove", (e) => {
+            if (!isDraggingOutput) return;
+
+            const deltaY = outputStartY - e.clientY;
+            const sensitivity = 0.005;
+            let newValue = outputStartValue + (deltaY * sensitivity);
+            newValue = Math.max(0, Math.min(1, newValue));
+
+            outputState.setNormalisedValue(newValue);
+            updateKnobVisual(outputTrimRotatable, newValue);
+        });
+
+        document.addEventListener("mouseup", () => {
+            if (isDraggingOutput) {
+                isDraggingOutput = false;
+            }
+        });
+
+        window.__JUCE__.backend.emitEvent("jsLog", "Output listener registered");
+
+        outputState.valueChangedEvent.addListener(() => {
+            const value = outputState.getNormalisedValue();
+            window.__JUCE__.backend.emitEvent("jsLog", `Output valueChangedEvent fired, value: ${value}`);
+            updateKnobVisual(outputTrimRotatable, value);
         });
 
         // ----------------------------------------------------------------

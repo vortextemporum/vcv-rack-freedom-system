@@ -33,7 +33,7 @@
 | OrganicHats | 📦 Installed | 1.0.0 | 2025-11-12 |
 | DrumRoulette | 📦 Installed | 1.0.0 | 2025-11-12 |
 | Scatter | 💡 Ideated | - | 2025-11-12 |
-| MinimalKick | 🚧 Stage 0 | - | 2025-11-12 |
+| MinimalKick | 🚧 Stage 4 | - | 2025-11-13 |
 
 ### GainKnob
 
@@ -93,23 +93,25 @@ Minimalist gain, pan, and DJ-style filter utility plugin with three knobs for vo
 ### TapeAge
 
 **Status:** 📦 **Installed**
-**Version:** 1.0.3
+**Version:** 1.1.0
 **Created:** 2025-11-10
 **Completed:** 2025-11-11
-**Installed:** 2025-11-12
+**Installed:** 2025-11-13
 **Type:** Audio Effect
 
 **Description:**
-Vintage tape saturator with warm saturation and musical degradation (wow/flutter/dropout/noise). 60s/70s aesthetic with earth tone palette.
+Vintage tape saturator with warm saturation and musical degradation (wow/flutter/dropout/noise). 60s/70s aesthetic with earth tone palette. Features input/output trim controls for gain staging.
 
-**Parameters (3 total):**
+**Parameters (5 total):**
+- INPUT: -12dB to +12dB, default 0dB (input gain trim)
 - DRIVE: 0-100%, default 50% (tape saturation)
 - AGE: 0-100%, default 25% (tape degradation - wow/flutter/dropout/noise)
 - MIX: 0-100%, default 100% (dry/wet blend)
+- OUTPUT: -12dB to +12dB, default 0dB (output gain trim)
 
-**DSP:** Warm harmonic saturation with controllable tape artifacts (wow, flutter, dropout, noise). Musical degradation even at maximum settings. 2x oversampling for aliasing reduction.
+**DSP:** Warm harmonic saturation with controllable tape artifacts (wow, flutter, dropout, noise). Musical degradation even at maximum settings. 2x oversampling for aliasing reduction. Signal chain: INPUT → saturation → degradation → MIX → OUTPUT.
 
-**GUI:** Medium rectangle, vintage VU meter (output peak), 3 brass knobs horizontal, creamy beige textured background, burnt orange/brown accents, clean sans-serif all-caps typography. WebView UI (500x450px).
+**GUI:** Medium rectangle, vintage VU meter (output peak), 3 main brass knobs + 2 small screw-style trim knobs (INPUT/OUTPUT), creamy beige textured background, burnt orange/brown accents, clean sans-serif all-caps typography. WebView UI (500x450px).
 
 **Validation:**
 - ✓ Factory presets: 5 presets created (Unity, Subtle Warmth, Classic Tape, Worn Out, Destroyed)
@@ -137,11 +139,12 @@ Vintage tape saturator with warm saturation and musical degradation (wow/flutter
 - **2025-11-11 (v1.0.1):** Fixed parameter state persistence in Ableton (getNumPrograms() interference)
 - **2025-11-11 (v1.0.2):** Fixed WebView parameter initialization (valueChangedEvent undefined callback parameters)
 - **2025-11-12 (v1.0.3):** Fixed knob hover shake - replaced scale transform with border color change
+- **2025-11-13 (v1.1.0):** Added INPUT and OUTPUT trim knobs for gain staging
 
 **Known Issues:**
 - None
 
-**Last Updated:** 2025-11-12
+**Last Updated:** 2025-11-13
 
 ### DriveVerb
 
@@ -544,7 +547,7 @@ Granular reversed delay with beautiful stuttering grains, randomized pitch (quan
 
 ### MinimalKick
 
-**Status:** 🚧 Stage 4.2
+**Status:** 🚧 Stage 4
 **Type:** Synth
 **Created:** 2025-11-12
 **Complexity:** 5.0 (Complex - phased implementation)
@@ -576,6 +579,8 @@ Minimal house kick drum synthesizer with sine wave + pitch envelope architecture
 - **2025-11-13 (Stage 3):** Shell complete - 5 APVTS parameters implemented (sweep, time, attack, decay, drive)
 - **2025-11-13 (Stage 4 Phase 4.1):** Core synthesis complete - Oscillator + MIDI + amplitude envelope (attack/decay working)
 - **2025-11-13 (Stage 4 Phase 4.2):** Pitch envelope complete - Exponential decay with sweep/time parameters (808-style kick working)
+- **2025-11-13 (Stage 4 Phase 4.3):** Saturation complete - Tanh waveshaping adds warm harmonics (drive parameter 0-100%)
+- **2025-11-13 (Stage 4):** DSP complete - All 3 phases finished (core synthesis + pitch envelope + saturation)
 
 **Known Issues:**
 - None

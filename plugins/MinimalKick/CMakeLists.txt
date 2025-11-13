@@ -10,11 +10,19 @@ juce_add_plugin(MinimalKick
     NEEDS_WEB_BROWSER TRUE
 )
 
-# Source files (minimal for Stage 2)
+# Source files
 target_sources(MinimalKick
     PRIVATE
         Source/PluginProcessor.cpp
         Source/PluginEditor.cpp
+)
+
+# WebView UI Resources
+juce_add_binary_data(MinimalKick_UIResources
+    SOURCES
+        Source/ui/public/index.html
+        Source/ui/public/js/juce/index.js
+        Source/ui/public/js/juce/check_native_interop.js
 )
 
 # Include paths
@@ -26,6 +34,7 @@ target_include_directories(MinimalKick
 # Required JUCE modules
 target_link_libraries(MinimalKick
     PRIVATE
+        MinimalKick_UIResources
         juce::juce_audio_basics
         juce::juce_audio_devices
         juce::juce_audio_formats
@@ -38,6 +47,7 @@ target_link_libraries(MinimalKick
         juce::juce_graphics
         juce::juce_gui_basics
         juce::juce_gui_extra  # Required for WebBrowserComponent
+        juce::juce_dsp        # Required for DSP components
     PUBLIC
         juce::juce_recommended_config_flags
         juce::juce_recommended_lto_flags
@@ -47,27 +57,10 @@ target_link_libraries(MinimalKick
 # Generate JuceHeader.h (JUCE 8 requirement - Pattern #1)
 juce_generate_juce_header(MinimalKick)
 
-# WebView UI Resources (uncommented by gui-agent if WebView UI used)
-# juce_add_binary_data(MinimalKick_UIResources
-#     SOURCES
-#         Source/ui/public/index.html
-#         Source/ui/public/js/juce/index.js
-# )
-#
-# target_link_libraries(MinimalKick
-#     PRIVATE
-#         MinimalKick_UIResources
-# )
-
 # Compile definitions
 target_compile_definitions(MinimalKick
     PUBLIC
         JUCE_VST3_CAN_REPLACE_VST2=0
+        JUCE_WEB_BROWSER=1
+        JUCE_USE_CURL=0
 )
-
-# WebView support (uncommented by gui-agent if WebView UI used)
-# target_compile_definitions(MinimalKick
-#     PUBLIC
-#         JUCE_WEB_BROWSER=1
-#         JUCE_USE_CURL=0
-# )
