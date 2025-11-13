@@ -1,5 +1,6 @@
 #pragma once
 #include <juce_audio_processors/juce_audio_processors.h>
+#include <juce_dsp/juce_dsp.h>
 
 class LushPadAudioProcessor : public juce::AudioProcessor
 {
@@ -34,6 +35,43 @@ public:
 private:
     // Parameter layout creation
     static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
+
+    // Voice structure for polyphonic synthesis
+    struct SynthVoice
+    {
+        bool active = false;
+        int currentNote = -1;
+        float currentVelocity = 0.0f;
+        uint64_t timestamp = 0;  // For oldest-note-stealing
+
+        // 3 oscillator phases (detuned ±7 cents)
+        float phase1 = 0.0f;  // Base frequency
+        float phase2 = 0.0f;  // +7 cents
+        float phase3 = 0.0f;  // -7 cents
+
+        juce::ADSR adsr;
+        juce::ADSR::Parameters adsrParams;
+
+        void reset()
+        {
+            active = false;
+            currentNote = -1;
+            currentVelocity = 0.0f;
+            phase1 = phase2 = phase3 = 0.0f;
+            adsr.reset();
+        }
+    };
+
+    // Voice management
+    static constexpr int maxVoices = 8;
+    SynthVoice voices[maxVoices];
+    uint64_t voiceCounter = 0;  // Incrementing timestamp for oldest-note-stealing
+    double currentSampleRate = 44100.0;
+
+    // Helper methods for voice allocation
+    void allocateVoice(int note, float velocity);
+    void releaseVoice(int note);
+    void startVoice(SynthVoice& voice, int note, float velocity);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(LushPadAudioProcessor)
 };
