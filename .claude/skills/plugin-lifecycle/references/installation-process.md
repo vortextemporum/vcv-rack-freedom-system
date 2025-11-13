@@ -132,38 +132,82 @@ Next steps:
 4. Test audio processing and UI
 ```
 
-## Step 8: Update PLUGINS.md (ATOMIC - both locations)
+## Step 8: Update State Files
 
-**CRITICAL:** Update BOTH registry table and full entry section.
+**Update PLUGINS.md table row:**
+```bash
+PLUGIN_NAME="[PluginName]"
+DATE=$(date +%Y-%m-%d)
 
-**Update sequence:**
+# Update status and last updated in table row
+CURRENT_ROW=$(grep "^| ${PLUGIN_NAME} |" PLUGINS.md)
+NEW_ROW=$(echo "$CURRENT_ROW" | awk -F'|' -v status=" 📦 Installed " -v date=" ${DATE} " '{print $1 "|" $2 "|" status "|" $4 "|" date}')
+sed -i '' "s/^| ${PLUGIN_NAME} | .*/$(echo "$NEW_ROW" | sed 's/[&/\]/\\&/g')/" PLUGINS.md
 ```
-1. Update registry table status:
-   Find: | [PluginName] | ✅ Working | [version] | [date] |
-   Replace: | [PluginName] | 📦 Installed | [version] | [YYYY-MM-DD] |
 
-2. Update full entry section status:
-   Find: **Status:** ✅ Working
-   Replace: **Status:** 📦 Installed
+**Update plugins/[Name]/NOTES.md:**
+```bash
+NOTES_FILE="plugins/${PLUGIN_NAME}/NOTES.md"
 
-3. Add installation details to full entry:
-   **Installed:** [YYYY-MM-DD]
+# Create NOTES.md if missing
+if [ ! -f "$NOTES_FILE" ]; then
+  # Read version from PLUGINS.md
+  VERSION=$(grep "^| ${PLUGIN_NAME} |" PLUGINS.md | awk -F'|' '{print $4}' | xargs)
 
-   **Formats:** VST3, AU
+  cat > "$NOTES_FILE" <<EOF
+# ${PLUGIN_NAME} Notes
 
-   **Locations:**
-   - VST3: `~/Library/Audio/Plug-Ins/VST3/[ProductName].vst3`
-   - AU: `~/Library/Audio/Plug-Ins/Components/[ProductName].component`
+## Status
+- **Current Status:** 📦 Installed
+- **Version:** ${VERSION}
+- **Type:** Audio Plugin
 
-4. Update Last Updated in both locations
+## Lifecycle Timeline
+
+- **${DATE}:** Installed to system folders (VST3 + AU)
+
+## Known Issues
+
+- None
+
+## Additional Notes
+
+**Installation Locations:**
+- VST3: \`~/Library/Audio/Plug-Ins/VST3/${PRODUCT_NAME}.vst3\`
+- AU: \`~/Library/Audio/Plug-Ins/Components/${PRODUCT_NAME}.component\`
+
+**Formats:** VST3, AU, Standalone
+EOF
+else
+  # Update existing NOTES.md
+  sed -i '' "s/^- \*\*Current Status:\*\* .*$/- **Current Status:** 📦 Installed/" "$NOTES_FILE"
+
+  # Add timeline entry
+  sed -i '' "/^## Lifecycle Timeline$/a\\
+- **${DATE}:** Installed to system folders (VST3 + AU)
+" "$NOTES_FILE"
+
+  # Add or update installation details in Additional Notes
+  if ! grep -q "Installation Locations:" "$NOTES_FILE"; then
+    cat >> "$NOTES_FILE" <<EOF
+
+**Installation Locations:**
+- VST3: \`~/Library/Audio/Plug-Ins/VST3/${PRODUCT_NAME}.vst3\`
+- AU: \`~/Library/Audio/Plug-Ins/Components/${PRODUCT_NAME}.component\`
+EOF
+  fi
+fi
 ```
 
 **Verification:**
 ```bash
-# Verify both locations show 📦 Installed
-TABLE=$(grep "^| [PluginName] |" PLUGINS.md | awk -F'|' '{print $3}' | xargs)
-ENTRY=$(grep -A 10 "^### [PluginName]$" PLUGINS.md | grep "^\*\*Status:\*\*" | sed 's/\*\*//g' | xargs)
-# Both should show: 📦 Installed
+# Verify PLUGINS.md table shows 📦 Installed
+TABLE=$(grep "^| ${PLUGIN_NAME} |" PLUGINS.md | awk -F'|' '{print $3}' | xargs)
+echo "Table status: $TABLE"  # Should show: 📦 Installed
+
+# Verify NOTES.md exists and shows 📦 Installed
+NOTES_STATUS=$(grep "^\*\*Current Status:\*\*" "plugins/${PLUGIN_NAME}/NOTES.md" | sed 's/.*Current Status:\*\* //')
+echo "NOTES status: $NOTES_STATUS"  # Should show: 📦 Installed
 ```
 
 ---

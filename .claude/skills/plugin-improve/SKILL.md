@@ -344,14 +344,23 @@ This is an upgrade from headless to WebView UI (v1.0.0 → v1.1.0).
     const handoffPath = `plugins/${pluginName}/.continue-here.md`;
     bash(`sed -i '' 's/^gui_type: headless/gui_type: webview/' "${handoffPath}"`);
 
-    // Update PLUGINS.md
+    // Update PLUGINS.md table row
     updatePluginStatus(pluginName, "✅ Working");
     updatePluginVersion(pluginName, newVersion);
 
-    // Remove "(Headless)" suffix from status if present
-    bash(`sed -i '' 's/✅ Working (Headless)/✅ Working/' PLUGINS.md`);
+    // Update NOTES.md status and timeline
+    const notesPath = `plugins/${pluginName}/NOTES.md`;
+    if (!fileExists(notesPath)) {
+      createNotesFile(pluginName, "✅ Working");
+    }
 
-    // Update timeline
+    // Update status in NOTES.md
+    bash(`sed -i '' 's/^- \\*\\*Current Status:\\*\\* .*$/- **Current Status:** ✅ Working/' "${notesPath}"`);
+
+    // Update version in NOTES.md
+    bash(`sed -i '' 's/^- \\*\\*Version:\\*\\* .*$/- **Version:** ${newVersion}/' "${notesPath}"`);
+
+    // Add timeline entry to NOTES.md
     updatePluginTimeline(pluginName, 4, `WebView UI added (v${newVersion}) - Custom interface with visual controls`);
 
     // CHANGELOG.md entry
@@ -931,16 +940,19 @@ Invoke `plugin-lifecycle` skill:
 Installing [PluginName] v[X.Y.Z]...
 ```
 
-**Update PLUGINS.md:**
+**Update state files:**
 
-Update version number:
+After plugin-lifecycle completes installation:
 
-```markdown
-**Version:** [X.Y.Z]
-**Last Updated:** [YYYY-MM-DD]
-```
+1. Update PLUGINS.md table row:
+   - Version: [X.Y.Z]
+   - Last Updated: [YYYY-MM-DD]
+   - Status: 📦 Installed (if previously ✅ Working)
 
-If status was ✅ Working and now installed, change to 📦 Installed.
+2. Update NOTES.md:
+   - Version: [X.Y.Z]
+   - Status: 📦 Installed
+   - Add timeline entry: "Installed to system folders (VST3 + AU)"
 
 </delegation_rule>
 
@@ -1004,7 +1016,8 @@ Choose (1-5): _
 **Updates:**
 
 - CHANGELOG.md (adds version entry)
-- PLUGINS.md (version number, last updated)
+- PLUGINS.md (table row: version, last updated, status)
+- plugins/[Name]/NOTES.md (status, version, timeline entries, known issues)
 - Source files (implementation changes)
 
 **Creates:**
@@ -1040,5 +1053,6 @@ Improvement is successful when:
 - Build succeeds without errors
 - Tests pass
 - Git staged with conventional commit message
-- PLUGINS.md updated
+- PLUGINS.md table row updated (version, status, last updated)
+- NOTES.md updated (status, version, timeline entry)
 - User knows how to rollback if needed

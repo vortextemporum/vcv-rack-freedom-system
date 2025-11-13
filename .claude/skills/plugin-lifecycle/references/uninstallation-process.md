@@ -77,36 +77,46 @@ Same as installation Step 6. See `references/cache-management.md`.
 
 DAWs may still show removed plugin in list (from cache). Clearing forces rescan.
 
-## Step 5: Update PLUGINS.md (ATOMIC - both locations)
+## Step 5: Update State Files
 
-**CRITICAL:** Update BOTH registry table and full entry section.
+**Update PLUGINS.md table row:**
+```bash
+PLUGIN_NAME="[PluginName]"
+DATE=$(date +%Y-%m-%d)
 
-**Update sequence:**
+# Update status and last updated in table row
+CURRENT_ROW=$(grep "^| ${PLUGIN_NAME} |" PLUGINS.md)
+NEW_ROW=$(echo "$CURRENT_ROW" | awk -F'|' -v status=" ✅ Working " -v date=" ${DATE} " '{print $1 "|" $2 "|" status "|" $4 "|" date}')
+sed -i '' "s/^| ${PLUGIN_NAME} | .*/$(echo "$NEW_ROW" | sed 's/[&/\]/\\&/g')/" PLUGINS.md
 ```
-1. Update registry table status:
-   Find: | [PluginName] | 📦 Installed | [version] | [date] |
-   Replace: | [PluginName] | ✅ Working | [version] | [YYYY-MM-DD] |
 
-2. Update full entry section status:
-   Find: **Status:** 📦 Installed
-   Replace: **Status:** ✅ Working
+**Update plugins/[Name]/NOTES.md:**
+```bash
+NOTES_FILE="plugins/${PLUGIN_NAME}/NOTES.md"
 
-3. Update installation note in full entry:
-   **Installed:** [Original date] (uninstalled: [YYYY-MM-DD])
+if [ -f "$NOTES_FILE" ]; then
+  # Update status
+  sed -i '' "s/^- \*\*Current Status:\*\* .*$/- **Current Status:** ✅ Working/" "$NOTES_FILE"
 
-4. Remove installation metadata from full entry:
-   - ~~**Formats:** VST3, AU~~
-   - ~~**Locations:** ...~~
+  # Add timeline entry
+  sed -i '' "/^## Lifecycle Timeline$/a\\
+- **${DATE}:** Uninstalled from system folders
+" "$NOTES_FILE"
 
-5. Update Last Updated in both locations
+  # Remove or comment out installation locations
+  sed -i '' '/^\*\*Installation Locations:\*\*/,/^$/d' "$NOTES_FILE"
+fi
 ```
 
 **Verification:**
 ```bash
-# Verify both locations show ✅ Working
-TABLE=$(grep "^| [PluginName] |" PLUGINS.md | awk -F'|' '{print $3}' | xargs)
-ENTRY=$(grep -A 10 "^### [PluginName]$" PLUGINS.md | grep "^\*\*Status:\*\*" | sed 's/\*\*//g' | xargs)
-# Both should show: ✅ Working
+# Verify PLUGINS.md table shows ✅ Working
+TABLE=$(grep "^| ${PLUGIN_NAME} |" PLUGINS.md | awk -F'|' '{print $3}' | xargs)
+echo "Table status: $TABLE"  # Should show: ✅ Working
+
+# Verify NOTES.md shows ✅ Working
+NOTES_STATUS=$(grep "^\*\*Current Status:\*\*" "plugins/${PLUGIN_NAME}/NOTES.md" | sed 's/.*Current Status:\*\* //')
+echo "NOTES status: $NOTES_STATUS"  # Should show: ✅ Working
 ```
 
 ## Step 6: Confirmation

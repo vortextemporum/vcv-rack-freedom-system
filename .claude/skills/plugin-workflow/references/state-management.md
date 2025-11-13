@@ -56,13 +56,20 @@ function verifySubagentStateUpdate(pluginName, expectedStage, result) {
     return { verified: false, reason: "date_not_current" }
   }
 
-  // Step 4: Verify PLUGINS.md status updated
+  // Step 4: Verify PLUGINS.md table row updated
   const pluginsMd = readFile("PLUGINS.md")
-  const statusLine = extractStatusLine(pluginsMd, pluginName)
+  const tableRow = extractTableRow(pluginsMd, pluginName)
 
-  if (!statusLine.includes(`Stage ${expectedStage}`)) {
-    logError(`PLUGINS.md not updated to Stage ${expectedStage}`)
+  if (!tableRow.includes(`Stage ${expectedStage}`)) {
+    logError(`PLUGINS.md table not updated to Stage ${expectedStage}`)
     return { verified: false, reason: "plugins_md_not_updated" }
+  }
+
+  // Step 5: Verify NOTES.md exists and has matching status
+  const notesPath = `plugins/${pluginName}/NOTES.md`
+  if (!fileExists(notesPath)) {
+    logWarning(`NOTES.md missing for ${pluginName}`)
+    return { verified: false, reason: "notes_md_missing" }
   }
 
   // All checks passed
@@ -102,14 +109,16 @@ function fallbackStateUpdate(pluginName, currentStage, result) {
     // Update .continue-here.md
     updateHandoff(pluginName, currentStage, result.completed, result.nextSteps)
 
-    // Update PLUGINS.md (atomic - both locations)
+    // Update PLUGINS.md table row + NOTES.md status
     updatePluginStatus(pluginName, `🚧 Stage ${currentStage}`)
+
+    // Update NOTES.md timeline entry
     updatePluginTimeline(pluginName, currentStage, result.description)
 
     // Validate consistency
     const consistent = validateRegistryConsistency(pluginName)
     if (!consistent) {
-      throw new Error("Registry consistency validation failed")
+      throw new Error("Registry consistency validation failed (NOTES.md missing or drift detected)")
     }
 
     logInfo("✓ State updated by orchestrator (fallback successful)")
@@ -254,37 +263,33 @@ contract_checksums:
 
 ### updatePluginStatus(pluginName, newStatus)
 
-**Purpose:** Update PLUGINS.md status in BOTH locations atomically.
+**Purpose:** Update status in PLUGINS.md table row and plugins/[Name]/NOTES.md.
 
-**Implementation (ATOMIC - all or nothing):**
+**Implementation:**
 ```bash
 #!/bin/bash
-# Atomic status update - updates both locations or reverts
+# Update status in two locations
 
 PLUGIN_NAME=$1
 NEW_STATUS=$2
+DATE=$(date +%Y-%m-%d)
 
-# Backup current state
-cp PLUGINS.md PLUGINS.md.backup
-
-# Update full entry section (canonical source)
-sed -i '' "/^### ${PLUGIN_NAME}$/,/^###/ s/^\*\*Status:\*\* .*$/\*\*Status:\*\* ${NEW_STATUS}/" PLUGINS.md
-
-# Update registry table (derived view)
+# 1. Update PLUGINS.md table row (status + last updated)
 CURRENT_ROW=$(grep "^| ${PLUGIN_NAME} |" PLUGINS.md)
-NEW_ROW=$(echo "$CURRENT_ROW" | awk -F'|' -v status=" ${NEW_STATUS} " '{print $1 "|" $2 "|" status "|" $4 "|" $5}')
+NEW_ROW=$(echo "$CURRENT_ROW" | awk -F'|' -v status=" ${NEW_STATUS} " -v date=" ${DATE} " '{print $1 "|" $2 "|" status "|" $4 "|" date}')
 sed -i '' "s/^| ${PLUGIN_NAME} | .*/$(echo "$NEW_ROW" | sed 's/[&/\]/\\&/g')/" PLUGINS.md
 
-# Validate both updates succeeded
-if validateRegistryConsistency "$PLUGIN_NAME"; then
-  rm PLUGINS.md.backup
-  echo "✓ Status updated atomically: ${NEW_STATUS}"
-  return 0
+# 2. Update plugins/[Name]/NOTES.md status metadata
+NOTES_FILE="plugins/${PLUGIN_NAME}/NOTES.md"
+if [ -f "$NOTES_FILE" ]; then
+  sed -i '' "s/^- \*\*Current Status:\*\* .*$/- \*\*Current Status:\*\* ${NEW_STATUS}/" "$NOTES_FILE"
 else
-  echo "ERROR: Atomic update failed. Reverting..."
-  mv PLUGINS.md.backup PLUGINS.md
-  return 1
+  # Create NOTES.md from template if missing
+  createNotesFile "$PLUGIN_NAME" "$NEW_STATUS"
 fi
+
+echo "✓ Status updated: ${NEW_STATUS}"
+return 0
 ```
 
 **Called by:**
@@ -293,58 +298,126 @@ fi
 
 ### updatePluginTimeline(pluginName, stage, description)
 
-**Purpose:** Append timeline entry to PLUGINS.md.
+**Purpose:** Append timeline entry to plugins/[Name]/NOTES.md.
 
 **Implementation:**
 ```bash
 #!/bin/bash
-# Add timeline entry for stage completion
+# Add timeline entry to per-plugin NOTES.md
 
 PLUGIN_NAME=$1
 STAGE=$2
 DESCRIPTION=$3
 DATE=$(date +%Y-%m-%d)
 
-# Find the "Lifecycle Timeline:" section and append
-sed -i '' "/^### ${PLUGIN_NAME}$/,/^###/ {
-  /^\*\*Lifecycle Timeline:\*\*/a\\
-- **${DATE} (Stage ${STAGE}):** ${DESCRIPTION}
-}" PLUGINS.md
+NOTES_FILE="plugins/${PLUGIN_NAME}/NOTES.md"
 
-# Update "Last Updated" field
-sed -i '' "/^### ${PLUGIN_NAME}$/,/^###/ s/^\*\*Last Updated:\*\* .*$/\*\*Last Updated:\*\* ${DATE}/" PLUGINS.md
+# Create NOTES.md if missing
+if [ ! -f "$NOTES_FILE" ]; then
+  createNotesFile "$PLUGIN_NAME"
+fi
+
+# Find the "Lifecycle Timeline" section and append
+sed -i '' "/^## Lifecycle Timeline$/a\\
+- **${DATE} (Stage ${STAGE}):** ${DESCRIPTION}
+" "$NOTES_FILE"
+
+# Also update Last Updated in PLUGINS.md table
+CURRENT_ROW=$(grep "^| ${PLUGIN_NAME} |" PLUGINS.md)
+NEW_ROW=$(echo "$CURRENT_ROW" | awk -F'|' -v date=" ${DATE} " '{$NF=date; print}' OFS='|')
+sed -i '' "s/^| ${PLUGIN_NAME} | .*/$(echo "$NEW_ROW" | sed 's/[&/\]/\\&/g')/" PLUGINS.md
+
+echo "✓ Timeline entry added to NOTES.md"
+return 0
 ```
 
 **Called by:**
 - fallbackStateUpdate() when subagent verification fails
 - Stage 5 (orchestrator direct execution)
 
-### validateRegistryConsistency(pluginName)
+### createNotesFile(pluginName, status)
 
-**Purpose:** Verify registry table matches full entry (no drift).
+**Purpose:** Create NOTES.md from template if it doesn't exist.
 
 **Implementation:**
 ```bash
 #!/bin/bash
-# Verify registry table matches full entry section
+# Create NOTES.md from template
 
 PLUGIN_NAME=$1
+STATUS=${2:-"🚧 In Development"}
+NOTES_FILE="plugins/${PLUGIN_NAME}/NOTES.md"
+
+# Read version from PLUGINS.md if exists
+VERSION=$(grep "^| ${PLUGIN_NAME} |" PLUGINS.md | awk -F'|' '{print $4}' | xargs)
+VERSION=${VERSION:-"-"}
+
+# Read type from PLUGINS.md if exists
+TYPE=$(grep "^| ${PLUGIN_NAME} |" PLUGINS.md | awk -F'|' '{print $3}' | xargs)
+TYPE=${TYPE:-"Audio Plugin"}
+
+cat > "$NOTES_FILE" <<EOF
+# ${PLUGIN_NAME} Notes
+
+## Status
+- **Current Status:** ${STATUS}
+- **Version:** ${VERSION}
+- **Type:** ${TYPE}
+
+## Lifecycle Timeline
+
+- **$(date +%Y-%m-%d):** NOTES.md created
+
+## Known Issues
+
+- None
+
+## Additional Notes
+
+[Plugin-specific notes will be added here]
+EOF
+
+echo "✓ Created NOTES.md for ${PLUGIN_NAME}"
+return 0
+```
+
+**Called by:**
+- updatePluginStatus() when NOTES.md missing
+- updatePluginTimeline() when NOTES.md missing
+
+### validateRegistryConsistency(pluginName)
+
+**Purpose:** Verify NOTES.md exists and is consistent with PLUGINS.md table.
+
+**Implementation:**
+```bash
+#!/bin/bash
+# Verify NOTES.md exists and status matches table
+
+PLUGIN_NAME=$1
+
+# Check NOTES.md exists
+NOTES_FILE="plugins/${PLUGIN_NAME}/NOTES.md"
+if [ ! -f "$NOTES_FILE" ]; then
+  echo "WARNING: NOTES.md missing for ${PLUGIN_NAME}"
+  return 1
+fi
 
 # Extract status from registry table
 TABLE_STATUS=$(grep "^| ${PLUGIN_NAME} |" PLUGINS.md | awk -F'|' '{print $3}' | xargs)
 
-# Extract status from full entry
-ENTRY_STATUS=$(grep -A 10 "^### ${PLUGIN_NAME}$" PLUGINS.md | grep "^\*\*Status:\*\*" | sed 's/\*\*//g; s/Status://g' | xargs)
+# Extract status from NOTES.md
+NOTES_STATUS=$(grep "^\*\*Current Status:\*\*" "$NOTES_FILE" | sed 's/.*Current Status:\*\* //' | xargs)
 
 # Normalize (remove emojis, trim whitespace)
 TABLE_NORMALIZED=$(echo "$TABLE_STATUS" | sed 's/[^a-zA-Z0-9 ]//g' | xargs)
-ENTRY_NORMALIZED=$(echo "$ENTRY_STATUS" | sed 's/[^a-zA-Z0-9 ]//g' | xargs)
+NOTES_NORMALIZED=$(echo "$NOTES_STATUS" | sed 's/[^a-zA-Z0-9 ]//g' | xargs)
 
 # Compare
-if [ "$TABLE_NORMALIZED" != "$ENTRY_NORMALIZED" ]; then
-  echo "ERROR: Registry drift detected"
+if [ "$TABLE_NORMALIZED" != "$NOTES_NORMALIZED" ]; then
+  echo "WARNING: Status drift detected"
   echo "  Table: ${TABLE_STATUS}"
-  echo "  Entry: ${ENTRY_STATUS}"
+  echo "  NOTES: ${NOTES_STATUS}"
   return 1
 fi
 
@@ -352,7 +425,7 @@ return 0
 ```
 
 **Called by:**
-- fallbackStateUpdate() after updating PLUGINS.md
+- fallbackStateUpdate() after updating state files
 - Post-checkpoint validation
 
 ---

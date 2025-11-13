@@ -34,8 +34,10 @@ All operations include proper permissions, cache clearing, state tracking, and s
 PRODUCT_NAME=$(grep 'PRODUCT_NAME' plugins/$PLUGIN_NAME/CMakeLists.txt | sed 's/.*PRODUCT_NAME "\(.*\)".*/\1/')
 ```
 
-**Update PLUGINS.md Status:**
-Use Edit tool to update status field for plugin (see reference files for specific status values).
+**Update State Files:**
+- PLUGINS.md table row: Update status, version, and last updated fields
+- plugins/[Name]/NOTES.md: Update status metadata, add timeline entries
+- See reference files for specific update sequences
 
 ---
 
@@ -208,7 +210,8 @@ After successful operations, present decision menu to user. See [references/deci
 
 **Updates:**
 
-- `PLUGINS.md` → Status changes to 📦 Installed, adds installation metadata
+- `PLUGINS.md` → Table row: status, version, last updated
+- `plugins/[Name]/NOTES.md` → Status metadata, timeline entries, installation details
 
 **Creates:**
 
@@ -231,7 +234,8 @@ Installation is successful when:
 - ✅ Caches cleared for all detected DAWs
 - ✅ Verification shows recent timestamps (< 60 seconds ago)
 - ✅ File sizes are reasonable (> 100 KB typically)
-- ✅ PLUGINS.md updated with 📦 status and installation locations
+- ✅ PLUGINS.md table row updated (status: 📦 Installed, last updated)
+- ✅ NOTES.md updated (status, timeline entry, installation locations)
 - ✅ User knows next steps (restart DAW, rescan plugins)
 
 **NOT required for success:**
