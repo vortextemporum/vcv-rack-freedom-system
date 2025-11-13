@@ -26,7 +26,7 @@ This skill orchestrates plugin implementation stages 2-5. Stages 0-1 (Research &
 - **Build System Ready:** Create build system and implement parameters (foundation-shell-agent)
 - **Audio Engine Working:** Implement audio processing (dsp-agent)
 - **UI Integrated:** Connect WebView interface to audio engine (gui-agent)
-- **Plugin Complete:** Factory presets, validation, and final polish (direct or validator)
+- **Plugin Complete:** Factory presets, validation, and final polish (direct or validation-agent)
 
 **Internal stage mapping:** Stage 2 → Build System Ready, Stage 3 → Audio Engine Working, Stage 4 → UI Integrated, Stage 5 → Plugin Complete
 
@@ -63,7 +63,7 @@ This skill orchestrates plugin implementation stages 2-5. Stages 0-1 (Research &
       - Stage 4: gui-agent
     </valid_delegations>
 
-    Stage 5 can optionally run directly in orchestrator or via validator subagent.
+    Stage 5 can optionally run directly in orchestrator or via validation-agent subagent.
   </delegation_rule>
 
   <checkpoint_protocol
@@ -336,7 +336,7 @@ See `references/state-management.md` for `checkStagePreconditions()` function.
      - Stage 2 → foundation-shell-agent (single-pass, creates build system + parameters)
      - Stage 3 → dsp-agent (phase-aware dispatch)
      - Stage 4 → gui-agent (phase-aware dispatch)
-     - Stage 5 → validator (single-pass or direct execution)
+     - Stage 5 → validation-agent (single-pass or direct execution)
   5. Pass contracts and Required Reading to subagent
   6. Wait for subagent completion
 
@@ -425,10 +425,10 @@ For detailed algorithm, pseudocode, and examples, see [references/phase-aware-di
   - Ensures contracts remain single source of truth
 
   **Override logging:**
-  If user chooses override, log to .validator-overrides.yaml:
+  If user chooses override, log to .validation-overrides.yaml:
   ```yaml
   - timestamp: [ISO-8601]
-    validator: design-sync
+    validation-agent: design-sync
     stage: pre-stage-2
     severity: [none|attention|critical]
     override-reason: "User proceeded despite drift"
@@ -585,7 +585,7 @@ runWorkflow(pluginName, resumeStage)
   - [stage-2-foundation-shell.md](references/stage-2-foundation-shell.md) - foundation-shell-agent
   - [stage-3-dsp.md](references/stage-3-dsp.md) - dsp-agent
   - [stage-4-gui.md](references/stage-4-gui.md) - gui-agent
-  - [stage-5-validation.md](references/stage-5-validation.md) - validator
+  - [stage-5-validation.md](references/stage-5-validation.md) - validation-agent
   - [state-management.md](references/state-management.md) - State machine functions
   - [dispatcher-pattern.md](references/dispatcher-pattern.md) - Routing logic
   - [precondition-checks.md](references/precondition-checks.md) - Contract validation
@@ -610,7 +610,7 @@ runWorkflow(pluginName, resumeStage)
 - `foundation-shell-agent` subagent (Stage 2) - REQUIRED, never implement directly
 - `dsp-agent` subagent (Stage 3) - REQUIRED, never implement directly
 - `gui-agent` subagent (Stage 4) - REQUIRED, never implement directly
-- `validator` subagent (Stage 5) - Optional, can run directly
+- `validation-agent` subagent (Stage 5) - Optional, can run directly
 
 **Also invokes:**
 
@@ -724,7 +724,7 @@ Summary of subagent and system component contracts:
 | foundation-shell-agent | 2 | Contracts + Required Reading | JSON report | Create build system + implement APVTS |
 | dsp-agent | 3 | Contracts + Required Reading | JSON report | Implement audio processing |
 | gui-agent | 4 | Contracts + Required Reading | JSON report | Integrate WebView UI |
-| validator | 1-4 | Stage-specific expectations | JSON report | Advisory validation |
+| validation-agent | 1-4 | Stage-specific expectations | JSON report | Advisory validation |
 | build-automation | 2-5 | Plugin name + build config | Build result | Verify compilation |
 | context-resume | N/A | Handoff context | Workflow resumption | Resume from checkpoint |
 | /implement | N/A | Plugin name | Full workflow | Entry point command |
@@ -744,7 +744,7 @@ Common error scenarios:
 - State file corruption → Reconstruct from git log → User verifies before continuing
 - Checkpoint step failure → Attempt remaining steps → Present partial status
 
-Graceful degradation when components unavailable (validator, build-automation, Required Reading).
+Graceful degradation when components unavailable (validation-agent, build-automation, Required Reading).
 
 For detailed error patterns, recovery strategies, and reporting format, see [references/error-handling.md](references/error-handling.md).
 

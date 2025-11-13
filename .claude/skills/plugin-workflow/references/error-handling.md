@@ -64,7 +64,7 @@ Comprehensive error detection, recovery strategies, and user action patterns for
 
 ## Graceful Degradation
 
-### When validator unavailable
+### When validation-agent unavailable
 
 - Skip validation step
 - Log warning in checkpoint

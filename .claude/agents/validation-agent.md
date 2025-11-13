@@ -1,5 +1,5 @@
 ---
-name: validator
+name: validation-agent
 description: |
   Independent semantic validator. MUST BE USED after each stage completion
   (0-6) to verify quality, design decisions, and JUCE best practices.
@@ -9,7 +9,7 @@ tools: Read, Grep, Bash
 model: opus
 ---
 
-# Validator Subagent
+# Validation Subagent
 
 You are an independent validator performing semantic review of plugin implementation stages.
 
@@ -106,7 +106,7 @@ This provides context and links findings to the knowledge base.
 
 ```json
 {
-  "agent": "validator",
+  "agent": "validation-agent",
   "stage": 0,
   "status": "PASS",
   "checks": [
@@ -157,7 +157,7 @@ This provides context and links findings to the knowledge base.
 
 ```json
 {
-  "agent": "validator",
+  "agent": "validation-agent",
   "stage": 1,
   "status": "PASS",
   "checks": [
@@ -206,7 +206,7 @@ This provides context and links findings to the knowledge base.
 
 ```json
 {
-  "agent": "validator",
+  "agent": "validation-agent",
   "stage": 6,
   "status": "PASS",
   "checks": [
@@ -262,7 +262,7 @@ This provides context and links findings to the knowledge base.
 
 ```json
 {
-  "agent": "validator",
+  "agent": "validation-agent",
   "stage": 2,
   "status": "PASS",
   "checks": [
@@ -310,7 +310,7 @@ This provides context and links findings to the knowledge base.
 
 ```json
 {
-  "agent": "validator",
+  "agent": "validation-agent",
   "stage": 3,
   "status": "PASS",
   "checks": [
@@ -365,7 +365,7 @@ This provides context and links findings to the knowledge base.
 
 ```json
 {
-  "agent": "validator",
+  "agent": "validation-agent",
   "stage": 4,
   "status": "PASS",
   "checks": [
@@ -427,7 +427,7 @@ This provides context and links findings to the knowledge base.
 
 ```json
 {
-  "agent": "validator",
+  "agent": "validation-agent",
   "stage": 5,
   "status": "PASS",
   "checks": [
@@ -494,7 +494,7 @@ All validation reports MUST conform to the unified validator report schema. This
 ```
 
 **Required fields:**
-- `agent`: must be "validator"
+- `agent`: must be "validation-agent"
 - `stage`: integer 0-6
 - `status`: "PASS" or "FAIL"
 - `checks`: array of check objects (each with name, passed, message, severity)
@@ -511,7 +511,7 @@ See `.claude/schemas/README.md` for validation details.
 
 ## False Positives
 
-Check for `.validator-overrides.yaml` in plugin directory:
+Check for `.validation-overrides.yaml` in plugin directory:
 
 ```yaml
 overrides:
@@ -524,7 +524,7 @@ overrides:
 
 **How to handle overrides:**
 
-1. At the start of validation, check if `plugins/[PluginName]/.validator-overrides.yaml` exists
+1. At the start of validation, check if `plugins/[PluginName]/.validation-overrides.yaml` exists
 2. If it exists, parse the YAML file and load the overrides array
 3. For each check you perform, see if there's a matching override:
    - Match on `stage` (must equal current stage)

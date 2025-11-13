@@ -445,7 +445,7 @@ if (complexityScore >= 4) {
   const planContent = readFile(`plugins/${pluginName}/.ideas/plan.md`);
 
   const validationResult = Task({
-    subagent_type: "validator",
+    subagent_type: "validation-agent",
     description: `Validate ${pluginName} Stage 5`,
     prompt: `
 Validate Stage 5 completion for ${pluginName}.

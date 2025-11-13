@@ -4,19 +4,19 @@ Integration details for deep-research skill with other Plugin Freedom System com
 
 ## Contents
 
-- [Integration with troubleshooter](#integration-with-troubleshooter)
+- [Integration with troubleshoot-agent](#integration-with-troubleshoot-agent)
 - [Integration with troubleshooting-docs](#integration-with-troubleshooting-docs)
 
 ---
 
-## Integration with troubleshooter
+## Integration with troubleshoot-agent
 
-**troubleshooter Level 4:**
+**troubleshoot-agent Level 4:**
 
-When troubleshooter agent exhausts Levels 0-3, it invokes deep-research:
+When troubleshoot-agent exhausts Levels 0-3, it invokes deep-research:
 
 ```markdown
-## troubleshooter.md - Level 4
+## troubleshoot-agent.md - Level 4
 
 If Levels 0-3 insufficient, escalate to deep-research skill:
 
@@ -34,11 +34,11 @@ deep-research handles:
 
 **Integration flow:**
 
-1. troubleshooter detects complex problem (Level 3 insufficient)
+1. troubleshoot-agent detects complex problem (Level 3 insufficient)
 2. Invokes deep-research skill
 3. deep-research starts at Level 1 (may escalate)
-4. Returns structured report to troubleshooter
-5. troubleshooter presents findings to user
+4. Returns structured report to troubleshoot-agent
+5. troubleshoot-agent presents findings to user
 
 ---
 

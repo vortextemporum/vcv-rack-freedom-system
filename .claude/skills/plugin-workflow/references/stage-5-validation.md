@@ -152,7 +152,7 @@ Call validator to verify Stage 6 completion:
 
 ```typescript
 const validation = Task({
-  subagent_type: "validator",
+  subagent_type: "validation-agent",
   description: `Validate ${pluginName} Stage 6`,
   prompt: `
 Validate Stage 6 completion for ${pluginName}.

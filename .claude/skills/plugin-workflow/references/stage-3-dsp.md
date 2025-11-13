@@ -362,7 +362,7 @@ Issues:
 ${report.issues.map((i) => `  - ${i}`).join("\n")}
 
 What would you like to do?
-1. Investigate (invoke troubleshooter)
+1. Investigate (invoke troubleshoot-agent)
 2. Show me the code (PluginProcessor.cpp)
 3. Show me the build output
 4. I'll fix it manually (say "resume automation" when ready)
@@ -433,7 +433,7 @@ Choose (1-4): _
 console.log("✓ All Stage 4 tests passed");
 ```
 
-### 6. Invoke validator for Complexity ≥4 Plugins
+### 6. Invoke validation-agent for Complexity ≥4 Plugins
 
 **For complexity ≥4 plugins, run semantic validation:**
 
@@ -451,7 +451,7 @@ if (complexityScore >= 4) {
   const planContent = readFile(`plugins/${pluginName}/.ideas/plan.md`);
 
   const validationResult = Task({
-    subagent_type: "validator",
+    subagent_type: "validation-agent",
     description: `Validate ${pluginName} Stage 4`,
     prompt: `
 Validate Stage 4 completion for ${pluginName}.
@@ -492,9 +492,9 @@ Return JSON validation report with status, checks, and recommendation.
     }
   } catch (error) {
     console.log(`
-⚠️ Warning: Could not parse validator report as JSON
+⚠️ Warning: Could not parse validation-agent report as JSON
 
-Raw validator output:
+Raw validation-agent output:
 ${validationResult}
 
 Continuing workflow (validation is advisory, not blocking).
@@ -540,10 +540,10 @@ ${status === "PASS" ? "✓" : "✗"} Validator ${status}: Stage 4 Review
 
 What's next?
 1. Integrate UI - Connect your interface to the audio engine ${
-      continue_to_next_stage ? "(recommended by validator)" : ""
+      continue_to_next_stage ? "(recommended by validation-agent)" : ""
     }
-2. Address validator ${errors.length > 0 ? "errors" : "warnings"} first
-3. Review validator report details
+2. Address validation-agent ${errors.length > 0 ? "errors" : "warnings"} first
+3. Review validation-agent report details
 4. Test audio manually in DAW - Listen to your processing
 5. Review DSP code
 6. Other

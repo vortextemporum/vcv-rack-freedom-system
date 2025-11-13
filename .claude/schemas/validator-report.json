@@ -8,8 +8,8 @@
   "properties": {
     "agent": {
       "type": "string",
-      "const": "validator",
-      "description": "Always 'validator' for this report type"
+      "const": "validation-agent",
+      "description": "Always 'validation-agent' for this report type"
     },
     "stage": {
       "type": "integer",
