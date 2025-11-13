@@ -4,14 +4,124 @@
 Drum808AudioProcessorEditor::Drum808AudioProcessorEditor(Drum808AudioProcessor& p)
     : AudioProcessorEditor(&p), processorRef(p)
 {
-    // Create WebView with resource provider (Pattern 11 - initialize in constructor body)
+    // 1. Create all 24 relays FIRST (parameter IDs must match APVTS and HTML exactly)
+    kickLevelRelay = std::make_unique<juce::WebSliderRelay>("kick_level");
+    kickToneRelay = std::make_unique<juce::WebSliderRelay>("kick_tone");
+    kickDecayRelay = std::make_unique<juce::WebSliderRelay>("kick_decay");
+    kickTuningRelay = std::make_unique<juce::WebSliderRelay>("kick_tuning");
+
+    lowtomLevelRelay = std::make_unique<juce::WebSliderRelay>("lowtom_level");
+    lowtomToneRelay = std::make_unique<juce::WebSliderRelay>("lowtom_tone");
+    lowtomDecayRelay = std::make_unique<juce::WebSliderRelay>("lowtom_decay");
+    lowtomTuningRelay = std::make_unique<juce::WebSliderRelay>("lowtom_tuning");
+
+    midtomLevelRelay = std::make_unique<juce::WebSliderRelay>("midtom_level");
+    midtomToneRelay = std::make_unique<juce::WebSliderRelay>("midtom_tone");
+    midtomDecayRelay = std::make_unique<juce::WebSliderRelay>("midtom_decay");
+    midtomTuningRelay = std::make_unique<juce::WebSliderRelay>("midtom_tuning");
+
+    clapLevelRelay = std::make_unique<juce::WebSliderRelay>("clap_level");
+    clapToneRelay = std::make_unique<juce::WebSliderRelay>("clap_tone");
+    clapSnapRelay = std::make_unique<juce::WebSliderRelay>("clap_snap");
+    clapTuningRelay = std::make_unique<juce::WebSliderRelay>("clap_tuning");
+
+    closedhatLevelRelay = std::make_unique<juce::WebSliderRelay>("closedhat_level");
+    closedhatToneRelay = std::make_unique<juce::WebSliderRelay>("closedhat_tone");
+    closedhatDecayRelay = std::make_unique<juce::WebSliderRelay>("closedhat_decay");
+    closedhatTuningRelay = std::make_unique<juce::WebSliderRelay>("closedhat_tuning");
+
+    openhatLevelRelay = std::make_unique<juce::WebSliderRelay>("openhat_level");
+    openhatToneRelay = std::make_unique<juce::WebSliderRelay>("openhat_tone");
+    openhatDecayRelay = std::make_unique<juce::WebSliderRelay>("openhat_decay");
+    openhatTuningRelay = std::make_unique<juce::WebSliderRelay>("openhat_tuning");
+
+    // 2. Create WebView with ALL relay options (CRITICAL: register all 24 relays)
     webView = std::make_unique<juce::WebBrowserComponent>(
         juce::WebBrowserComponent::Options{}
             .withNativeIntegrationEnabled()
             .withResourceProvider([this](const juce::String& url) {
                 return getResource(url);
             })
+            .withOptionsFrom(*kickLevelRelay)
+            .withOptionsFrom(*kickToneRelay)
+            .withOptionsFrom(*kickDecayRelay)
+            .withOptionsFrom(*kickTuningRelay)
+            .withOptionsFrom(*lowtomLevelRelay)
+            .withOptionsFrom(*lowtomToneRelay)
+            .withOptionsFrom(*lowtomDecayRelay)
+            .withOptionsFrom(*lowtomTuningRelay)
+            .withOptionsFrom(*midtomLevelRelay)
+            .withOptionsFrom(*midtomToneRelay)
+            .withOptionsFrom(*midtomDecayRelay)
+            .withOptionsFrom(*midtomTuningRelay)
+            .withOptionsFrom(*clapLevelRelay)
+            .withOptionsFrom(*clapToneRelay)
+            .withOptionsFrom(*clapSnapRelay)
+            .withOptionsFrom(*clapTuningRelay)
+            .withOptionsFrom(*closedhatLevelRelay)
+            .withOptionsFrom(*closedhatToneRelay)
+            .withOptionsFrom(*closedhatDecayRelay)
+            .withOptionsFrom(*closedhatTuningRelay)
+            .withOptionsFrom(*openhatLevelRelay)
+            .withOptionsFrom(*openhatToneRelay)
+            .withOptionsFrom(*openhatDecayRelay)
+            .withOptionsFrom(*openhatTuningRelay)
     );
+
+    // 3. Create all 24 attachments LAST (CRITICAL: 3 parameters per Pattern 12)
+    kickLevelAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
+        *processorRef.parameters.getParameter("kick_level"), *kickLevelRelay, nullptr);
+    kickToneAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
+        *processorRef.parameters.getParameter("kick_tone"), *kickToneRelay, nullptr);
+    kickDecayAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
+        *processorRef.parameters.getParameter("kick_decay"), *kickDecayRelay, nullptr);
+    kickTuningAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
+        *processorRef.parameters.getParameter("kick_tuning"), *kickTuningRelay, nullptr);
+
+    lowtomLevelAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
+        *processorRef.parameters.getParameter("lowtom_level"), *lowtomLevelRelay, nullptr);
+    lowtomToneAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
+        *processorRef.parameters.getParameter("lowtom_tone"), *lowtomToneRelay, nullptr);
+    lowtomDecayAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
+        *processorRef.parameters.getParameter("lowtom_decay"), *lowtomDecayRelay, nullptr);
+    lowtomTuningAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
+        *processorRef.parameters.getParameter("lowtom_tuning"), *lowtomTuningRelay, nullptr);
+
+    midtomLevelAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
+        *processorRef.parameters.getParameter("midtom_level"), *midtomLevelRelay, nullptr);
+    midtomToneAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
+        *processorRef.parameters.getParameter("midtom_tone"), *midtomToneRelay, nullptr);
+    midtomDecayAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
+        *processorRef.parameters.getParameter("midtom_decay"), *midtomDecayRelay, nullptr);
+    midtomTuningAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
+        *processorRef.parameters.getParameter("midtom_tuning"), *midtomTuningRelay, nullptr);
+
+    clapLevelAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
+        *processorRef.parameters.getParameter("clap_level"), *clapLevelRelay, nullptr);
+    clapToneAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
+        *processorRef.parameters.getParameter("clap_tone"), *clapToneRelay, nullptr);
+    clapSnapAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
+        *processorRef.parameters.getParameter("clap_snap"), *clapSnapRelay, nullptr);
+    clapTuningAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
+        *processorRef.parameters.getParameter("clap_tuning"), *clapTuningRelay, nullptr);
+
+    closedhatLevelAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
+        *processorRef.parameters.getParameter("closedhat_level"), *closedhatLevelRelay, nullptr);
+    closedhatToneAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
+        *processorRef.parameters.getParameter("closedhat_tone"), *closedhatToneRelay, nullptr);
+    closedhatDecayAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
+        *processorRef.parameters.getParameter("closedhat_decay"), *closedhatDecayRelay, nullptr);
+    closedhatTuningAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
+        *processorRef.parameters.getParameter("closedhat_tuning"), *closedhatTuningRelay, nullptr);
+
+    openhatLevelAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
+        *processorRef.parameters.getParameter("openhat_level"), *openhatLevelRelay, nullptr);
+    openhatToneAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
+        *processorRef.parameters.getParameter("openhat_tone"), *openhatToneRelay, nullptr);
+    openhatDecayAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
+        *processorRef.parameters.getParameter("openhat_decay"), *openhatDecayRelay, nullptr);
+    openhatTuningAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
+        *processorRef.parameters.getParameter("openhat_tuning"), *openhatTuningRelay, nullptr);
 
     addAndMakeVisible(*webView);
 
