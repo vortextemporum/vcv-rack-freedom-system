@@ -1,0 +1,96 @@
+window:
+  width: 500
+  height: 300
+  resizable: false
+  title: "MinimalKick"
+
+layout:
+  type: horizontal
+  arrangement: single_row
+  spacing: 15
+
+controls:
+  - id: pitch
+    type: rotary_knob
+    position: { x: 50, y: 120 }
+    size: 60
+    range: [30.0, 100.0]
+    default: 50.0
+    unit: "Hz"
+    label: "PITCH"
+    style: large_circular
+
+  - id: decay
+    type: rotary_knob
+    position: { x: 140, y: 120 }
+    size: 60
+    range: [50.0, 2000.0]
+    default: 400.0
+    unit: "ms"
+    label: "DECAY"
+    style: large_circular
+
+  - id: attack
+    type: rotary_knob
+    position: { x: 230, y: 120 }
+    size: 60
+    range: [0.0, 50.0]
+    default: 5.0
+    unit: "ms"
+    label: "ATTACK"
+    style: large_circular
+
+  - id: release
+    type: rotary_knob
+    position: { x: 320, y: 120 }
+    size: 60
+    range: [50.0, 1000.0]
+    default: 300.0
+    unit: "ms"
+    label: "RELEASE"
+    style: large_circular
+
+  - id: drive
+    type: rotary_knob
+    position: { x: 410, y: 120 }
+    size: 60
+    range: [0.0, 100.0]
+    default: 20.0
+    unit: "%"
+    label: "DRIVE"
+    style: large_circular
+
+visual_elements:
+  - type: led_indicator
+    position: { x: 240, y: 40 }
+    size: 12
+    label: "TRIGGER"
+    color: "#ffffff"
+
+styling:
+  colors:
+    background: "#1a1a1a"
+    foreground: "#ffffff"
+    knob_track: "#333333"
+    knob_fill: "#ffffff"
+    led_on: "#ffffff"
+    led_off: "#3a3a3a"
+    text: "#cccccc"
+
+  fonts:
+    primary: "Arial, sans-serif"
+    label_size: 11
+    value_size: 13
+    weight: normal
+
+  theme:
+    aesthetic: minimal_modern
+    contrast: high
+    decorations: none
+
+metadata:
+  version: 1
+  plugin_name: "MinimalKick"
+  parameter_count: 5
+  complexity: low
+  design_philosophy: "Pure minimal - five essential parameters with immediate visual feedback"
