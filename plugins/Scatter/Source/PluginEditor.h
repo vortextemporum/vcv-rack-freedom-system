@@ -2,7 +2,8 @@
 #include "PluginProcessor.h"
 #include <juce_gui_extra/juce_gui_extra.h>
 
-class ScatterAudioProcessorEditor : public juce::AudioProcessorEditor
+class ScatterAudioProcessorEditor : public juce::AudioProcessorEditor,
+                                    private juce::Timer
 {
 public:
     explicit ScatterAudioProcessorEditor(ScatterAudioProcessor&);
@@ -10,6 +11,10 @@ public:
 
     void paint(juce::Graphics&) override;
     void resized() override;
+
+private:
+    // Phase 4.2: Timer callback for grain visualization updates (30Hz)
+    void timerCallback() override;
 
 private:
     ScatterAudioProcessor& processorRef;

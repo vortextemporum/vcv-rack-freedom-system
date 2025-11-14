@@ -257,6 +257,40 @@ juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 }
 
 // ============================================================================
+// Phase 4.2: Grain Visualization Data Accessor
+// ============================================================================
+
+std::vector<ScatterAudioProcessor::GrainVisualizationData> ScatterAudioProcessor::getActiveGrainPositions() const
+{
+    std::vector<GrainVisualizationData> data;
+
+    // Copy active grain positions (thread-safe read - audio thread writes, message thread reads)
+    for (const auto& grain : grainVoices)
+    {
+        if (grain.active)
+        {
+            GrainVisualizationData vizData;
+
+            // X-axis: Normalized time position in delay buffer (0.0-1.0)
+            vizData.x = grain.readPosition / static_cast<float>(currentDelayBufferSize);
+
+            // Y-axis: Pitch shift normalized to -1.0 to +1.0 range
+            // playbackRate = 2^(semitones / 12)
+            // Reverse calculation: semitones = 12 * log2(playbackRate)
+            float semitones = 12.0f * std::log2(grain.playbackRate);
+            vizData.y = semitones / 7.0f;  // Normalize to -1.0 to +1.0 (-7 to +7 semitones)
+
+            // Pan position (already 0.0-1.0)
+            vizData.pan = grain.pan;
+
+            data.push_back(vizData);
+        }
+    }
+
+    return data;
+}
+
+// ============================================================================
 // Phase 3.1: Core Granular Engine Helper Methods
 // ============================================================================
 

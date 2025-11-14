@@ -34,6 +34,17 @@ public:
 
     juce::AudioProcessorValueTreeState parameters;
 
+    // Phase 4.2: Grain visualization data structure
+    struct GrainVisualizationData
+    {
+        float x;      // Time position in delay buffer (0.0-1.0)
+        float y;      // Pitch shift amount (-1.0 to +1.0, representing -7 to +7 semitones)
+        float pan;    // Pan position (0.0-1.0)
+    };
+
+    // Phase 4.2: Public accessor for grain positions (thread-safe read)
+    std::vector<GrainVisualizationData> getActiveGrainPositions() const;
+
 private:
     static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
 

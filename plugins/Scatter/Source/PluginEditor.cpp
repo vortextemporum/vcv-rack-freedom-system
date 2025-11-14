@@ -59,10 +59,16 @@ ScatterAudioProcessorEditor::ScatterAudioProcessorEditor(ScatterAudioProcessor& 
 
     // Set editor size (from mockup: 550x600px)
     setSize(550, 600);
+
+    // Phase 4.2: Start timer for grain visualization updates (30Hz = ~33ms interval)
+    startTimer(33);
 }
 
 ScatterAudioProcessorEditor::~ScatterAudioProcessorEditor()
 {
+    // Phase 4.2: Stop timer before cleanup
+    stopTimer();
+
     // Smart pointers handle cleanup in reverse order
 }
 
@@ -116,4 +122,37 @@ ScatterAudioProcessorEditor::getResource(const juce::String& url)
     // Resource not found
     juce::Logger::writeToLog("Resource not found: " + url);
     return std::nullopt;
+}
+
+// ============================================================================
+// Phase 4.2: Grain Visualization Timer Callback
+// ============================================================================
+
+void ScatterAudioProcessorEditor::timerCallback()
+{
+    // Get active grain positions from processor (thread-safe read)
+    auto grainData = processorRef.getActiveGrainPositions();
+
+    // Build JSON array for JavaScript
+    juce::String jsonData = "[";
+
+    for (size_t i = 0; i < grainData.size(); ++i)
+    {
+        const auto& grain = grainData[i];
+
+        jsonData += "{\"x\":" + juce::String(grain.x, 4)
+                 + ",\"y\":" + juce::String(grain.y, 4)
+                 + ",\"pan\":" + juce::String(grain.pan, 4) + "}";
+
+        if (i < grainData.size() - 1)
+            jsonData += ",";
+    }
+
+    jsonData += "]";
+
+    // Send to JavaScript via custom event
+    if (webView != nullptr)
+    {
+        webView->emitEventIfBrowserIsVisible("grainUpdate", jsonData);
+    }
 }
