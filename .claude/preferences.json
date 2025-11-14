@@ -1,8 +1,8 @@
 {
   "workflow": {
-    "mode": "manual",
-    "auto_test": false,
-    "auto_install": false,
-    "auto_package": false
+    "mode": "express",
+    "auto_test": true,
+    "auto_install": true,
+    "auto_package": true
   }
 }

@@ -48,28 +48,23 @@ target_link_libraries(LushPad
 # Generate JuceHeader.h (JUCE 8 requirement - CRITICAL: must come after target_link_libraries)
 juce_generate_juce_header(LushPad)
 
-# WebView UI Resources (uncommented by gui-agent if WebView UI used)
-# juce_add_binary_data(LushPad_UIResources
-#     SOURCES
-#         Source/ui/public/index.html
-#         Source/ui/public/js/juce/index.js
-#         Source/ui/public/js/juce/check_native_interop.js
-# )
-#
-# target_link_libraries(LushPad
-#     PRIVATE
-#         LushPad_UIResources
-# )
+# WebView UI Resources
+juce_add_binary_data(LushPad_UIResources
+    SOURCES
+        Source/ui/public/index.html
+        Source/ui/public/js/juce/index.js
+        Source/ui/public/js/juce/check_native_interop.js
+)
+
+target_link_libraries(LushPad
+    PRIVATE
+        LushPad_UIResources
+)
 
 # Compile definitions
 target_compile_definitions(LushPad
     PUBLIC
         JUCE_VST3_CAN_REPLACE_VST2=0
+        JUCE_WEB_BROWSER=1
+        JUCE_USE_CURL=0
 )
-
-# WebView support (uncommented by gui-agent if WebView UI used)
-# target_compile_definitions(LushPad
-#     PUBLIC
-#         JUCE_WEB_BROWSER=1
-#         JUCE_USE_CURL=0
-# )
