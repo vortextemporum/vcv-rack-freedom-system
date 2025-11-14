@@ -85,7 +85,7 @@ Note: This command works at any stage of development, even before completion.
 
 ## Use Cases
 
-- Rapid UI iteration during Stage 5 (GUI)
+- Rapid UI iteration during Stage 4 (GUI)
 - Visual design verification
 - Quick parameter testing without DAW
 - Layout debugging

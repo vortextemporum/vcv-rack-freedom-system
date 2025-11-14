@@ -28,7 +28,7 @@ if [ -n "$PLUGIN_NAME" ]; then
 
   echo "Validating contract integrity for $PLUGIN_NAME..." >&2
 
-  # 1. Verify contract checksums (Stages 2-5 only)
+  # 1. Verify contract checksums (Stages 1-4 only)
   python3 .claude/hooks/validators/validate-checksums.py "$PLUGIN_PATH"
   CHECKSUM_RESULT=$?
   if [ $CHECKSUM_RESULT -eq 1 ]; then
@@ -67,7 +67,7 @@ case "$SUBAGENT" in
     ;;
 
   shell-agent)
-    echo "Validating shell-agent output (Stage 2)..."
+    echo "Validating shell-agent output (Stage 1)..."
     python3 .claude/hooks/validators/validate-parameters.py
     RESULT=$?
     if [ $RESULT -ne 0 ]; then
@@ -78,7 +78,7 @@ case "$SUBAGENT" in
     ;;
 
   dsp-agent)
-    echo "Validating dsp-agent output (Stage 2)..."
+    echo "Validating dsp-agent output (Stage 1)..."
     python3 .claude/hooks/validators/validate-dsp-components.py
     RESULT=$?
     if [ $RESULT -ne 0 ]; then
@@ -89,7 +89,7 @@ case "$SUBAGENT" in
     ;;
 
   gui-agent)
-    echo "Validating gui-agent output (Stage 3)..."
+    echo "Validating gui-agent output (Stage 2)..."
     python3 .claude/hooks/validators/validate-gui-bindings.py
     RESULT=$?
     if [ $RESULT -ne 0 ]; then

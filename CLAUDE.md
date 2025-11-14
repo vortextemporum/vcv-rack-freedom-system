@@ -33,7 +33,7 @@ When technical terms appear in the system, they refer to these concepts:
 
 **Internal vs User-Facing:**
 
-- **Internal:** Stage numbers (2-5) used for routing logic, never shown to users
+- **Internal:** Stage numbers (1-4) used for routing logic, never shown to users
 - **User-facing:** Milestone names (Build System Ready, Audio Engine Working, etc.) shown in all menus and messages
 
 When these terms appear in the system, the plain-language equivalent will be shown on first use:
@@ -82,10 +82,10 @@ The system prevents late-stage failures through multi-layer validation:
 - Reports critical errors with actionable fix commands
 - Prevents 10+ minutes of work before discovering missing dependencies
 
-**Stage 0→2 Transition (brief sync):**
+**Stage 0→1 Transition (brief sync):**
 
 - Automatic update of creative brief from finalized mockup
-- Ensures contracts reflect final UI design before Stage 2
+- Ensures contracts reflect final UI design before Stage 1
 - No manual reconciliation needed (mockup is source of truth)
 
 **During Implementation (PostToolUse hook):**
@@ -143,7 +143,7 @@ Auto-progress to next stage without menu:
 
 [Stage execution begins immediately]
 
-**Final menu always appears** (even in express mode) after Stage 5.
+**Final menu always appears** (even in express mode) after Stage 4.
 
 ### Workflow Mode Configuration
 
@@ -162,7 +162,7 @@ Auto-progress to next stage without menu:
 
 **Mode options:**
 
-- **"manual"** (default): Present decision menus at all checkpoints (Stages 0, 2, 3, 4, 5)
+- **"manual"** (default): Present decision menus at all checkpoints (Stages 0, 1, 2, 3, 4)
 - **"express"**: Auto-progress through stages without menus (time savings: 3-5 minutes per plugin)
 
 **Command-line overrides:**
@@ -180,7 +180,7 @@ Auto-progress to next stage without menu:
 
 **Auto-actions:**
 
-- `auto_test`: Run pluginval automatically after Stage 5
+- `auto_test`: Run pluginval automatically after Stage 4
 - `auto_install`: Install to system folders after tests pass
 - `auto_package`: Create PKG installer after installation
 
@@ -200,9 +200,9 @@ Do NOT use AskUserQuestion tool for decision menus - use inline numbered lists a
 All implementation stages use the dispatcher pattern:
 
 - Stage 0 → You **must** invoke research-planning-agent via Task tool (plugin-planning skill)
-- Stage 2 → You **must** invoke foundation-shell-agent via Task tool (plugin-workflow skill)
-- Stage 3 → You **must** invoke dsp-agent via Task tool (plugin-workflow skill)
-- Stage 4 → You **must** invoke gui-agent via Task tool (plugin-workflow skill)
+- Stage 1 → You **must** invoke foundation-shell-agent via Task tool (plugin-workflow skill)
+- Stage 2 → You **must** invoke dsp-agent via Task tool (plugin-workflow skill)
+- Stage 3 → You **must** invoke gui-agent via Task tool (plugin-workflow skill)
 
 The orchestrating skills delegate to subagents, they do **not** implement directly.
 
@@ -227,18 +227,18 @@ This ensures consistent checkpoint behavior and clean separation of concerns.
 
 ## GUI-Optional Flow (Phase 7 Enhancement)
 
-**Purpose:** Plugins can skip custom UI (Stage 4) and ship as "headless" plugins using DAW-provided parameter controls. Custom UI can be added later via `/improve`.
+**Purpose:** Plugins can skip custom UI (Stage 3) and ship as "headless" plugins using DAW-provided parameter controls. Custom UI can be added later via `/improve`.
 
 **Benefits:**
 
 - **Time savings:** 14 minutes per plugin when custom UI isn't needed (12 min vs 26 min)
-- **Faster iteration:** Test DSP immediately after Stage 3 without waiting for UI
+- **Faster iteration:** Test DSP immediately after Stage 2 without waiting for UI
 - **Progressive enhancement:** Add GUI later when ready via `/improve [PluginName]`
 - **Flexibility:** User decides when/if to build custom UI
 
 **Workflow:**
 
-After Stage 3 (DSP) completes, user chooses:
+After Stage 2 (DSP) completes, user chooses:
 
 1. **Add custom UI** - Create WebView interface (existing behavior, 15 min)
 2. **Ship headless** - Use DAW controls only (new option, 1 min)
@@ -246,7 +246,7 @@ After Stage 3 (DSP) completes, user chooses:
 **Headless path:**
 
 - Generates minimal PluginEditor (shows plugin name, instructs to use DAW controls)
-- Proceeds directly to Stage 5 (Validation)
+- Proceeds directly to Stage 4 (Validation)
 - Plugin marked as v1.0.0 (Headless)
 - All parameters exposed to DAW automation
 - No custom UI overhead (smaller binary, faster compile)
@@ -255,7 +255,7 @@ After Stage 3 (DSP) completes, user chooses:
 
 - `/improve [PluginName]` detects headless plugins
 - Offers "Create custom UI" option
-- Invokes ui-mockup → gui-agent (same as Stage 4)
+- Invokes ui-mockup → gui-agent (same as Stage 3)
 - Version bumped to v1.1.0 (minor version - new feature)
 - Backward compatible (existing automation/presets unaffected)
 
@@ -270,7 +270,7 @@ After Stage 3 (DSP) completes, user chooses:
 - `plugins/TEMPLATE-HEADLESS-EDITOR/` - Minimal PluginEditor templates
 - Automatically substituted with plugin name during generation
 
-**Entry point:** After Stage 3 completion (GUI decision gate in plugin-workflow)
+**Entry point:** After Stage 2 completion (GUI decision gate in plugin-workflow)
 
 ## Implementation Status
 
@@ -331,7 +331,7 @@ After Stage 3 (DSP) completes, user chooses:
 - `troubleshooting/parameter-issues/` - APVTS and state management
 - `troubleshooting/validation-problems/` - pluginval failures
 - `troubleshooting/patterns/` - Common patterns and solutions
-- `troubleshooting/patterns/juce8-critical-patterns.md` - **REQUIRED READING** for all subagents (Stages 2-5)
+- `troubleshooting/patterns/juce8-critical-patterns.md` - **REQUIRED READING** for all subagents (Stages 1-4)
 
 ### Scripts
 

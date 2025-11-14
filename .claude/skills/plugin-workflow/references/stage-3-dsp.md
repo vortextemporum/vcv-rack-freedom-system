@@ -1,7 +1,7 @@
-# Stage 3: DSP
+# Stage 2: DSP
 
 **Context:** This file is part of the plugin-workflow skill.
-**Invoked by:** Main workflow dispatcher after Stage 2 completion
+**Invoked by:** Main workflow dispatcher after Stage 1 completion
 **Purpose:** Implement audio processing where parameters control DSP
 
 ---
@@ -12,7 +12,7 @@
 
 **Preconditions:**
 
-- Stage 2 complete (parameters implemented)
+- Stage 1 complete (parameters implemented)
 - architecture.md exists (DSP component specifications)
 - plan.md exists (complexity score, phase breakdown)
 
@@ -32,7 +32,7 @@ const complexityScore = complexityMatch ? parseFloat(complexityMatch[1]) : 0;
 // Check if plan specifies phases
 const hasPhases =
   planContent.includes("### Phase 3.1") ||
-  planContent.includes("## Stage 3: DSP Phases");
+  planContent.includes("## Stage 2: DSP Phases");
 
 console.log(
   `Complexity: ${complexityScore} (${hasPhases ? "phased" : "single-pass"})`
@@ -48,9 +48,9 @@ Invoke dsp-agent once for complete DSP implementation with minimal prompt:
 ```typescript
 const dspResult = Task({
   subagent_type: "dsp-agent",
-  description: `Stage 3 - ${pluginName}`,
+  description: `Stage 2 - ${pluginName}`,
   prompt: `
-You are dsp-agent implementing Stage 3 for ${pluginName}.
+You are dsp-agent implementing Stage 2 for ${pluginName}.
 
 **Plugin:** ${pluginName}
 **Stage:** 3 (DSP Implementation)
@@ -79,7 +79,7 @@ Build verification handled by orchestrator after you complete.
   `
 });
 
-// Parse and validate report (same as Stage 2/3)
+// Parse and validate report (same as Stage 1/3)
 const report = parseSubagentReport(dspResult);
 
 if (report.status === "success") {
@@ -131,7 +131,7 @@ while ((match = phasePattern.exec(planContent)) !== null) {
   });
 }
 
-console.log(`Stage 4 will execute in ${phases.length} phases:`);
+console.log(`Stage 3 will execute in ${phases.length} phases:`);
 phases.forEach((phase) => {
   console.log(`  - Phase ${phase.number}: ${phase.description}`);
 });
@@ -150,7 +150,7 @@ for (let i = 0; i < phases.length; i++) {
 
   const phaseResult = Task({
     subagent_type: "dsp-agent",
-    description: `Stage 3.${i+1} - ${pluginName}`,
+    description: `Stage 2.${i+1} - ${pluginName}`,
     prompt: `
 You are dsp-agent implementing Phase ${phase.number} for ${pluginName}.
 
@@ -206,7 +206,7 @@ What would you like to do?
 Choose (1-4): _
     `);
 
-    // Handle failure (same 4-option menu as Stage 2/3)
+    // Handle failure (same 4-option menu as Stage 1/3)
     return; // Stop phased execution on failure
   }
 
@@ -255,7 +255,7 @@ EOF
           "Test",
           "Pause",
         ]
-      : ["Auto-test Stage 4 output", "Review complete DSP", "Pause"],
+      : ["Auto-test Stage 3 output", "Review complete DSP", "Pause"],
     complexityScore,
     true // phased
   );
@@ -305,13 +305,13 @@ console.log(`\n✓ All ${phases.length} phases complete!`);
 updateHandoff(
   pluginName,
   4,
-  "Stage 4: DSP - Audio processing implemented",
-  ["Auto-test Stage 4", "Review DSP code", "Test audio manually"],
+  "Stage 3: DSP - Audio processing implemented",
+  ["Auto-test Stage 3", "Review DSP code", "Test audio manually"],
   complexityScore,
   false
 );
 
-updatePluginStatus(pluginName, "🚧 Stage 4");
+updatePluginStatus(pluginName, "🚧 Stage 3");
 updatePluginTimeline(
   pluginName,
   4,
@@ -325,7 +325,7 @@ git add plugins/${pluginName}/.continue-here.md
 git add PLUGINS.md
 
 git commit -m "$(cat <<'EOF'
-feat: ${pluginName} Stage 4 - DSP
+feat: ${pluginName} Stage 3 - DSP
 
 Audio processing implemented
 ${report.outputs.dsp_components_implemented.length} DSP components
@@ -348,7 +348,7 @@ EOF
 if (report.status === "failure") {
   console.log(`
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✗ Stage 4 Failed: DSP Implementation
+✗ Stage 3 Failed: DSP Implementation
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Error: ${report.outputs.error_message}
@@ -366,22 +366,22 @@ What would you like to do?
 Choose (1-4): _
   `);
 
-  // Handle choice (same as Stage 2/3)
+  // Handle choice (same as Stage 1/3)
 }
 ```
 
 ### 5. Auto-Invoke plugin-testing Skill
 
-**After Stage 4 succeeds (all phases if phased):**
+**After Stage 3 succeeds (all phases if phased):**
 
 ```typescript
 console.log("\n━━━ Running automated tests ━━━\n");
 
 const testResult = Task({
   subagent_type: "general-purpose", // Or invoke plugin-testing skill directly
-  description: `Test ${pluginName} after Stage 4`,
+  description: `Test ${pluginName} after Stage 3`,
   prompt: `
-Run automated tests for ${pluginName} after Stage 4 DSP implementation.
+Run automated tests for ${pluginName} after Stage 3 DSP implementation.
 
 Use the plugin-testing skill to run the 5 automated tests:
 1. Build test (already passed)
@@ -403,7 +403,7 @@ const testsPassed =
 if (!testsPassed) {
   console.log(`
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✗ Stage 4 Tests FAILED
+✗ Stage 3 Tests FAILED
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Audio processing implementation completed, but automated tests failed.
@@ -422,11 +422,11 @@ What would you like to do?
 Choose (1-4): _
   `);
 
-  // STOP - Do not proceed to Stage 5 with failing tests
+  // STOP - Do not proceed to Stage 4 with failing tests
   return;
 }
 
-console.log("✓ All Stage 4 tests passed");
+console.log("✓ All Stage 3 tests passed");
 ```
 
 ### 6. Invoke validation-agent for Complexity ≥4 Plugins
@@ -448,9 +448,9 @@ if (complexityScore >= 4) {
 
   const validationResult = Task({
     subagent_type: "validation-agent",
-    description: `Validate ${pluginName} Stage 4`,
+    description: `Validate ${pluginName} Stage 3`,
     prompt: `
-Validate Stage 4 completion for ${pluginName}.
+Validate Stage 3 completion for ${pluginName}.
 
 **Stage:** 4
 **Plugin:** ${pluginName}
@@ -459,7 +459,7 @@ Validate Stage 4 completion for ${pluginName}.
 - architecture.md: ${architectureContent}
 - plan.md: ${planContent}
 
-**Expected outputs for Stage 4:**
+**Expected outputs for Stage 3:**
 - All DSP components from architecture.md implemented
 - processBlock() contains real-time safe audio processing
 - Parameters modulate DSP components correctly
@@ -505,7 +505,7 @@ Continuing workflow (validation is advisory, not blocking).
 
     console.log(`
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-${status === "PASS" ? "✓" : "✗"} Validator ${status}: Stage 4 Review
+${status === "PASS" ? "✓" : "✗"} Validator ${status}: Stage 3 Review
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     `);
 
@@ -585,7 +585,7 @@ Choose (1-6): _
 const choice = getUserInput();
 
 if (choice === "1" || choice === "add_gui" || choice === "custom ui") {
-  // Option 1: Custom WebView UI path (existing Stage 4 behavior)
+  // Option 1: Custom WebView UI path (existing Stage 3 behavior)
   handleGuiPath(pluginName, complexityScore);
 } else if (choice === "2" || choice === "headless" || choice === "ship headless") {
   // Option 2: Headless path (NEW)
@@ -601,14 +601,14 @@ if (choice === "1" || choice === "add_gui" || choice === "custom ui") {
   // Re-present decision menu
 } else if (choice === "5" || choice === "pause") {
   // Pause workflow
-  updateHandoff(pluginName, 3, "Stage 3: DSP complete, paused at GUI decision gate",
+  updateHandoff(pluginName, 3, "Stage 2: DSP complete, paused at GUI decision gate",
     ["Add custom UI", "Ship headless", "Test in DAW"], complexityScore, false);
   console.log("\n⏸ Paused at GUI decision gate. Resume with /continue");
   return;
 }
 ```
 
-**Helper function: handleGuiPath()** (existing Stage 4 logic):
+**Helper function: handleGuiPath()** (existing Stage 3 logic):
 
 ```typescript
 function handleGuiPath(pluginName: string, complexityScore: number) {
@@ -653,10 +653,10 @@ Choose (1-4): _
     console.log(`✓ Found existing mockup: ${mockupPath}`);
   }
 
-  // Mockup exists - proceed to Stage 4 (GUI) as normal
+  // Mockup exists - proceed to Stage 3 (GUI) as normal
   console.log("\n━━━ Integrating WebView UI ━━━\n");
 
-  // Continue to Stage 4 GUI implementation (existing behavior)
+  // Continue to Stage 3 GUI implementation (existing behavior)
   // This will be handled by main workflow orchestration
   currentStage = 4;
 }
@@ -692,14 +692,14 @@ Mockup preserved for future use (add UI via /improve later).
   updateHandoff(
     pluginName,
     4,
-    "Stage 4: GUI - Minimal editor (headless, DAW controls only)",
+    "Stage 3: GUI - Minimal editor (headless, DAW controls only)",
     ["Run validation tests", "Install plugin", "Add custom UI later"],
     complexityScore,
     false,
     "headless" // NEW: gui_type field
   );
 
-  updatePluginStatus(pluginName, "🚧 Stage 4");
+  updatePluginStatus(pluginName, "🚧 Stage 3");
   updatePluginTimeline(
     pluginName,
     4,
@@ -714,7 +714,7 @@ git add plugins/${pluginName}/.continue-here.md
 git add PLUGINS.md
 
 git commit -m "$(cat <<'EOF'
-feat(${pluginName}): Stage 4 - Minimal Editor (Headless)
+feat(${pluginName}): Stage 3 - Minimal Editor (Headless)
 
 Generated minimal PluginEditor for headless deployment
 Plugin uses DAW-provided parameter controls
@@ -757,7 +757,7 @@ Choose (1-6): _
   const nextChoice = getUserInput();
 
   if (nextChoice === "1") {
-    // Proceed to Stage 5 (validation)
+    // Proceed to Stage 4 (validation)
     currentStage = 5;
     // Return to main workflow orchestration
   } else if (nextChoice === "3") {
@@ -829,7 +829,7 @@ function findLatestMockup(pluginName: string): string | null {
 }
 ```
 
-**CRITICAL: Do NOT proceed to Stage 5 if tests fail.**
+**CRITICAL: Do NOT proceed to Stage 4 if tests fail.**
 
 ---
 

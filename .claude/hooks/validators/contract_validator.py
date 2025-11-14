@@ -8,7 +8,7 @@ Provides contract immutability enforcement for the Plugin Freedom System:
 3. Contract modification detection
 4. Evolution tracking
 
-Used by hooks and subagents to ensure contract integrity during Stages 2-5.
+Used by hooks and subagents to ensure contract integrity during Stages 1-4.
 """
 
 import hashlib
@@ -274,8 +274,8 @@ class ContractValidator:
                     if component:
                         dsp_components.append(component)
 
-            # Check if these components are mentioned in plan Stage 2
-            stage2_match = re.search(r'Stage 2:.*?(?=Stage [34]:|$)', plan, re.DOTALL)
+            # Check if these components are mentioned in plan Stage 1
+            stage2_match = re.search(r'Stage 1:.*?(?=Stage [34]:|$)', plan, re.DOTALL)
             if stage2_match and dsp_components:
                 stage2_text = stage2_match.group(0)
                 missing_components = []
@@ -287,7 +287,7 @@ class ContractValidator:
                 if missing_components:
                     results.append(ValidationResult(
                         passed=False,
-                        message=f"DSP components not referenced in plan Stage 2: {missing_components}",
+                        message=f"DSP components not referenced in plan Stage 1: {missing_components}",
                         severity='warning',
                         contract='plan.md'
                     ))

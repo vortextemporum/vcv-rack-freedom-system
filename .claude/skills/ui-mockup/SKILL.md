@@ -959,7 +959,7 @@ Present completion menu after ui-finalization-agent successfully returns.
 
 **File naming:** All 7 files prefixed with version (e.g., `v2-ui.html`, `v2-PluginEditor.h`)
 
-**Implementation:** Latest version used for Stage 5 unless user specifies different version.
+**Implementation:** Latest version used for Stage 4 unless user specifies different version.
 
 **See:** `references/versioning.md` for file management details.
 
@@ -1013,7 +1013,7 @@ Present completion menu after ui-finalization-agent successfully returns.
 **Blocks:**
 
 - Stage 1 (Planning) → Cannot proceed without parameter-spec.md
-- Stage 5 (GUI) → Cannot implement without approved UI mockup
+- Stage 4 (GUI) → Cannot implement without approved UI mockup
 
 ## Reference Documentation
 

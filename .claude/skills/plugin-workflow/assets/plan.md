@@ -23,7 +23,7 @@
 
 ## Stage Breakdown
 
-### Stage 2: Foundation
+### Stage 1: Foundation
 **Duration:** [10-15 minutes]
 **Deliverables:**
 - CMakeLists.txt configuration
@@ -31,7 +31,7 @@
 - APVTS parameter definitions from parameter-spec.md
 - Build system verification
 
-### Stage 3: Shell
+### Stage 2: Shell
 **Duration:** [5-10 minutes]
 **Deliverables:**
 - PluginProcessor skeleton
@@ -39,7 +39,7 @@
 - Empty processBlock()
 - Compiling plugin shell
 
-### Stage 4: DSP Implementation
+### Stage 3: DSP Implementation
 **Duration:** [Estimate based on complexity]
 
 **Implementation Strategy:** [Single-pass | Multi-phase]
@@ -64,7 +64,7 @@
 - Parameters: [Which parameters implemented]
 - Success criteria: [What makes this phase complete]
 
-### Stage 5: GUI Implementation
+### Stage 4: GUI Implementation
 **Duration:** [Estimate based on UI complexity]
 
 **Implementation Strategy:** [Single-pass | Multi-phase]
@@ -83,7 +83,7 @@
 - Duration: [Estimate]
 - Focus: Refinements and edge cases
 
-### Stage 6: Validation
+### Stage 4: Validation
 **Duration:** [20-40 minutes]
 **Deliverables:**
 - Pluginval compliance check
@@ -103,6 +103,6 @@
 ## Notes
 
 - This plan is generated after contracts (parameter-spec.md, architecture.md) are locked
-- Complexity ≥3 plugins use multi-phase approach for Stage 4 and/or Stage 5
+- Complexity ≥3 plugins use multi-phase approach for Stage 3 and/or Stage 4
 - Each phase creates a git commit
 - Workflow can be paused at any stage boundary

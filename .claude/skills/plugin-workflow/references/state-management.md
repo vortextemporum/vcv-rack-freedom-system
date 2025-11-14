@@ -241,7 +241,7 @@ phased_implementation: false
 orchestration_mode: true
 gui_type: headless  # "headless" or "webview" (optional, defaults to "webview" if missing)
 workflow_mode: express  # NEW: "express" or "manual" (optional, defaults to "manual" if missing)
-auto_test: false  # NEW: Run pluginval after Stage 5 (optional, defaults to false)
+auto_test: false  # NEW: Run pluginval after Stage 4 (optional, defaults to false)
 auto_install: true  # NEW: Install to system folders after tests (optional, defaults to false)
 auto_package: false  # NEW: Create PKG installer after install (optional, defaults to false)
 next_action: run_validation
@@ -257,7 +257,7 @@ contract_checksums:
 **gui_type field specification:**
 - **Values:** "headless" | "webview"
 - **Purpose:** Track which GUI implementation path was chosen
-- **Set by:** handleHeadlessPath() (Stage 3 → 4 transition) or handleGuiPath()
+- **Set by:** handleHeadlessPath() (Stage 2 → 4 transition) or handleGuiPath()
 - **Used by:** plugin-improve skill (detects headless plugins and offers "Create custom UI" option)
 - **Backward compatibility:** If field missing, defaults to "webview" (existing behavior)
 
@@ -277,7 +277,7 @@ contract_checksums:
 
 **Called by:**
 - fallbackStateUpdate() when subagent verification fails
-- Stage 5 (orchestrator direct execution, no subagent)
+- Stage 4 (orchestrator direct execution, no subagent)
 
 ### updatePluginStatus(pluginName, newStatus)
 
@@ -312,7 +312,7 @@ return 0
 
 **Called by:**
 - fallbackStateUpdate() when subagent verification fails
-- Stage 5 (orchestrator direct execution)
+- Stage 4 (orchestrator direct execution)
 
 ### updatePluginTimeline(pluginName, stage, description)
 
@@ -351,7 +351,7 @@ return 0
 
 **Called by:**
 - fallbackStateUpdate() when subagent verification fails
-- Stage 5 (orchestrator direct execution)
+- Stage 4 (orchestrator direct execution)
 
 ### createNotesFile(pluginName, status)
 
@@ -653,10 +653,10 @@ Choose (1-5): _
 **Per-stage breakdown:**
 ```
 Stage 0: 15k → 1k tokens (verification only)
-Stage 2: 12k → 1k tokens (verification only)
-Stage 3: 15k → 1.5k tokens (verification + phase handling)
-Stage 4: 12k → 1.2k tokens (verification + phase handling)
-Stage 5: 3.5k → 0.3k tokens (verification only)
+Stage 1: 12k → 1k tokens (verification only)
+Stage 2: 15k → 1.5k tokens (verification + phase handling)
+Stage 3: 12k → 1.2k tokens (verification + phase handling)
+Stage 4: 3.5k → 0.3k tokens (verification only)
 ```
 
 ---

@@ -17,7 +17,7 @@ The phrase "That worked!" triggers automatic skill invocation (matches confirmat
 From conversation history:
 - **Plugin**: ReverbPlugin
 - **Symptom**: DECAY parameter not persisting after DAW reload
-- **Stage**: Post-implementation (Stage 6 complete)
+- **Stage**: Post-implementation (Stage 4 complete)
 - **Failed attempts**: Checked APVTS creation, verified parameter ID
 - **Solution**: Added `parameterValueChanged()` to update processor state
 - **Root cause**: State only saved from APVTS, not reflecting UI changes

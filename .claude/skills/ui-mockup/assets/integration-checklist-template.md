@@ -8,7 +8,7 @@
 
 - [ ] UI design approved (tested in browser)
 - [ ] parameter-spec.md finalized
-- [ ] Plugin shell exists (Stage 3 complete)
+- [ ] Plugin shell exists (Stage 2 complete)
 
 ## Step 1: Copy HTML to Plugin
 
@@ -283,7 +283,7 @@ UI integration is complete when:
 
 After successful integration:
 
-1. Continue to Stage 6 (Validation)
+1. Continue to Stage 4 (Validation)
 2. Run pluginval tests
 3. Manual DAW testing
 4. Install for production use

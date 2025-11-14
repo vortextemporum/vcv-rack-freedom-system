@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Parameter Validator (Stage 3)
+Parameter Validator (Stage 2)
 Validates that all parameters from parameter-spec.md exist in PluginProcessor.cpp
 Exit 0: PASS, Exit 1: FAIL
 """

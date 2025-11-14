@@ -8,7 +8,7 @@ argument-hint: <PluginName>
 
 <preconditions enforcement="blocking">
   <check target="PLUGINS.md" condition="status_equals" required="true">
-    Plugin status MUST be ✅ Working (Stage 6 complete)
+    Plugin status MUST be ✅ Working (Stage 4 complete)
   </check>
   <check target="build" condition="exists" required="true">
     Plugin MUST have successful Release build
@@ -20,7 +20,7 @@ argument-hint: <PluginName>
     Plugin MUST have been tested in DAW from build folder
   </check>
   <on_failure action="block">
-    Guide user to complete Stage 6 first - DO NOT proceed
+    Guide user to complete Stage 4 first - DO NOT proceed
   </on_failure>
 </preconditions>
 

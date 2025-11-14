@@ -173,7 +173,7 @@ This provides context and links findings to the knowledge base.
     {
       "name": "phase_breakdown",
       "passed": true,
-      "message": "Stage 4 has 3 phases (4.1, 4.2, 4.3) for complexity 3.5",
+      "message": "Stage 3 has 3 phases (4.1, 4.2, 4.3) for complexity 3.5",
       "severity": "info"
     }
   ],
@@ -182,7 +182,7 @@ This provides context and links findings to the knowledge base.
 }
 ```
 
-### Stage 6: Validation & Presets
+### Stage 4: Validation & Presets
 
 **Expected Inputs:**
 
@@ -237,7 +237,7 @@ This provides context and links findings to the knowledge base.
 }
 ```
 
-### Stage 2: Foundation Validation
+### Stage 1: Foundation Validation
 
 **Expected Inputs:**
 
@@ -287,7 +287,7 @@ This provides context and links findings to the knowledge base.
 }
 ```
 
-### Stage 2: Foundation Validation
+### Stage 1: Foundation Validation
 
 **Expected Inputs:**
 
@@ -355,7 +355,7 @@ This provides context and links findings to the knowledge base.
 }
 ```
 
-### Stage 3: DSP Validation
+### Stage 2: DSP Validation
 
 **Expected Inputs:**
 
@@ -414,7 +414,7 @@ This provides context and links findings to the knowledge base.
 }
 ```
 
-### Stage 4: GUI Validation
+### Stage 3: GUI Validation
 
 **Expected Inputs:**
 
@@ -467,7 +467,7 @@ This provides context and links findings to the knowledge base.
 }
 ```
 
-### Stage 5: Final Validation
+### Stage 4: Final Validation
 
 **Expected Inputs:**
 

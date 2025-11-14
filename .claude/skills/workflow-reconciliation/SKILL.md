@@ -64,7 +64,7 @@ Detect current workflow context, validate state file currency, and remediate gap
           - .ideas/creative-brief.md → plugin-ideation
           - .ideas/mockups/v*-ui.html → ui-mockup
           - Source/*.cpp changes + CHANGELOG.md → plugin-improve
-          - plugins/*/CMakeLists.txt → plugin-workflow (Stage 2+)
+          - plugins/*/CMakeLists.txt → plugin-workflow (Stage 1+)
     </detection_method>
   </required_analysis>
 

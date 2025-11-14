@@ -302,7 +302,7 @@ Now integrating WebView UI into ${pluginName}...
     const parameterSpec = readFile(`plugins/${pluginName}/.ideas/parameter-spec.md`);
     const architecture = readFile(`plugins/${pluginName}/.ideas/architecture.md`);
 
-    // Invoke gui-agent (same as plugin-workflow Stage 4)
+    // Invoke gui-agent (same as plugin-workflow Stage 3)
     const guiResult = Task({
       subagent_type: "gui-agent",
       description: `Add WebView UI to ${pluginName}`,

@@ -348,7 +348,7 @@ Available plugins:
 
 **Workflow after reset:**
 ```
-💡 Ideated → /implement → Stage 0 → ... → Stage 6 → ✅ Working
+💡 Ideated → /implement → Stage 0 → ... → Stage 4 → ✅ Working
 ```
 
 ## Use Cases

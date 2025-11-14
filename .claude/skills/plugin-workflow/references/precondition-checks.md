@@ -2,7 +2,7 @@
 
 ## Contract Verification
 
-Before starting Stage 2, verify all required planning documents exist and check cache:
+Before starting Stage 1, verify all required planning documents exist and check cache:
 
 ```bash
 # Source cache utilities

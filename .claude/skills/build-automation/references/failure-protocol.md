@@ -11,7 +11,7 @@ Context:
 - Build log: logs/[PluginName]/build_TIMESTAMP.log
 - Error summary: [extracted error from log]
 - Build flags used: [--no-install | none]
-- Invoking stage: [Stage 2-6 | plugin-improve | manual]
+- Invoking stage: [Stage 1-6 | plugin-improve | manual]
 
 Instructions:
 1. Analyze build log for root cause

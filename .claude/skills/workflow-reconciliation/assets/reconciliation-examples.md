@@ -24,7 +24,7 @@ State File Analysis:
   Status: LOCKED AND CURRENT
 
 ✗ PLUGINS.md
-  Current: 🚧 Stage 5
+  Current: 🚧 Stage 4
   Expected: ✅ Working (after UI implementation)
   Action: UPDATE status emoji
 
@@ -42,7 +42,7 @@ Git Status:
 
 Proposed Actions:
 
-1. Update PLUGINS.md status: 🚧 Stage 5 → ✅ Working
+1. Update PLUGINS.md status: 🚧 Stage 4 → ✅ Working
 2. Stage all 5 mockup implementation files
 3. Commit with message: "feat(DriveVerb): Complete UI mockup v1 with implementation files"
 
@@ -77,7 +77,7 @@ All state files synchronized. Workflow can resume without context loss.
 ## Example 2: After Subagent Completion
 
 ### Scenario
-foundation-agent completed Stage 2 but didn't create .continue-here.md handoff file. Reconciliation detects missing handoff and offers to create it.
+foundation-agent completed Stage 1 but didn't create .continue-here.md handoff file. Reconciliation detects missing handoff and offers to create it.
 
 ### Report Output
 
@@ -86,7 +86,7 @@ foundation-agent completed Stage 2 but didn't create .continue-here.md handoff f
 📋 Reconciliation Report for SimpleTremolo
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Current Workflow: plugin-workflow (Stage 2 - Complete)
+Current Workflow: plugin-workflow (Stage 1 - Complete)
 
 State File Analysis:
 
@@ -97,7 +97,7 @@ State File Analysis:
 
 ✓ PLUGINS.md
   Status: UP TO DATE
-  Entry: 🚧 Stage 2 | SimpleTremolo
+  Entry: 🚧 Stage 1 | SimpleTremolo
 
 Git Status:
 
@@ -114,7 +114,7 @@ Proposed Actions:
    - stage: 2
    - status: complete
    - last_updated: 2025-11-12T15:45:00Z
-2. Commit staged changes with message: "feat(SimpleTremolo): Complete Stage 2 (Foundation) - build system operational"
+2. Commit staged changes with message: "feat(SimpleTremolo): Complete Stage 1 (Foundation) - build system operational"
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -144,11 +144,11 @@ status: complete
 last_updated: 2025-11-12T15:45:00Z
 ---
 
-# plugin-workflow - Stage 2 - Complete
+# plugin-workflow - Stage 1 - Complete
 
 Foundation layer established. Build system operational, plugin loads successfully.
 
-Next: Invoke dsp-agent for Stage 3 (DSP Core implementation).
+Next: Invoke dsp-agent for Stage 2 (DSP Core implementation).
 
 ─────────────────────────────────────────────────────
 
@@ -160,7 +160,7 @@ Commit will include:
 - plugins/SimpleTremolo/README.md
 
 Commit message:
-"feat(SimpleTremolo): Complete Stage 2 (Foundation) - build system operational"
+"feat(SimpleTremolo): Complete Stage 1 (Foundation) - build system operational"
 
 ─────────────────────────────────────────────────────
 
@@ -186,7 +186,7 @@ User runs `/reconcile` on a plugin with all state files current and no uncommitt
 📋 Reconciliation Report for DriveVerb
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Current Workflow: plugin-workflow (Stage 3 - In Progress)
+Current Workflow: plugin-workflow (Stage 2 - In Progress)
 
 State File Analysis:
 
@@ -196,7 +196,7 @@ State File Analysis:
 
 ✓ PLUGINS.md
   Status: UP TO DATE
-  Entry: 🚧 Stage 3 | DriveVerb
+  Entry: 🚧 Stage 2 | DriveVerb
 
 Git Status:
 

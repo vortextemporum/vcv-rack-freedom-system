@@ -168,7 +168,7 @@ See **[references/error-recovery.md](references/error-recovery.md)** for all err
 
 **Outbound (Skill delegation):**
 
-1. `plugin-workflow` - For workflow resume at specific stage (Stages 0, 2-5)
+1. `plugin-workflow` - For workflow resume at specific stage (Stages 0-4)
 2. `plugin-ideation` - For ideation resume (improvements or refinement)
 3. `ui-mockup` - For mockup iteration resume
 4. `plugin-improve` - For improvement implementation resume

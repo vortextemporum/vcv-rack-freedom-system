@@ -1,6 +1,6 @@
 ---
 name: plugin-lifecycle
-description: Manage complete plugin lifecycle - install, uninstall, reset, destroy. Use after Stage 6 completion or when modifying deployed plugins.
+description: Manage complete plugin lifecycle - install, uninstall, reset, destroy. Use after Stage 4 completion or when modifying deployed plugins.
 allowed-tools:
   - Bash
   - Read
@@ -198,7 +198,7 @@ After successful operations, present decision menu to user. See [references/deci
 - `/reset-to-ideation [PluginName]` → Mode 3 (Reset)
 - `/destroy [PluginName]` → Mode 4 (Destroy)
 - `/clean [PluginName]` → Interactive menu
-- `plugin-workflow` skill → After Stage 6 (auto-installs)
+- `plugin-workflow` skill → After Stage 4 (auto-installs)
 - `plugin-improve` skill → After successful changes (offers reinstallation)
 - Natural language: "Install [PluginName]", "Remove [PluginName]", "Clean up [PluginName]"
 

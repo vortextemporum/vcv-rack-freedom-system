@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-DSP Component Validator (Stage 4)
+DSP Component Validator (Stage 3)
 Validates that all DSP components from architecture.md exist in PluginProcessor
 Exit 0: PASS, Exit 1: FAIL
 """

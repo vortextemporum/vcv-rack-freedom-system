@@ -96,7 +96,7 @@ Extract pattern from current conversation and add to `troubleshooting/patterns/j
     Pattern #N: [Pattern Name]
     Location: troubleshooting/patterns/juce8-critical-patterns.md
 
-    All subagents (Stages 2-5) will see this pattern before code generation.
+    All subagents (Stages 1-4) will see this pattern before code generation.
     ```
   </step>
 </critical_sequence>

@@ -16,7 +16,7 @@ Controls workflow automation level:
   - Time cost: ~3-5 minutes per plugin (5 decision points)
   - Use when: Learning the system, troubleshooting, or want control over each stage
 
-- **"express"**: Automatically progress through all stages without decision menus. Final menu still appears after Stage 5.
+- **"express"**: Automatically progress through all stages without decision menus. Final menu still appears after Stage 4.
   - Time savings: 3-5 minutes per plugin (0 intermediate decisions)
   - Use when: Building straightforward plugins, comfortable with the workflow, want speed
 
@@ -33,7 +33,7 @@ Controls workflow automation level:
 **Type:** Boolean
 **Default:** false
 
-Run automated validation tests (pluginval) after Stage 5 completes.
+Run automated validation tests (pluginval) after Stage 4 completes.
 
 - **true**: After final menu selection, automatically invoke plugin-testing skill (Mode 2: Build + Pluginval)
 - **false**: Present "Run validation tests" option in final menu (manual decision)
@@ -59,7 +59,7 @@ Run automated validation tests (pluginval) after Stage 5 completes.
 
 Install plugin to system folders automatically after tests pass.
 
-- **true**: After tests pass (or if auto_test=false, after Stage 5), automatically invoke plugin-lifecycle skill (Mode 1: Installation)
+- **true**: After tests pass (or if auto_test=false, after Stage 4), automatically invoke plugin-lifecycle skill (Mode 1: Installation)
 - **false**: Present "Install to system folders" option in final menu (manual decision)
 
 **Prerequisite:** Tests must pass first (if auto_test=true)
@@ -246,7 +246,7 @@ If any error occurs during express mode, the workflow automatically drops to man
 
 **Example:**
 ```
-✗ Build failed at Stage 3
+✗ Build failed at Stage 2
 
 Errors:
 - PluginProcessor.cpp:124: 'processBlock' is not a member of 'juce::AudioProcessor'
@@ -297,23 +297,23 @@ When you pause and resume a workflow:
 
 **Scenario:**
 1. Start: `/implement PluginName` (mode: express)
-2. Pause at Stage 3 (Ctrl+C)
+2. Pause at Stage 2 (Ctrl+C)
 3. Resume: `/continue PluginName`
 
 **Result:**
 - Resume in express mode (mode preserved in `.continue-here.md`)
-- Stage 3 continues → auto-progress to Stage 4
+- Stage 2 continues → auto-progress to Stage 3
 
 ### Mode Override on Resume
 
 **Scenario:**
 1. Start: `/implement PluginName` (mode: manual)
-2. Pause at Stage 3
+2. Pause at Stage 2
 3. Resume: `/continue PluginName --express`
 
 **Result:**
 - Resume in express mode (flag overrides saved mode)
-- Stage 3 continues → auto-progress to Stage 4
+- Stage 2 continues → auto-progress to Stage 3
 - `.continue-here.md` updated to `workflow_mode: express`
 
 ---
@@ -386,7 +386,7 @@ When you pause and resume a workflow:
    ✓ Build System Ready
 
    What's next?
-   1. Continue to Stage 3 (recommended)
+   1. Continue to Stage 2 (recommended)
    2. Test build
    3. Pause workflow
    4. Review code

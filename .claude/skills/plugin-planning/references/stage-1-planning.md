@@ -192,14 +192,14 @@ Total: [X.X] / 5.0
 - Straightforward implementation plan
 
 **Complex plugins (score ≥ 3.0):**
-- Break Stage 4 (DSP) into phases
-- Break Stage 5 (GUI) into phases
+- Break Stage 3 (DSP) into phases
+- Break Stage 4 (GUI) into phases
 - Each phase gets git commit
 - Clear test criteria per phase
 
 ### 4. Create Phase Breakdown (Complex Plugins Only)
 
-#### Stage 4: DSP Phases
+#### Stage 3: DSP Phases
 
 **Phase 4.1: Core Processing**
 
@@ -229,7 +229,7 @@ Identify advanced components:
 - Multiband processing
 - MIDI control
 
-#### Stage 5: GUI Phases
+#### Stage 4: GUI Phases
 
 **Phase 5.1: Layout and Basic Controls**
 
@@ -291,21 +291,21 @@ Components:
 
 - Stage 0: Research ✓
 - Stage 1: Planning ✓
-- Stage 2: Foundation ← Next
-- Stage 3: Shell
-- Stage 4: DSP
-- Stage 5: GUI
-- Stage 6: Validation
+- Stage 1: Foundation ← Next
+- Stage 2: Shell
+- Stage 3: DSP
+- Stage 4: GUI
+- Stage 4: Validation
 
 ## Estimated Duration
 
 Total: ~[X] minutes
 
-- Stage 2: 5 min (Foundation - project structure)
-- Stage 3: 5 min (Shell - APVTS parameters)
-- Stage 4: [X] min (DSP - single pass)
-- Stage 5: [X] min (GUI - single pass)
-- Stage 6: 15 min (Validation - presets, pluginval, changelog)
+- Stage 1: 5 min (Foundation - project structure)
+- Stage 2: 5 min (Shell - APVTS parameters)
+- Stage 3: [X] min (DSP - single pass)
+- Stage 4: [X] min (GUI - single pass)
+- Stage 4: 15 min (Validation - presets, pluginval, changelog)
 
 ## Implementation Notes
 
@@ -316,8 +316,8 @@ Total: ~[X] minutes
 
 Use template with full phase breakdown:
 - Complexity calculation shown
+- Stage 3 phases with test criteria
 - Stage 4 phases with test criteria
-- Stage 5 phases with test criteria
 - Duration estimates per phase
 
 **Example phase entry:**
@@ -369,7 +369,7 @@ Update markdown sections:
 ```markdown
 ## Current State: Stage 1 - Planning Complete
 
-Implementation plan created. Ready to proceed to foundation (Stage 2).
+Implementation plan created. Ready to proceed to foundation (Stage 1).
 
 ## Completed So Far
 
@@ -381,7 +381,7 @@ Implementation plan created. Ready to proceed to foundation (Stage 2).
 
 ## Next Steps
 
-1. Stage 2: Foundation (create build system) - Run /implement [PluginName]
+1. Stage 1: Foundation (create build system) - Run /implement [PluginName]
 2. Review plan.md details
 3. Pause here
 
@@ -464,7 +464,7 @@ git log -1 --format='✓ Committed: %h - Stage 1 complete'
 ✓ Stage 1 complete: Implementation plan created (Complexity [X.X], [single-pass/phased])
 
 What's next?
-1. Continue to Stage 2 - Foundation (via /implement) (recommended)
+1. Continue to Stage 1 - Foundation (via /implement) (recommended)
 2. Review plan.md details
 3. Adjust complexity assessment
 4. Review contracts (parameter-spec, architecture)

@@ -26,11 +26,11 @@ All subagents follow a consistent contract pattern:
 
 ## foundation-agent Contract
 
-**When:** Stage 2 (Foundation) implementation
+**When:** Stage 1 (Foundation) implementation
 
 **Sends via Task tool:**
 ```
-Implement Stage 2 (Foundation) for [PluginName].
+Implement Stage 1 (Foundation) for [PluginName].
 
 **Contracts:**
 - creative-brief.md: [full content]
@@ -75,11 +75,11 @@ Return JSON report when complete.
 
 ## shell-agent Contract
 
-**When:** Stage 3 (Shell) implementation
+**When:** Stage 2 (Shell) implementation
 
 **Sends via Task tool:**
 ```
-Implement Stage 3 (Shell) for [PluginName].
+Implement Stage 2 (Shell) for [PluginName].
 
 **Contracts:**
 - parameter-spec.md: [full content]
@@ -105,11 +105,11 @@ Return JSON report when complete.
 
 ## dsp-agent Contract
 
-**When:** Stage 4 (DSP) implementation
+**When:** Stage 3 (DSP) implementation
 
 **Sends via Task tool:**
 ```
-Implement Stage 4 [Phase X] for [PluginName].
+Implement Stage 3 [Phase X] for [PluginName].
 
 **Contracts:**
 - architecture.md: [full content]
@@ -136,11 +136,11 @@ Return JSON report when complete.
 
 ## gui-agent Contract
 
-**When:** Stage 5 (GUI) implementation
+**When:** Stage 4 (GUI) implementation
 
 **Sends via Task tool:**
 ```
-Implement Stage 5 (GUI) for [PluginName].
+Implement Stage 4 (GUI) for [PluginName].
 
 **Contracts:**
 - parameter-spec.md: [full content]
@@ -250,10 +250,10 @@ Return JSON validation report.
 
 **Receives:**
 - Plugin name (string)
-- Entry stage (typically Stage 2, or wherever workflow paused)
+- Entry stage (typically Stage 1, or wherever workflow paused)
 
 **Returns:**
-- Executes workflow from entry stage through Stage 6
+- Executes workflow from entry stage through Stage 4
 - Presents checkpoint menus at each stage
 - Updates PLUGINS.md to ✅ Working when complete
 

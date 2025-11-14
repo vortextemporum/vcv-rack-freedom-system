@@ -90,7 +90,7 @@ User chose option 1 (Finalize) or 2 (Iterate)
 
 If option 1 (Finalize):
   - Generate parameter-spec.md if not exists
-  - Offer to start Stage 5 (GUI) with plugin-workflow
+  - Offer to start Stage 4 (GUI) with plugin-workflow
   - Or offer to start Stage 0 (Research) for new implementation
 
 If option 2 (Iterate):
@@ -164,7 +164,7 @@ Loaded context:
 - Architecture: Schroeder topology with modulation
 - Plan: Complexity 3.8, phased implementation
 
-Invoking plugin-workflow at Stage 4.2...
+Invoking plugin-workflow at Stage 3.2...
 ```
 
 Skill then continues from documented next steps.

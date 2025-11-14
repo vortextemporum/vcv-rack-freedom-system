@@ -127,18 +127,18 @@ Construct user-facing summary combining all parsed information:
 **Example for workflow resume:**
 
 ```
-Resuming TapeDelay at Stage 4 (DSP Implementation)...
+Resuming TapeDelay at Stage 3 (DSP Implementation)...
 
-Status: Stage 4.2 in progress (modulation system)
+Status: Stage 3.2 in progress (modulation system)
 Last session: 2 hours ago
 
 Progress so far:
 ✓ Stage 0: Research
 ✓ Stage 1: Planning (complexity 3.8, phased)
-✓ Stage 2: Foundation
-✓ Stage 3: Shell
-✓ Stage 4.1: Core delay algorithm
-🚧 Stage 4.2: Modulation system (in progress)
+✓ Stage 1: Foundation
+✓ Stage 2: Shell
+✓ Stage 3.1: Core delay algorithm
+🚧 Stage 3.2: Modulation system (in progress)
 
 Current work:
 - Implementing LFOs for wow/flutter modulation
@@ -148,8 +148,8 @@ Last build: ✓ Success
 Last test: ✓ Pass (4/5 tests)
 
 Next steps:
-1. ⭐ Continue Stage 4.2 (implement modulation matrix)
-2. Review Stage 4.1 code
+1. ⭐ Continue Stage 3.2 (implement modulation matrix)
+2. Review Stage 3.1 code
 3. Test wow/flutter parameters manually
 4. Pause here
 

@@ -9,9 +9,9 @@
 ## Philosophy
 
 **Problem:** Technical stage numbers create cognitive overhead:
-- "Stage 3 complete" → User must mentally map to "What did Stage 3 do?"
-- "Continue to Stage 4" → User must remember "What happens in Stage 4?"
-- "🚧 Stage 5" → User sees progress number, not achievement context
+- "Stage 2 complete" → User must mentally map to "What did Stage 2 do?"
+- "Continue to Stage 3" → User must remember "What happens in Stage 3?"
+- "🚧 Stage 4" → User sees progress number, not achievement context
 
 **Solution:** Milestone language conveys WHAT was achieved and WHY it matters:
 - "Audio Engine Working" → User knows audio processing is functional
@@ -28,10 +28,10 @@
 
 | Internal Stage | User-Facing Milestone | What It Means | Status Emoji |
 |----------------|----------------------|---------------|--------------|
-| Stage 2 | Build System Ready | Plugin compiles with all parameters implemented | 🔨 Building System |
-| Stage 3 | Audio Engine Working | DSP processing functional | 🎵 Processing Audio |
-| Stage 4 | UI Integrated | Interface connected to audio engine | 🎨 Designing Interface |
-| Stage 5 | Plugin Complete | Validated, tested, ready to install | ✅ Validating |
+| Stage 1 | Build System Ready | Plugin compiles with all parameters implemented | 🔨 Building System |
+| Stage 2 | Audio Engine Working | DSP processing functional | 🎵 Processing Audio |
+| Stage 3 | UI Integrated | Interface connected to audio engine | 🎨 Designing Interface |
+| Stage 4 | Plugin Complete | Validated, tested, ready to install | ✅ Validating |
 
 ### Planning Milestones (Managed by plugin-planning skill)
 
@@ -44,7 +44,7 @@
 
 | Internal Status | User-Facing Milestone | What It Means | Status Emoji |
 |-----------------|----------------------|---------------|--------------|
-| Stage 5 complete | Plugin Complete | All validation passed | ✅ Ready to Install |
+| Stage 4 complete | Plugin Complete | All validation passed | ✅ Ready to Install |
 | Installed | Deployed | Live in system folders | 📦 Installed |
 
 ---
@@ -53,10 +53,10 @@
 
 **OLD (Stage-centric):**
 ```
-✓ Stage 3 complete
+✓ Stage 2 complete
 
 What's next?
-1. Continue to Stage 4 (recommended)
+1. Continue to Stage 3 (recommended)
 2. Run tests
 3. Pause workflow
 ```
@@ -95,7 +95,7 @@ What's next?
 
 **Examples:**
 
-**Stage 2 Complete:**
+**Stage 1 Complete:**
 ```
 ✓ Build System Ready
    Your plugin compiles successfully with all parameters implemented
@@ -107,7 +107,7 @@ APVTS: Created and functional
 Status: Ready for DSP implementation
 ```
 
-**Stage 3 Complete:**
+**Stage 2 Complete:**
 ```
 ✓ Audio Engine Working
    Your DSP processing is implemented and functional
@@ -119,7 +119,7 @@ Tests: All passed
 Status: Ready for UI integration
 ```
 
-**Stage 4 Complete:**
+**Stage 3 Complete:**
 ```
 ✓ UI Integrated
    Your interface is connected and responding to parameter changes
@@ -131,7 +131,7 @@ Tests: All passed (including UI sync)
 Status: Ready for final validation
 ```
 
-**Stage 5 Complete:**
+**Stage 4 Complete:**
 ```
 ✓ Plugin Complete
    All validation passed - your plugin is ready to use
@@ -185,7 +185,7 @@ What's next?
 
 **OLD (Stage-centric):**
 ```
-Cannot proceed to Stage 4 - Stage 3 not complete
+Cannot proceed to Stage 3 - Stage 2 not complete
 ```
 
 **NEW (Milestone-centric):**
@@ -227,14 +227,14 @@ Next milestone: [Required milestone]
 📦 Installed            → Deployed to system
 ```
 
-**Implementation note:** Internal code still uses stage numbers (2-5) for routing logic, but NEVER displays them to users.
+**Implementation note:** Internal code still uses stage numbers (1-4) for routing logic, but NEVER displays them to users.
 
 ---
 
 ## Action Descriptions (Benefit-Focused)
 
 **OLD (Task-focused):**
-- "Continue to Stage 4"
+- "Continue to Stage 3"
 - "Run tests"
 - "Review code"
 
@@ -299,7 +299,7 @@ What would you like to do?
 
 **OLD:**
 ```
-Resuming from Stage 3...
+Resuming from Stage 2...
 ```
 
 **NEW:**
@@ -319,10 +319,10 @@ What would you like to do?
 ## Internal Stage Tracking
 
 **CRITICAL:** Internal code STILL uses stage numbers for:
-- Routing logic (Stage 2 → foundation-agent, Stage 3 → dsp-agent, etc.)
+- Routing logic (Stage 1 → foundation-agent, Stage 2 → dsp-agent, etc.)
 - .continue-here.md state tracking (stage: 3)
 - Precondition checks (checkStagePreconditions(3))
-- Git commit metadata (feat: [Plugin] Stage 3 - audio engine working)
+- Git commit metadata (feat: [Plugin] Stage 2 - audio engine working)
 
 **But NEVER displays stage numbers to users in:**
 - Decision menus

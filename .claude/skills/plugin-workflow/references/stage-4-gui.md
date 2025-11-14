@@ -1,7 +1,7 @@
-# Stage 3: GUI
+# Stage 2: GUI
 
 **Context:** This file is part of the plugin-workflow skill.
-**Invoked by:** Main workflow dispatcher after Stage 3 completion
+**Invoked by:** Main workflow dispatcher after Stage 2 completion
 **Purpose:** Integrate WebView UI with parameter bindings
 
 ---
@@ -12,7 +12,7 @@
 
 **Preconditions:**
 
-- Stage 3 complete and tests passed (DSP operational)
+- Stage 2 complete and tests passed (DSP operational)
 - Finalized UI mockup exists (v[N]-ui.html)
 - parameter-spec.md exists
 
@@ -31,12 +31,12 @@ LATEST_MOCKUP=$(ls -1 v*-ui.html 2>/dev/null | sort -V | tail -1)
 if [ -z "$LATEST_MOCKUP" ]; then
   echo "
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✗ BLOCKED: Cannot proceed to Stage 5
+✗ BLOCKED: Cannot proceed to Stage 4
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Missing required contract: Finalized UI mockup
 
-Stage 5 requires a finalized UI mockup (v[N]-ui.html) to integrate.
+Stage 4 requires a finalized UI mockup (v[N]-ui.html) to integrate.
 
 WHY BLOCKED:
 Without a finalized UI mockup, gui-agent cannot know:
@@ -49,7 +49,7 @@ HOW TO UNBLOCK:
 1. Run /mockup to create UI mockup
 2. Design UI through iterative refinement
 3. Finalize a design version (marks it as v[N])
-4. Then resume Stage 5 with /continue ${PLUGIN_NAME}
+4. Then resume Stage 4 with /continue ${PLUGIN_NAME}
 
 Current status: No finalized mockup found in .ideas/mockups/
 
@@ -66,14 +66,14 @@ echo "✓ Found finalized mockup: $LATEST_MOCKUP"
 
 ### 2. Read Complexity and Check for Phases
 
-Same as Stage 3 - check if phased implementation needed:
+Same as Stage 2 - check if phased implementation needed:
 
 ```typescript
 const planContent = readFile(`plugins/${pluginName}/.ideas/plan.md`);
 const complexityScore = extractComplexityScore(planContent);
 const hasPhases =
   planContent.includes("### Phase 4.1") ||
-  planContent.includes("## Stage 3: GUI Phases");
+  planContent.includes("## Stage 2: GUI Phases");
 
 console.log(
   `Complexity: ${complexityScore} (${hasPhases ? "phased" : "single-pass"})`
@@ -91,9 +91,9 @@ const mockupPath = findLatestMockup(pluginName);
 
 const guiResult = Task({
   subagent_type: "gui-agent",
-  description: `Stage 4 - ${pluginName}`,
+  description: `Stage 3 - ${pluginName}`,
   prompt: `
-You are gui-agent implementing Stage 4 for ${pluginName}.
+You are gui-agent implementing Stage 3 for ${pluginName}.
 
 **Plugin:** ${pluginName}
 **Stage:** 4 (GUI Integration)
@@ -169,7 +169,7 @@ if (report.status === "success") {
 
 **If complexity ≥3 AND plan.md defines UI phases:**
 
-Parse phase breakdown (similar to Stage 3):
+Parse phase breakdown (similar to Stage 2):
 
 ```typescript
 // Extract Phase 4.1, 5.2, etc. from plan.md
@@ -184,7 +184,7 @@ while ((match = phasePattern.exec(planContent)) !== null) {
   });
 }
 
-console.log(`Stage 5 will execute in ${phases.length} phases:`);
+console.log(`Stage 4 will execute in ${phases.length} phases:`);
 phases.forEach((phase) => {
   console.log(`  - Phase ${phase.number}: ${phase.description}`);
 });
@@ -201,7 +201,7 @@ for (let i = 0; i < phases.length; i++) {
 
   const phaseResult = Task({
     subagent_type: "gui-agent",
-    description: `Stage 4.${i+1} - ${pluginName}`,
+    description: `Stage 3.${i+1} - ${pluginName}`,
     prompt: `
 You are gui-agent implementing Phase ${phase.number} for ${pluginName}.
 
@@ -294,13 +294,13 @@ console.log(`\n✓ All ${phases.length} UI phases complete!`);
 updateHandoff(
   pluginName,
   5,
-  "Stage 3: GUI - WebView UI integrated, all parameters bound",
-  ["Auto-test Stage 5", "Test UI in DAW", "Review bindings"],
+  "Stage 2: GUI - WebView UI integrated, all parameters bound",
+  ["Auto-test Stage 4", "Test UI in DAW", "Review bindings"],
   complexityScore,
   false
 );
 
-updatePluginStatus(pluginName, "🚧 Stage 5");
+updatePluginStatus(pluginName, "🚧 Stage 4");
 updatePluginTimeline(
   pluginName,
   5,
@@ -316,7 +316,7 @@ git add plugins/${pluginName}/.continue-here.md
 git add PLUGINS.md
 
 git commit -m "$(cat <<'EOF'
-feat: ${pluginName} Stage 5 - GUI
+feat: ${pluginName} Stage 4 - GUI
 
 WebView UI integrated from ${report.outputs.ui_mockup_version}
 ${report.outputs.binding_count} parameter bindings created
@@ -341,7 +341,7 @@ if (report.status === "failure") {
   if (report.outputs.error_type === "binding_mismatch") {
     console.log(`
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✗ Stage 5 Failed: Parameter Binding Mismatch
+✗ Stage 4 Failed: Parameter Binding Mismatch
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Error: Not all parameters from parameter-spec.md have UI bindings
@@ -364,7 +364,7 @@ Choose (1-4): _
     // Other errors (build failure, member order wrong, etc.)
     console.log(`
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✗ Stage 5 Failed: UI Integration
+✗ Stage 4 Failed: UI Integration
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Error: ${report.outputs.error_message}
@@ -383,22 +383,22 @@ Choose (1-4): _
     `);
   }
 
-  // Handle choice (same pattern as Stages 2-4)
+  // Handle choice (same pattern as Stages 1-3)
 }
 ```
 
 ### 6. Auto-Invoke plugin-testing Skill
 
-**After Stage 5 succeeds (all phases if phased):**
+**After Stage 4 succeeds (all phases if phased):**
 
 ```typescript
 console.log("\n━━━ Running automated tests (including UI validation) ━━━\n");
 
 const testResult = Task({
   subagent_type: "general-purpose",
-  description: `Test ${pluginName} after Stage 5`,
+  description: `Test ${pluginName} after Stage 4`,
   prompt: `
-Run automated tests for ${pluginName} after Stage 5 UI integration.
+Run automated tests for ${pluginName} after Stage 4 UI integration.
 
 Use the plugin-testing skill to run all 5 tests plus UI-specific checks:
 1. Build test (already passed)
@@ -421,15 +421,15 @@ const testsPassed =
 if (!testsPassed) {
   console.log(`
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✗ Stage 5 Tests FAILED
+✗ Stage 4 Tests FAILED
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Stage 5 UI integration completed, but automated tests failed.
+Stage 4 UI integration completed, but automated tests failed.
 
 Test results:
 ${testResult}
 
-CANNOT proceed to Stage 6 (validation) with failing UI tests.
+CANNOT proceed to Stage 4 (validation) with failing UI tests.
 
 What would you like to do?
 1. Investigate test failures
@@ -440,11 +440,11 @@ What would you like to do?
 Choose (1-4): _
   `);
 
-  // STOP - Do not proceed to Stage 6 with failing tests
+  // STOP - Do not proceed to Stage 4 with failing tests
   return;
 }
 
-console.log("✓ All Stage 5 tests passed (including UI validation)");
+console.log("✓ All Stage 4 tests passed (including UI validation)");
 ```
 
 ### 7. Invoke validator for Complexity ≥4 Plugins
@@ -466,9 +466,9 @@ if (complexityScore >= 4) {
 
   const validationResult = Task({
     subagent_type: "validation-agent",
-    description: `Validate ${pluginName} Stage 5`,
+    description: `Validate ${pluginName} Stage 4`,
     prompt: `
-Validate Stage 5 completion for ${pluginName}.
+Validate Stage 4 completion for ${pluginName}.
 
 **Stage:** 5
 **Plugin:** ${pluginName}
@@ -477,7 +477,7 @@ Validate Stage 5 completion for ${pluginName}.
 - architecture.md: ${architectureContent}
 - plan.md: ${planContent}
 
-**Expected outputs for Stage 3:**
+**Expected outputs for Stage 2:**
 - Member declaration order correct (Relays → WebView → Attachments)
 - All parameters from spec have UI bindings
 - HTML element IDs match relay names
@@ -523,7 +523,7 @@ Continuing workflow (validation is advisory, not blocking).
 
     console.log(`
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-${status === "PASS" ? "✓" : "✗"} Validator ${status}: Stage 5 Review
+${status === "PASS" ? "✓" : "✗"} Validator ${status}: Stage 4 Review
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     `);
 
@@ -594,7 +594,7 @@ What's next?
 Choose (1-6): _
 ```
 
-**CRITICAL: Do NOT proceed to Stage 6 if tests fail.**
+**CRITICAL: Do NOT proceed to Stage 4 if tests fail.**
 
 ---
 

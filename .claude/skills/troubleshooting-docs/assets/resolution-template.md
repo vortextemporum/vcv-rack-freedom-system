@@ -21,7 +21,7 @@ tags: [keyword1, keyword2, keyword3]
 ## Environment
 - Plugin: [Name or "JUCE generic"]
 - JUCE Version: [version if applicable]
-- Affected: [Component, file, stage - e.g., "PluginEditor UI, Stage 5", "DSP processBlock, Stage 4"]
+- Affected: [Component, file, stage - e.g., "PluginEditor UI, Stage 4", "DSP processBlock, Stage 3"]
 - Date: [YYYY-MM-DD when this was solved]
 
 ## Symptoms

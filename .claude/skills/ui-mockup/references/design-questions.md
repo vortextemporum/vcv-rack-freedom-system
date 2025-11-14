@@ -94,7 +94,7 @@ You mentioned [VU meter / analyzer / waveform]. What should it display exactly?
 - **Envelope follower**: ADSR visual feedback
 - **Modulation indicators**: LFO/envelope routing
 
-**Implementation note:** Some special elements may need C++ rendering (OpenGL). For Phase 1, design them in HTML/CSS with the understanding they may need Stage 5 (GUI) implementation.
+**Implementation note:** Some special elements may need C++ rendering (OpenGL). For Phase 1, design them in HTML/CSS with the understanding they may need Stage 4 (GUI) implementation.
 
 ## Example Question Batches
 

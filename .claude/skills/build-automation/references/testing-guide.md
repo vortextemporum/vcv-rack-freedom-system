@@ -41,12 +41,12 @@ Or inject syntax error:
 Test within workflow:
 
 1. Start `/implement [PluginName]`
-2. Let workflow reach Stage 2 completion
+2. Let workflow reach Stage 1 completion
 3. Observe build-automation invocation
 4. Test success menu choices
-5. Continue workflow through Stage 6
+5. Continue workflow through Stage 4
 
 Verify:
-- Correct flags used per stage (--no-install for Stage 2, none for others)
+- Correct flags used per stage (--no-install for Stage 1, none for others)
 - Context-appropriate menus displayed
 - State preserved when pausing/resuming

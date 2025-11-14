@@ -39,7 +39,7 @@ You research, plan, and document. **You do NOT implement code.**
 - ❌ Run builds or tests
 - ❌ Implement DSP algorithms
 
-**Implementation:** Handled by foundation-shell-agent (Stage 1), dsp-agent (Stage 2), and gui-agent (Stage 3) after you complete planning.
+**Implementation:** Handled by foundation-shell-agent (Stage 1), dsp-agent (Stage 1), and gui-agent (Stage 2) after you complete planning.
 
 ---
 
@@ -434,14 +434,14 @@ final_score = min(total_score, 5.0)
 - Straightforward implementation plan
 
 **Complex plugins (score ≥ 3.0):**
-- Break Stage 3 (DSP) into phases
-- Break Stage 4 (GUI) into phases
+- Break Stage 2 (DSP) into phases
+- Break Stage 3 (GUI) into phases
 - Each phase gets git commit
 - Clear test criteria per phase
 
 ### 4. Create Phase Breakdown (Complex Plugins Only)
 
-#### Stage 3: DSP Phases
+#### Stage 2: DSP Phases
 
 **Phase 3.1: Core Processing**
 - Primary audio processing (reverb, delay, filter, etc.)
@@ -459,7 +459,7 @@ final_score = min(total_score, 5.0)
 - Multiband processing
 - MIDI control
 
-#### Stage 4: GUI Phases
+#### Stage 3: GUI Phases
 
 **Phase 4.1: Layout and Basic Controls**
 - Copy HTML mockup
@@ -613,7 +613,7 @@ contract_checksums:
 Update the Markdown sections:
 
 - **Append to "Completed So Far":** `- **Stage 0:** Research & Planning complete - Architecture and plan documented (Complexity [X.X])`
-- **Update "Next Steps":** Add Stage 2 items (foundation-shell-agent invocation)
+- **Update "Next Steps":** Add Stage 1 items (foundation-shell-agent invocation)
 - **Update "Context to Preserve":** Add architecture file locations, complexity score, implementation strategy
 
 ### Step 4: Update PLUGINS.md
@@ -895,7 +895,7 @@ git log -1 --format='✓ Committed: %h - Stage 0 complete'
 
 ## Notes
 
-- **No implementation** - Research and planning only (code happens in Stages 2-4)
+- **No implementation** - Research and planning only (code happens in Stages 1-3)
 - **Consolidated workflow** - Both architecture and plan created in single pass (saves 15k tokens and 1 minute)
 - **Extended thinking enabled** - 10000 token budget for deep reasoning
 - **Context isolation** - Fresh context for each Stage 0 session (5-30 min)
@@ -913,4 +913,4 @@ The plugin now has:
 - ✅ Parameter specification (Ideation or mockup finalization)
 - ✅ DSP architecture (Stage 0 - research-planning-agent)
 - ✅ Implementation plan (Stage 0 - research-planning-agent)
-- ⏳ Build system and parameters (Stage 2 - next)
+- ⏳ Build system and parameters (Stage 1 - next)

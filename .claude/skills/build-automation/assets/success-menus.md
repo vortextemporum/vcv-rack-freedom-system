@@ -11,38 +11,38 @@
 
 ## Menu Definitions
 
-### Stage 2 (Foundation)
+### Stage 1 (Foundation)
 **Completion message:** "Foundation verified"
 **Options:**
-1. Continue to Stage 3 (Shell/Parameters) [recommended]
+1. Continue to Stage 2 (Shell/Parameters) [recommended]
 2. Review generated code
 3. Pause workflow
 
-### Stage 3 (Shell)
+### Stage 2 (Shell)
 **Completion message:** "Shell built successfully"
 **Options:**
-1. Continue to Stage 4 (DSP) [recommended]
+1. Continue to Stage 3 (DSP) [recommended]
 2. Test in DAW now
 3. Review parameter code
 4. Pause workflow
 
-### Stage 4 (DSP)
+### Stage 3 (DSP)
 **Completion message:** "DSP implementation complete"
 **Options:**
-1. Continue to Stage 5 (GUI) [recommended]
+1. Continue to Stage 4 (GUI) [recommended]
 2. Test in DAW now
 3. Review DSP code
 4. Pause workflow
 
-### Stage 5 (GUI)
+### Stage 4 (GUI)
 **Completion message:** "GUI implementation complete"
 **Options:**
-1. Continue to Stage 6 (Validation) [recommended]
+1. Continue to Stage 4 (Validation) [recommended]
 2. Test in DAW now
 3. Review GUI code
 4. Pause workflow
 
-### Stage 6 (Validation)
+### Stage 4 (Validation)
 **Completion message:** "Plugin complete and validated"
 **Options:**
 1. Test in DAW now [recommended]

@@ -59,8 +59,8 @@ console.log(`Execution mode: ${needsPhasedImplementation ? "PHASED" : "SINGLE-PA
 
 1. Invoke subagent ONCE for entire stage
 2. Use prompt template from reference file single-pass section:
-   - Stage 4: `references/stage-4-dsp.md` lines 45-87 (single-pass implementation)
-   - Stage 5: `references/stage-5-gui.md` lines 83-135 (single-pass implementation)
+   - Stage 3: `references/stage-4-dsp.md` lines 45-87 (single-pass implementation)
+   - Stage 4: `references/stage-5-gui.md` lines 83-135 (single-pass implementation)
 3. Checkpoint after stage completes (standard 6-step checkpoint)
 4. Present decision menu (continue to next stage, pause, test, etc.)
 
@@ -268,7 +268,7 @@ Build verification handled by workflow after agent completes.
 
 ❌ **NEVER send** "Implement ALL phases" to subagent
 - Causes compilation errors from attempting too much
-- Led to DrumRoulette Stage 5 failure (3 phases → single invocation → build errors)
+- Led to DrumRoulette Stage 4 failure (3 phases → single invocation → build errors)
 - Violates incremental implementation principle
 
 ✓ **ALWAYS invoke** subagent once per phase with phase-specific prompt
@@ -288,9 +288,9 @@ Build verification handled by workflow after agent completes.
 2. No phase markers in plan.md (plan didn't define phases)
 
 **Phase-aware dispatch DOES NOT APPLY to:**
-- Stage 2 (Foundation) - always single-pass
-- Stage 3 (Shell) - always single-pass
-- Stage 6 (Validation) - always single-pass
+- Stage 1 (Foundation) - always single-pass
+- Stage 2 (Shell) - always single-pass
+- Stage 4 (Validation) - always single-pass
 
 **The orchestrator MUST:**
 - Read plan.md to detect phases BEFORE invoking subagent

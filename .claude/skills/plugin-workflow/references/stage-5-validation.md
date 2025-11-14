@@ -1,7 +1,7 @@
-# Stage 4: Validation
+# Stage 3: Validation
 
 **Context:** This file is part of the plugin-workflow skill.
-**Invoked by:** Main workflow dispatcher after Stage 4 completion
+**Invoked by:** Main workflow dispatcher after Stage 3 completion
 **Purpose:** Final validation, ready to install and use
 
 ---
@@ -18,15 +18,15 @@
 
 **Actions:**
 
-**CRITICAL: Always rebuild after Stage 4 completion**
+**CRITICAL: Always rebuild after Stage 3 completion**
 
-Stage 4 modifies source code (WebView UI integration, parameter bindings). Without rebuilding, Stage 6 will install stale binaries from Stage 4 that lack GUI changes.
+Stage 3 modifies source code (WebView UI integration, parameter bindings). Without rebuilding, Stage 4 will install stale binaries from Stage 3 that lack GUI changes.
 
-1. Rebuild with Stage 4 changes:
+1. Rebuild with Stage 3 changes:
 
 ```bash
 # Rebuild from root directory (matches foundation-agent build location)
-echo "Rebuilding ${PLUGIN_NAME} with Stage 4 GUI changes..."
+echo "Rebuilding ${PLUGIN_NAME} with Stage 3 GUI changes..."
 
 cmake --build build --config Release \
   --target ${PLUGIN_NAME}_VST3 \
@@ -34,12 +34,12 @@ cmake --build build --config Release \
   --parallel
 
 if [ $? -ne 0 ]; then
-  echo "❌ Build failed after Stage 4 changes"
+  echo "❌ Build failed after Stage 3 changes"
   echo "Check logs/[PluginName]/build_*.log for errors"
   exit 1
 fi
 
-echo "✓ Build complete with Stage 4 WebView integration"
+echo "✓ Build complete with Stage 3 WebView integration"
 
 # Verify binaries are fresh (newer than source files)
 LATEST_SOURCE=$(find plugins/${PLUGIN_NAME}/Source -type f -exec stat -f "%m" {} \; 2>/dev/null | sort -n | tail -1)
@@ -72,7 +72,7 @@ After successful rebuild:
 ```bash
 # No source changes to commit (rebuild only updates binaries in build/)
 # But log the rebuild event
-echo "Stage 4: Rebuild complete with Stage 4 changes" >> logs/${PLUGIN_NAME}/build_$(date +%Y%m%d).log
+echo "Stage 3: Rebuild complete with Stage 3 changes" >> logs/${PLUGIN_NAME}/build_$(date +%Y%m%d).log
 ```
 
 2. Create factory presets:
@@ -148,14 +148,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 5. Invoke validator subagent:
 
-Call validator to verify Stage 6 completion:
+Call validator to verify Stage 4 completion:
 
 ```typescript
 const validation = Task({
   subagent_type: "validation-agent",
-  description: `Validate ${pluginName} Stage 6`,
+  description: `Validate ${pluginName} Stage 4`,
   prompt: `
-Validate Stage 6 completion for ${pluginName}.
+Validate Stage 4 completion for ${pluginName}.
 
 **Stage:** 6
 **Plugin:** ${pluginName}
@@ -164,7 +164,7 @@ Validate Stage 6 completion for ${pluginName}.
 - architecture.md: [paste content or "not applicable"]
 - plan.md: [paste content]
 
-**Expected outputs for Stage 4:**
+**Expected outputs for Stage 3:**
 - CHANGELOG.md exists in Keep a Changelog format
 - Version 1.0.0 for initial release
 - Presets/ directory has 3+ preset files

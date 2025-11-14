@@ -115,7 +115,7 @@ You generate implementation files and return a JSON report. **You do NOT present
 - ❌ Test in browser or DAW
 - ❌ Modify creative-brief.md or other contracts
 
-**Build verification:** Handled by gui-agent during Stage 5 (GUI) implementation.
+**Build verification:** Handled by gui-agent during Stage 4 (GUI) implementation.
 </responsibilities>
 
 <contracts>
@@ -204,7 +204,7 @@ echo "✓ Preconditions met - proceeding to file generation"
 
 **Create:** `plugins/[Name]/.ideas/mockups/v[N]-ui.html`
 
-**Purpose:** Production HTML that will be copied to `Source/ui/public/index.html` during Stage 5.
+**Purpose:** Production HTML that will be copied to `Source/ui/public/index.html` during Stage 4.
 
 **Generation strategy:**
 
@@ -260,7 +260,7 @@ for (const match of comboMatches) {
 - `plugins/[Name]/.ideas/mockups/v[N]-PluginEditor-TEMPLATE.h`
 - `plugins/[Name]/.ideas/mockups/v[N]-PluginEditor-TEMPLATE.cpp`
 
-**⚠️ IMPORTANT:** These are TEMPLATE files for gui-agent reference, NOT copy-paste files. gui-agent will adapt them to actual plugin structure during Stage 5.
+**⚠️ IMPORTANT:** These are TEMPLATE files for gui-agent reference, NOT copy-paste files. gui-agent will adapt them to actual plugin structure during Stage 4.
 
 **Generation strategy: Generate from parameter-spec.md, NOT by copying templates with placeholders.**
 
@@ -400,7 +400,7 @@ setSize(600, 400);  // From YAML dimensions
 
 **Create:** `plugins/[Name]/.ideas/mockups/v[N]-CMakeLists-SNIPPET.txt`
 
-**Purpose:** CMake configuration snippet to append to plugin's CMakeLists.txt during Stage 5.
+**Purpose:** CMake configuration snippet to append to plugin's CMakeLists.txt during Stage 4.
 
 **Base template:** `ui-mockup/assets/webview-templates/CMakeLists-webview-snippet.cmake`
 
@@ -440,14 +440,14 @@ target_compile_definitions(${PRODUCT_NAME}
 
 **Create:** `plugins/[Name]/.ideas/mockups/v[N]-integration-checklist.md`
 
-**Purpose:** Step-by-step guide for gui-agent to integrate UI during Stage 5.
+**Purpose:** Step-by-step guide for gui-agent to integrate UI during Stage 4.
 
 **Base template:** `ui-mockup/assets/integration-checklist-template.md`
 
 **Checklist structure:**
 
 ```markdown
-# Stage 5 (GUI) Integration Checklist - v[N]
+# Stage 4 (GUI) Integration Checklist - v[N]
 
 **Plugin:** [PluginName]
 **Mockup Version:** v[N]
@@ -653,9 +653,9 @@ if missing_from_mockup or extra_in_mockup:
 
 ## Notes
 
-- Parameters are implemented in EXACT order during Stage 3 (Shell)
+- Parameters are implemented in EXACT order during Stage 2 (Shell)
 - Parameter IDs must remain consistent across all stages
-- UI controls implemented from v1 mockup during Stage 5 (GUI)
+- UI controls implemented from v1 mockup during Stage 4 (GUI)
 ```
 
 **Data sources:**
@@ -696,7 +696,7 @@ Generated 5 implementation files for WebView integration:
 - Production HTML with JUCE bindings
 - C++ PluginEditor boilerplate (correct member order)
 - CMake WebView configuration
-- Integration checklist for Stage 5
+- Integration checklist for Stage 4
 
 [Parameter count]: [N] parameters
 [Relay declarations]: [N] relays
@@ -1218,8 +1218,8 @@ After ui-finalization-agent succeeds:
 The plugin now has:
 
 - ✅ UI design finalized (Phase A + Phase B complete)
-- ✅ Implementation files ready for Stage 5 (GUI)
+- ✅ Implementation files ready for Stage 4 (GUI)
 - ✅ parameter-spec.md locked (immutable contract)
 - ⏳ Planning (Stage 0 - if user chooses /plan)
-- ⏳ Implementation (Stages 2-5 - if user chooses /implement)
+- ⏳ Implementation (Stages 1-4 - if user chooses /implement)
 </next_stage>

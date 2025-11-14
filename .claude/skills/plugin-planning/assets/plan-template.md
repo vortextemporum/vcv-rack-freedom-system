@@ -23,11 +23,11 @@
 
 - Stage 0: Research ✓
 - Stage 1: Planning ✓
-- Stage 2: Foundation ← Next
-- Stage 3: Shell
-- Stage 4: DSP [phased if complex]
-- Stage 5: GUI [phased if complex]
-- Stage 6: Validation
+- Stage 1: Foundation ← Next
+- Stage 2: Shell
+- Stage 3: DSP [phased if complex]
+- Stage 4: GUI [phased if complex]
+- Stage 4: Validation
 
 ---
 
@@ -39,11 +39,11 @@
 
 Total: ~[X] minutes
 
-- Stage 2: 5 min (Foundation - project structure)
-- Stage 3: 5 min (Shell - APVTS parameters)
-- Stage 4: [X] min (DSP - single pass)
-- Stage 5: [X] min (GUI - single pass)
-- Stage 6: 15 min (Validation - presets, pluginval, changelog)
+- Stage 1: 5 min (Foundation - project structure)
+- Stage 2: 5 min (Shell - APVTS parameters)
+- Stage 3: [X] min (DSP - single pass)
+- Stage 4: [X] min (GUI - single pass)
+- Stage 4: 15 min (Validation - presets, pluginval, changelog)
 
 ### Implementation Notes
 
@@ -63,7 +63,7 @@ Total: ~[X] minutes
 
 [Use this format for complex plugins - phased implementation]
 
-### Stage 4: DSP Phases
+### Stage 3: DSP Phases
 
 #### Phase 4.1: Core Processing
 
@@ -122,7 +122,7 @@ Total: ~[X] minutes
 
 ---
 
-### Stage 5: GUI Phases
+### Stage 4: GUI Phases
 
 #### Phase 5.1: Layout and Basic Controls
 
@@ -190,17 +190,17 @@ Total: ~[X] minutes
 
 Total: ~[X] hours
 
-- Stage 2: 5 min (Foundation - project structure)
-- Stage 3: 5 min (Shell - APVTS parameters)
-- Stage 4: [X] min (DSP - [N] phases)
+- Stage 1: 5 min (Foundation - project structure)
+- Stage 2: 5 min (Shell - APVTS parameters)
+- Stage 3: [X] min (DSP - [N] phases)
   - Phase 4.1: [X] min
   - Phase 4.2: [X] min
   - Phase 4.3: [X] min (if applicable)
-- Stage 5: [X] min (GUI - [N] phases)
+- Stage 4: [X] min (GUI - [N] phases)
   - Phase 5.1: [X] min
   - Phase 5.2: [X] min
   - Phase 5.3: [X] min (if applicable)
-- Stage 6: 20 min (Validation - presets, pluginval, changelog)
+- Stage 4: 20 min (Validation - presets, pluginval, changelog)
 
 ---
 

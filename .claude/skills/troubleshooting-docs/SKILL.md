@@ -250,7 +250,7 @@ EOF
 
 If automatic indicators suggest this might be a critical pattern:
 - Severity: `critical` in YAML
-- Affects multiple plugins OR foundational stage (Stage 2 or 3)
+- Affects multiple plugins OR foundational stage (Stage 1 or 3)
 - Non-obvious solution
 
 Then add suggestion in decision menu (Step 8):

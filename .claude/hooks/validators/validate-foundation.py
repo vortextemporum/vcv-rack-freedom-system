@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Foundation Validator (Stage 2)
+Foundation Validator (Stage 1)
 Validates that CMakeLists.txt exists and project builds successfully
 Exit 0: PASS, Exit 1: FAIL
 """

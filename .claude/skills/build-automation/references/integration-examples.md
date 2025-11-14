@@ -1,12 +1,12 @@
 # Integration Examples
 
-## Scenario 1: From Stage 2 (Foundation)
+## Scenario 1: From Stage 1 (Foundation)
 
 **Context:** plugin-workflow invoked build-automation after foundation-agent completed
 
 **Invocation:**
 ```
-Invoking build-automation for LushVerb (Stage 2: Foundation)
+Invoking build-automation for LushVerb (Stage 1: Foundation)
 Flags: --no-install
 ```
 
@@ -18,7 +18,7 @@ Flags: --no-install
 
 ```
 Foundation verified. What's next?
-1. Continue to Stage 3 (Shell/Parameters) (recommended)
+1. Continue to Stage 2 (Shell/Parameters) (recommended)
 2. Review generated code
 3. Pause workflow
 ```
@@ -33,7 +33,7 @@ Foundation verified. What's next?
 
 **Invocation:**
 ```
-Invoking build-automation for LushVerb (Stage 4: DSP)
+Invoking build-automation for LushVerb (Stage 3: DSP)
 Flags: none (full build + install)
 ```
 
@@ -45,7 +45,7 @@ Flags: none (full build + install)
 
 ```
 DSP implementation complete. What's next?
-1. Continue to Stage 5 (GUI) (recommended)
+1. Continue to Stage 4 (GUI) (recommended)
 2. Test in DAW now
 3. Review DSP code
 4. Pause workflow

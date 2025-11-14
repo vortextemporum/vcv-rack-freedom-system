@@ -382,13 +382,13 @@ Implement with APVTS initialization and state management:
 
 void [PluginName]AudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
-    // Initialization will be added in Stage 3 (DSP)
+    // Initialization will be added in Stage 2 (DSP)
     juce::ignoreUnused(sampleRate, samplesPerBlock);
 }
 
 void [PluginName]AudioProcessor::releaseResources()
 {
-    // Cleanup will be added in Stage 3 (DSP)
+    // Cleanup will be added in Stage 2 (DSP)
 }
 
 void [PluginName]AudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
@@ -396,7 +396,7 @@ void [PluginName]AudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, 
     juce::ScopedNoDenormals noDenormals;
     juce::ignoreUnused(midiMessages);
 
-    // Parameter access example (for Stage 2 DSP implementation):
+    // Parameter access example (for Stage 1 DSP implementation):
     // auto* gainParam = parameters.getRawParameterValue("gain");
     // float gainValue = gainParam->load();  // Atomic read (real-time safe)
 
@@ -493,7 +493,7 @@ void [PluginName]AudioProcessorEditor::paint(juce::Graphics& g)
 
     g.setColour(juce::Colours::white);
     g.setFont(24.0f);
-    g.drawFittedText("[Plugin Name] - Stage 2", getLocalBounds(), juce::Justification::centred, 1);
+    g.drawFittedText("[Plugin Name] - Stage 1", getLocalBounds(), juce::Justification::centred, 1);
 
     g.setFont(14.0f);
     g.drawFittedText("[N] parameters implemented",
@@ -503,16 +503,16 @@ void [PluginName]AudioProcessorEditor::paint(juce::Graphics& g)
 
 void [PluginName]AudioProcessorEditor::resized()
 {
-    // Layout will be added in Stage 3 (GUI)
+    // Layout will be added in Stage 2 (GUI)
 }
 ```
 
 **Key points:**
 
-- 600x400 default size (will be adjusted in Stage 3 based on UI mockup)
+- 600x400 default size (will be adjusted in Stage 2 based on UI mockup)
 - Placeholder text for Stage 1
 - Shows parameter count
-- Empty layout (WebView added in Stage 3)
+- Empty layout (WebView added in Stage 2)
 
 ### 9. Self-Validation
 
@@ -709,8 +709,8 @@ contract_checksums:
 
 Update the Markdown sections:
 
-- **Append to "Completed So Far":** `- **Stage 2:** Foundation complete - Build system operational, [N] parameters implemented`
-- **Update "Next Steps":** Remove Stage 1 items, add Stage 2 DSP implementation items
+- **Append to "Completed So Far":** `- **Stage 1:** Foundation complete - Build system operational, [N] parameters implemented`
+- **Update "Next Steps":** Remove Stage 1 items, add Stage 1 DSP implementation items
 - **Update "Build Artifacts":** Add paths to compiled binaries (after successful build)
 
 ### Step 4: Update PLUGINS.md
@@ -806,7 +806,7 @@ If state update fails:
 - Wrong JUCE API format used
 - Validation mismatch (expected vs actual parameters)
 
-**Build verification (Stage 2 completion) handled by:**
+**Build verification (Stage 1 completion) handled by:**
 
 - plugin-workflow invokes build-automation skill after foundation-shell-agent completes
 - build-automation runs build script and handles any build failures
@@ -814,8 +814,8 @@ If state update fails:
 ## Notes
 
 - **Combined foundation + parameters** - Both build system and APVTS in one pass
-- **No DSP yet** - Audio processing added in Stage 2
-- **No UI yet** - WebView integration added in Stage 3
+- **No DSP yet** - Audio processing added in Stage 1
+- **No UI yet** - WebView integration added in Stage 2
 - **Pass-through audio** - Plugin does nothing but allows signal flow
 - **Foundation + shell in Stage 1** - Proves build system works AND parameters defined
 
@@ -873,14 +873,14 @@ float value = param->getValue();  // Uses locks internally
 
 ## Real-Time Safety
 
-**Stage 2 creates the parameter system but does NOT use parameters yet:**
+**Stage 1 creates the parameter system but does NOT use parameters yet:**
 
 - Parameters are declared and available
-- No DSP implementation yet (Stage 3)
+- No DSP implementation yet (Stage 2)
 - processBlock() remains pass-through
 - Parameter access example shown but commented out
 
-**Stage 3 (DSP) will:**
+**Stage 2 (DSP) will:**
 
 - Read parameter values in processBlock()
 - Use atomic reads (real-time safe)
@@ -888,7 +888,7 @@ float value = param->getValue();  // Uses locks internally
 
 ## JUCE API Verification
 
-All JUCE classes used in Stage 2 are verified for JUCE 8.0.9+:
+All JUCE classes used in Stage 1 are verified for JUCE 8.0.9+:
 
 - ✅ `juce::AudioProcessor` - Core audio processor
 - ✅ `juce::AudioProcessorEditor` - Base editor class
@@ -903,11 +903,11 @@ All JUCE classes used in Stage 2 are verified for JUCE 8.0.9+:
 
 ## Next Stage
 
-After Stage 1 succeeds, plugin-workflow will invoke dsp-agent for Stage 2 (audio processing implementation).
+After Stage 1 succeeds, plugin-workflow will invoke dsp-agent for Stage 1 (audio processing implementation).
 
 The plugin now has:
 
 - ✅ Build system (foundation)
 - ✅ Parameter system (shell/APVTS)
-- ⏳ Audio processing (Stage 2 - next)
-- ⏳ UI integration (Stage 3 - after Stage 2)
+- ⏳ Audio processing (Stage 1 - next)
+- ⏳ UI integration (Stage 2 - after Stage 1)

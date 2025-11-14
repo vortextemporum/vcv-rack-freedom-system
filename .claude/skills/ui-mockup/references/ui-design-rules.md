@@ -2,7 +2,7 @@
 
 **Purpose:** Non-negotiable constraints for WebView-based plugin UIs that prevent runtime failures and ensure professional behavior.
 
-**When to enforce:** Every mockup generation, validation before finalization, gui-agent Stage 5 implementation.
+**When to enforce:** Every mockup generation, validation before finalization, gui-agent Stage 4 implementation.
 
 ---
 

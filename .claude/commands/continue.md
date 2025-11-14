@@ -128,9 +128,9 @@ Present summary:
 Resuming [PluginName] at Stage [N]...
 
 Summary of completed work:
-- [Stage 2] Foundation set up
-- [Stage 3] Plugin loads in DAW
-- [Stage 4.1] Core DSP implemented
+- [Stage 1] Foundation set up
+- [Stage 2] Plugin loads in DAW
+- [Stage 3.1] Core DSP implemented
 
 Current status:
 Working on Stage [N] ([Description]).
@@ -156,7 +156,7 @@ IF no handoff exists for any plugin:
 
 IF specific [PluginName] doesn't have handoff:
 - Display: "[PluginName] doesn't have a handoff file"
-- Explain: Plugin may be complete (Stage 6), not started, or handoff removed
+- Explain: Plugin may be complete (Stage 4), not started, or handoff removed
 - Suggest: Check `PLUGINS.md`, `/improve [PluginName]`, or `/implement [PluginName]`
 
 See `context-resume` skill's `error-recovery.md` for additional scenarios.

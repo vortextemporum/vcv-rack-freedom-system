@@ -95,14 +95,14 @@ All errors presented to the user include:
 ### Example Error Message
 
 ```
-ERROR: Stage 3 (Shell) failed
+ERROR: Stage 2 (Shell) failed
 
 Reason: Parameter count mismatch (expected 5, found 3)
 Missing parameters: delayTime, feedback
 
 What should I do?
 
-1. Retry Stage 3 - shell-agent will regenerate APVTS
+1. Retry Stage 2 - shell-agent will regenerate APVTS
 2. Check parameter-spec.md - Verify parameter definitions
 3. Manual fix - Edit PluginProcessor.cpp manually then continue
 4. Pause workflow - Save progress and investigate

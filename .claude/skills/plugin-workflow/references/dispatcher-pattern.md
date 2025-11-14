@@ -53,7 +53,7 @@ async function dispatchStage(pluginName, stageNumber) {
 1. **Always delegate stages 1-4** - Use Task tool to invoke subagents
 2. **Pass contracts and Required Reading** - Every subagent receives architecture.md, plan.md, and juce8-critical-patterns.md
 3. **Check preconditions first** - Validate contracts exist before dispatching
-4. **Stage 4 flexibility** - Can run directly in orchestrator or via validator subagent
+4. **Stage 3 flexibility** - Can run directly in orchestrator or via validator subagent
 
 ## Integration
 

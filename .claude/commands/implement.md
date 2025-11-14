@@ -210,8 +210,8 @@ Implementation:
 4. Parse stage: Extract "Stage N" or "Stage N.M" pattern
 
 Example:
-  Input: **Status:** 🚧 **Stage 4.1**
-  After strip: 🚧 Stage 4.1
+  Input: **Status:** 🚧 **Stage 3.1**
+  After strip: 🚧 Stage 3.1
   Parsed stage: 4.1
 
 Why this approach:
@@ -240,7 +240,7 @@ Invoke the plugin-workflow skill with the plugin name and starting stage. The sk
   <skill_responsibility ref="plugin-workflow">
     The plugin-workflow skill orchestrates stages 1-4:
 
-    Stage 1 (Foundation) → Stage 2 (DSP) → Stage 3 (GUI) → Stage 4 (Validation)
+    Stage 1 (Foundation) → Stage 1 (DSP) → Stage 2 (GUI) → Stage 3 (Validation)
 
     Each stage uses specialized subagent, follows checkpoint protocol (commit, state update, decision menu).
 
@@ -285,5 +285,5 @@ Resume with `/continue [PluginName]`
 Complete plugin development flow:
 1. `/dream [PluginName]` - Creative brief + UI mockup
 2. `/plan [PluginName]` - Research and planning (Stages 0-1)
-3. `/implement [PluginName]` - Build plugin (Stages 2-6)
+3. `/implement [PluginName]` - Build plugin (Stages 1-4)
 4. `/install-plugin [PluginName]` - Deploy to system folders

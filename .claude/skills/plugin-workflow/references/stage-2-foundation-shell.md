@@ -1,4 +1,4 @@
-# Stage 2: Foundation + Shell
+# Stage 1: Foundation + Shell
 
 **Context:** This file is part of the plugin-workflow skill.
 **Invoked by:** Main workflow dispatcher after Stage 1 completion
@@ -25,7 +25,7 @@
 
 ```bash
 if [ ! -f "plugins/${PLUGIN_NAME}/.ideas/parameter-spec.md" ]; then
-  echo "Cannot proceed to Stage 2 - parameter-spec.md missing"
+  echo "Cannot proceed to Stage 1 - parameter-spec.md missing"
   echo "Complete UI mockup workflow first (/mockup)"
   exit 1
 fi
@@ -44,9 +44,9 @@ Call foundation-shell-agent subagent with minimal prompt:
 ```typescript
 const foundationShellResult = Task({
   subagent_type: "foundation-shell-agent",
-  description: `Stage 2 - ${pluginName}`,
+  description: `Stage 1 - ${pluginName}`,
   prompt: `
-You are foundation-shell-agent implementing Stage 2 for ${pluginName}.
+You are foundation-shell-agent implementing Stage 1 for ${pluginName}.
 
 **Plugin:** ${pluginName}
 **Stage:** 2 (Foundation + Shell)
@@ -117,7 +117,7 @@ const report = parseSubagentReport(foundationShellResult);
 if (!report) {
   console.log(`
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✗ Stage 2 Error: Could not parse foundation-shell-agent report
+✗ Stage 1 Error: Could not parse foundation-shell-agent report
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 The foundation-shell-agent subagent completed but returned malformed output.
@@ -247,7 +247,7 @@ Skill({
     stage: 2,
     flags: ["--no-install"],
     invoking_skill: "plugin-workflow",
-    purpose: "Verify Stage 2 foundation+shell compiles successfully",
+    purpose: "Verify Stage 1 foundation+shell compiles successfully",
   },
 });
 ```
@@ -295,7 +295,7 @@ if (validation.status === "FAIL" && !validation.continue_to_next_stage) {
 console.log(`✓ Validation ${validation.status}: ${validation.recommendation}`);
 ```
 
-**validation-agent checks for Stage 2:**
+**validation-agent checks for Stage 1:**
 - CMakeLists.txt uses appropriate JUCE modules
 - JUCE 8 patterns followed (ParameterID format, header generation)
 - All parameters from parameter-spec.md implemented
@@ -314,9 +314,9 @@ console.log(`✓ Validation ${validation.status}: ${validation.recommendation}`)
 updateHandoff(
   pluginName,
   2,
-  `Stage 2: Foundation + Shell - Build system + ${report.outputs.parameter_count} parameters`,
+  `Stage 1: Foundation + Shell - Build system + ${report.outputs.parameter_count} parameters`,
   [
-    "Stage 3: Implement DSP",
+    "Stage 2: Implement DSP",
     "Review build artifacts",
     "Test parameters in DAW",
   ],
@@ -324,7 +324,7 @@ updateHandoff(
   phased
 );
 
-updatePluginStatus(pluginName, "🚧 Stage 2");
+updatePluginStatus(pluginName, "🚧 Stage 1");
 updatePluginTimeline(
   pluginName,
   2,
@@ -341,7 +341,7 @@ git add plugins/[PluginName]/.continue-here.md
 git add PLUGINS.md
 
 git commit -m "$(cat <<'EOF'
-feat: [PluginName] Stage 2 - foundation + shell
+feat: [PluginName] Stage 1 - foundation + shell
 
 Build system created with JUCE 8 configuration
 [N] parameters implemented with APVTS
@@ -381,7 +381,7 @@ Choose (1-7): _
 
 **Handle responses:**
 
-- 1 or "continue": Proceed to Stage 3 (DSP)
+- 1 or "continue": Proceed to Stage 2 (DSP)
 - 2: Provide DAW testing instructions
 - 3: Show build artifacts list
 - 4: Display source files with parameter code

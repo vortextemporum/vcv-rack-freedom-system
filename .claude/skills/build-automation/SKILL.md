@@ -40,11 +40,11 @@ This skill fails when:
 
 Orchestrates plugin builds via `scripts/build-and-install.sh` with comprehensive failure handling.
 
-**Invokers:** plugin-workflow (Stages 2-6), plugin-improve (Phase 5), plugin-lifecycle (verification)
+**Invokers:** plugin-workflow (Stages 1-4), plugin-improve (Phase 5), plugin-lifecycle (verification)
 **Invokes:** build script, troubleshooter agent (on failure, user option 1)
 
 **Key behaviors:**
-- Context-aware build flags (Stage 2 uses `--no-install`, others full build)
+- Context-aware build flags (Stage 1 uses `--no-install`, others full build)
 - Structured 5-option failure menu (never auto-retry)
 - Context-specific success menus (different per stage)
 - Always returns control to invoker (never continues autonomously)
@@ -56,7 +56,7 @@ When invoked, this skill receives context via invocation parameters:
 ```json
 {
   "plugin_name": "PluginName",
-  "stage": "Stage 2" | "Stage 3" | "Stage 4" | "Stage 5" | "Stage 6" | null,
+  "stage": "Stage 1" | "Stage 2" | "Stage 3" | "Stage 4" | "Stage 4" | null,
   "invoker": "plugin-workflow" | "plugin-improve" | "plugin-lifecycle" | "manual",
   "build_flags": ["--no-install"] | ["--dry-run"] | []
 }
@@ -102,7 +102,7 @@ Build Progress:
 
 Context-aware flag selection:
 
-- **Stage 2 (Foundation)**: Always use `--no-install` flag (verify compilation only, no installation)
+- **Stage 1 (Foundation)**: Always use `--no-install` flag (verify compilation only, no installation)
 - **Stages 3-6 (Shell/DSP/GUI/Validation)**: Full build with installation (no flags)
 - **plugin-improve**: Full build with installation (no flags)
 - **Manual invocation** (`invoker: "manual"`): Ask if they want `--dry-run` to preview commands
@@ -221,7 +221,7 @@ Build time: [duration]
 Log: logs/[PluginName]/build_TIMESTAMP.log
 ```
 
-For `--no-install` builds (Stage 2):
+For `--no-install` builds (Stage 1):
 
 ```
 ✓ Build successful (compilation verified, not installed)
@@ -288,7 +288,7 @@ When user requests build retry after manual fix:
 MUST preserve from original invocation:
 - Build flags (`--no-install`, `--dry-run`, or none)
 - Invoking skill (plugin-workflow, plugin-improve, manual)
-- Invoking stage (Stage 2, 3, 4, 5, 6, or N/A)
+- Invoking stage (Stage 1, 3, 4, 5, 6, or N/A)
 - Last decision point (for return navigation)
 
 Context is already stored from skill entry (see "Context Mechanism" section).

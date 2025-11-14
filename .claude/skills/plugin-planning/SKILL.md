@@ -55,7 +55,7 @@ If all preconditions pass → proceed to Stage 0
         LOG: "Using full parameter specification"
       ELSE IF parameter-spec-draft.md exists:
         Use draft specification (sufficient for Stage 0)
-        LOG: "Using draft parameters. Full spec needed before Stage 2."
+        LOG: "Using draft parameters. Full spec needed before Stage 1."
       ELSE:
         BLOCK with error: "No parameter specification found. Either:
         1. Run quick parameter capture (/dream → option 1)
@@ -139,7 +139,7 @@ If all preconditions pass → proceed to Stage 0
    Strategy: [Single-pass | Phased implementation]
 
 What's next?
-1. Start implementation - Begin Stage 2 (Foundation + Shell) (recommended)
+1. Start implementation - Begin Stage 1 (Foundation + Shell) (recommended)
 2. Review contracts (architecture.md, plan.md)
 3. Improve creative brief based on research
 4. Run deeper JUCE investigation (deep-research skill) ← Discover troubleshooting
@@ -155,7 +155,7 @@ Choose (1-6): _
 <delegation_rule skill="plugin-workflow" trigger="option_1">
 - Condition: User chooses option 1 (Start implementation)
 - Action: Must invoke plugin-workflow skill via Skill tool
-- Prompt: "Begin implementation for [PluginName] starting at Stage 2"
+- Prompt: "Begin implementation for [PluginName] starting at Stage 1"
 </delegation_rule>
 
 - **Option 1: Start implementation**
@@ -164,7 +164,7 @@ Choose (1-6): _
   ```
   Skill tool:
   - skill: "plugin-workflow"
-  - prompt: "Begin implementation for [PluginName] starting at Stage 2"
+  - prompt: "Begin implementation for [PluginName] starting at Stage 1"
   ```
 
 - **Option 2: Review contracts**
@@ -219,7 +219,7 @@ Choose (1-6): _
 
 **Note:** research-planning-agent runs in fresh context (5-35 min session doesn't pollute orchestrator)
 
-**VALIDATION GATE: Before proceeding to Stage 2:**
+**VALIDATION GATE: Before proceeding to Stage 1:**
 
 1. Verify: architecture.md exists and is not empty
 2. Verify: architecture.md contains all required sections (Core Components, Processing Chain, Parameter Mapping)
@@ -235,10 +235,10 @@ Choose (1-6): _
 
 <handoff_protocol id="planning-to-implementation">
 <state_requirement>
-CRITICAL: Handoff file is already updated to Stage 0 complete by research-planning-agent. Verify state before proceeding to Stage 2.
+CRITICAL: Handoff file is already updated to Stage 0 complete by research-planning-agent. Verify state before proceeding to Stage 1.
 </state_requirement>
 
-**When user chooses to proceed to Stage 2:**
+**When user chooses to proceed to Stage 1:**
 
 <verification_step>
 Before handoff, verify:
@@ -264,7 +264,7 @@ Contracts created:
 ✓ architecture.md
 ✓ plan.md
 
-Ready for implementation. Proceeding to Stage 2 (Foundation + Shell)...
+Ready for implementation. Proceeding to Stage 1 (Foundation + Shell)...
 ```
 </handoff_protocol>
 

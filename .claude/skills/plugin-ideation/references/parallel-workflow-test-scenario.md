@@ -77,7 +77,7 @@ User: 3
 ```
 User: /plan SimpleComp
 System: [Checks for parameter spec]
-System: ℹ Using draft parameters. Full spec needed before Stage 2.
+System: ℹ Using draft parameters. Full spec needed before Stage 1.
 System: [Invokes research-planning-agent with draft params]
 System: [Stage 0 completes - creates architecture.md]
 ```
@@ -115,7 +115,7 @@ System: [Calculates complexity, creates plan.md]
 System: ✓ Planning complete
 ```
 
-### Phase 5: Implementation - Stage 2 Block Test
+### Phase 5: Implementation - Stage 1 Block Test
 
 **Test Case 1: Only draft exists (should BLOCK)**
 ```
@@ -133,7 +133,7 @@ Run: /dream SimpleComp → option 2
 # After mockup finalized
 User: /implement SimpleComp
 System: ✓ parameter-spec.md found
-System: [Proceeds to Stage 2 via foundation-shell-agent]
+System: [Proceeds to Stage 1 via foundation-shell-agent]
 ```
 
 ## Validation Checklist
@@ -148,7 +148,7 @@ System: [Proceeds to Stage 2 via foundation-shell-agent]
 ### Stage 0 Accepts Draft
 - [ ] plugin-planning checks for draft OR full spec
 - [ ] Stage 0 proceeds with draft parameters
-- [ ] Warning logged: "Using draft parameters. Full spec needed before Stage 2."
+- [ ] Warning logged: "Using draft parameters. Full spec needed before Stage 1."
 - [ ] architecture.md created successfully
 
 ### Stage 0 Accepts Draft
@@ -163,7 +163,7 @@ System: [Proceeds to Stage 2 via foundation-shell-agent]
 - [ ] Merges or reconciles differences based on user choice
 - [ ] Generates parameter-spec.md with union or corrected set
 
-### Stage 2 Blocks Without Full Spec
+### Stage 1 Blocks Without Full Spec
 - [ ] Precondition check requires parameter-spec.md
 - [ ] Clear error message if only draft exists
 - [ ] Guides user to complete mockup workflow
@@ -219,7 +219,7 @@ Total: 33 minutes (18 min saved, 35% reduction)
 2. Stage 0 accepts either draft or full parameter spec
 3. Stage 0 accepts either draft or full parameter spec
 4. UI mockup validates draft consistency and merges (Phase 10)
-5. Stage 2 blocks until full spec available
+5. Stage 1 blocks until full spec available
 6. Parallel execution demonstrably works (both workflows proceed simultaneously)
 7. Time savings achieved (18 minutes through parallelization)
 8. No regression in sequential workflow
@@ -235,7 +235,7 @@ Total: 33 minutes (18 min saved, 35% reduction)
 ## Notes
 
 - Draft spec is OPTIONAL (user chooses workflow path)
-- Full spec is REQUIRED for Stage 2 (implementation)
+- Full spec is REQUIRED for Stage 1 (implementation)
 - Validation at merge point prevents mismatches
 - Clear error messages guide users through process
 - Both workflows remain functional (parallel is opt-in)

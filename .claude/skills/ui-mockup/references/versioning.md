@@ -37,7 +37,7 @@ plugins/LushVerb/.ui/
 
 ## Version Selection for Implementation
 
-**Default behavior:** Use latest version number for Stage 5 integration.
+**Default behavior:** Use latest version number for Stage 4 integration.
 
 **Explicit selection:** User can specify different version:
 - "Use v2 design for implementation" → Integrate v2-ui.html
@@ -49,12 +49,12 @@ plugins/LushVerb/.ui/
 - Has all 7 files generated
 - `mockup_finalized: true` in .continue-here.md
 - `finalized_version: [N]` recorded
-- Ready for Stage 5 integration
+- Ready for Stage 4 integration
 
 **Unfinalized version:**
 - Has only 2 files (YAML + test HTML)
 - User iteration in progress
-- Not ready for Stage 5
+- Not ready for Stage 4
 
 ## Version Cleanup
 

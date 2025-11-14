@@ -90,14 +90,14 @@ When user runs `/plan [PluginName?]`, invoke the plugin-planning skill to handle
 
 After Stage 0 completes, the skill creates handoff state:
 - .continue-here.md updated with "ready_for_implementation: true"
-- User runs `/implement [PluginName]` to begin Stage 2 (Foundation + Shell)
+- User runs `/implement [PluginName]` to begin Stage 1 (Foundation + Shell)
 
 ## Workflow Integration
 
 Complete plugin development flow:
 1. `/dream [PluginName]` - Create creative brief + UI mockup
 2. `/plan [PluginName]` - Research and planning (Stage 0 - consolidated)
-3. `/implement [PluginName]` - Build plugin (Stages 2-4)
+3. `/implement [PluginName]` - Build plugin (Stages 1-3)
 
 ## Output
 

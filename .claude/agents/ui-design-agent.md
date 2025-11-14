@@ -1167,7 +1167,7 @@ After UI design agent completes:
 
 - Symptom: Parameter IDs contain uppercase, hyphens, or spaces
 - Resolution: Convert to lowercase snake_case (e.g., "Attack Time" → "attack_time")
-- Impact: C++ compilation will fail in Stage 5
+- Impact: C++ compilation will fail in Stage 4
 </troubleshooting>
 
 <reference_documentation>

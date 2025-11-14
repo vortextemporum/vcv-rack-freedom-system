@@ -269,7 +269,7 @@ Use format from `assets/report-templates.md#test-log-format`
 
 Update `.continue-here.md`:
 - Set current_stage: "testing_complete"
-- Set next_step based on test results (Stage 6 if passed, investigation if failed)
+- Set next_step based on test results (Stage 4 if passed, investigation if failed)
 - Record test_date: [timestamp]
 - Record test_mode: [1/2/3]
 

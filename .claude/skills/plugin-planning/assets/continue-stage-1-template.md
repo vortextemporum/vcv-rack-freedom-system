@@ -11,7 +11,7 @@ phased_implementation: ${PHASED_IMPLEMENTATION}
 
 ## Current State: Stage 1 - Planning Complete
 
-Implementation plan created. Ready to proceed to foundation (Stage 2).
+Implementation plan created. Ready to proceed to foundation (Stage 1).
 
 ## Completed So Far
 
@@ -23,7 +23,7 @@ Implementation plan created. Ready to proceed to foundation (Stage 2).
 
 ## Next Steps
 
-1. Stage 2: Foundation (create build system)
+1. Stage 1: Foundation (create build system)
 2. Review plan details
 3. Pause here
 

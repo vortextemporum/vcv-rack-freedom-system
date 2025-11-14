@@ -41,7 +41,7 @@ last_updated: [ISO 8601 timestamp]
 
 ## Examples
 
-### plugin-workflow Stage 3
+### plugin-workflow Stage 2
 
 ```yaml
 ---
@@ -52,7 +52,7 @@ status: in_progress
 last_updated: 2025-11-12T14:30:00Z
 ---
 
-# plugin-workflow - Stage 3 - In Progress
+# plugin-workflow - Stage 2 - In Progress
 
 DSP implementation for reverb algorithm. Currently implementing early reflections.
 Next: Complete late reverb diffusion network.

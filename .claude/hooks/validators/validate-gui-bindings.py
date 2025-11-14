@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-GUI Binding Validator (Stage 5)
+GUI Binding Validator (Stage 4)
 Validates that HTML parameter IDs match C++ relay IDs
 Exit 0: PASS, Exit 1: FAIL
 """

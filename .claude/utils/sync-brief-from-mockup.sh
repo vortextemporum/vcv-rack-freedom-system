@@ -252,7 +252,7 @@ if 'Technical Notes' in sections:
 # Next Steps section (auto-generate)
 output.append("## Next Steps\n")
 output.append("\n- [ ] Complete mockup finalization\n")
-output.append("- [ ] Run /implement to begin Stage 2 (Foundation)\n")
+output.append("- [ ] Run /implement to begin Stage 1 (Foundation)\n")
 output.append("- [ ] Proceed through workflow stages\n")
 output.append("- [ ] Test and validate plugin\n")
 

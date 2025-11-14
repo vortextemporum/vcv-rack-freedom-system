@@ -54,11 +54,11 @@ For each handoff found, extract context summary and present interactive menu:
 Which plugin would you like to resume?
 
 1. TapeDelay
-   Stage 4 (DSP implementation) • In progress • 2 hours ago
+   Stage 3 (DSP implementation) • In progress • 2 hours ago
    Last: Core delay algorithm implemented, testing modulation next
 
 2. VintageComp
-   Stage 6 (Validation) • Testing • 1 day ago
+   Stage 4 (Validation) • Testing • 1 day ago
    Last: Pluginval passed, creating factory presets
 
 3. SpringReverb
@@ -97,7 +97,7 @@ Present disambiguation:
 ```
 Multiple resume points found for TapeDelay:
 
-1. Main workflow: Stage 4 (DSP implementation)
+1. Main workflow: Stage 3 (DSP implementation)
    Location: plugins/TapeDelay/.continue-here.md
    Last updated: 2 hours ago
    Context: Implementing modulation matrix for wow/flutter
@@ -120,7 +120,7 @@ Choose (1-4): _
 
 - If main workflow is more recent → Recommend that
 - If mockup is more recent → Recommend mockup
-- If workflow is at Stage 5 (GUI) and mockup exists → Recommend mockup
+- If workflow is at Stage 4 (GUI) and mockup exists → Recommend mockup
 - Default to main workflow if uncertain
 
 ---

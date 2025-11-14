@@ -30,7 +30,7 @@
 
 **Fix:**
 1. Check if file exists: `ls plugins/[PluginName]/CMakeLists.txt`
-2. If missing, re-run Stage 2 (foundation-agent)
+2. If missing, re-run Stage 1 (foundation-agent)
 3. Or restore from backup in `plugins/[PluginName]/.backup/`
 
 ## Build succeeds but menu not displayed

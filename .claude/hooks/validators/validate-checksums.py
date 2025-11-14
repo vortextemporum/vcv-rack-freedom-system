@@ -3,7 +3,7 @@
 Contract Checksum Validator
 
 Verifies contract file checksums match values stored in .continue-here.md.
-Called by SubagentStop hook before stage transitions during Stages 2-5.
+Called by SubagentStop hook before stage transitions during Stages 1-4.
 """
 
 import sys
@@ -124,11 +124,11 @@ def main():
         for result in errors:
             print(f"  ❌ {result.message}", file=sys.stderr)
         print("\nContract files have been modified during implementation!", file=sys.stderr)
-        print("This violates the immutability requirement for Stages 2-5.", file=sys.stderr)
+        print("This violates the immutability requirement for Stages 1-4.", file=sys.stderr)
         print("\nTo fix:", file=sys.stderr)
         print("  1. Review contract changes", file=sys.stderr)
         print("  2. Revert to original contracts (git checkout)", file=sys.stderr)
-        print("  3. OR restart from Stage 2 with updated contracts", file=sys.stderr)
+        print("  3. OR restart from Stage 1 with updated contracts", file=sys.stderr)
         return 1
 
     print("\nContract checksum validation PASSED", file=sys.stderr)

@@ -1,8 +1,8 @@
 ---
 name: plugin-workflow
-description: Implementation orchestrator for stages 2-6 (Foundation through Validation)
+description: Implementation orchestrator for stages 1-4 (Foundation through Validation)
 allowed-tools:
-  - Task # REQUIRED - All stages 2-5 MUST invoke subagents
+  - Task # REQUIRED - All stages 1-4 MUST invoke subagents
   - Bash # For git commits
   - Read # For contracts
   - Write # For documentation
@@ -10,13 +10,13 @@ allowed-tools:
 preconditions:
   - architecture.md must exist (from /plan)
   - plan.md must exist (from /plan)
-  - Status must be 🚧 Stage 0 (complete) OR resuming from 🚧 Stage 2+
+  - Status must be 🚧 Stage 0 (complete) OR resuming from 🚧 Stage 1+
   - Plugin must NOT be ✅ Working or 📦 Installed (use /improve instead)
 ---
 
 # plugin-workflow Skill
 
-**Purpose:** Pure orchestrator for stages 2-5 of JUCE plugin implementation. This skill NEVER implements directly - it always delegates to specialized subagents and presents decision menus after each stage completes.
+**Purpose:** Pure orchestrator for stages 1-4 of JUCE plugin implementation. This skill NEVER implements directly - it always delegates to specialized subagents and presents decision menus after each stage completes.
 
 ## Overview
 
@@ -28,7 +28,7 @@ This skill orchestrates plugin implementation stages 1-4. Stage 0 (Research & Pl
 - **UI Integrated:** Connect WebView interface to audio engine (gui-agent)
 - **Plugin Complete:** Factory presets, validation, and final polish (direct or validation-agent)
 
-**Internal stage mapping:** Stage 0 → Research & Planning Complete, Stage 1 → Build System Ready, Stage 2 → Audio Engine Working, Stage 3 → UI Integrated
+**Internal stage mapping:** Stage 0 → Research & Planning Complete, Stage 1 → Build System Ready, Stage 1 → Audio Engine Working, Stage 2 → UI Integrated
 
 <orchestration_rules enforcement_level="STRICT">
   <delegation_rule
@@ -55,11 +55,11 @@ This skill orchestrates plugin implementation stages 1-4. Stage 0 (Research & Pl
 
     <valid_delegations>
       - Stage 1: foundation-shell-agent
-      - Stage 2: dsp-agent
-      - Stage 3: gui-agent
+      - Stage 1: dsp-agent
+      - Stage 2: gui-agent
     </valid_delegations>
 
-    Stage 4 can optionally run directly in orchestrator or via validation-agent subagent.
+    Stage 3 can optionally run directly in orchestrator or via validation-agent subagent.
   </delegation_rule>
 
   <checkpoint_protocol
@@ -99,7 +99,7 @@ This skill orchestrates plugin implementation stages 1-4. Stage 0 (Research & Pl
       Subagent returns JSON:
       {
         "status": "success" | "error",
-        "stage": 2-6,
+        "stage": 1-4,
         "completionStatement": "...",
         "filesCreated": [...],
         "nextSteps": [...],
@@ -128,7 +128,7 @@ This skill orchestrates plugin implementation stages 1-4. Stage 0 (Research & Pl
   </handoff_protocol>
 
   <state_requirement id="required-reading-injection">
-    All subagents (stages 2-5) MUST receive Required Reading file to prevent repeat mistakes.
+    All subagents (stages 1-4) MUST receive Required Reading file to prevent repeat mistakes.
 
     <enforcement>
       ALWAYS inject Required Reading at start of subagent prompt:
@@ -159,19 +159,19 @@ Each stage is fully documented in its own reference file in `references/` subdir
 
 <preconditions blocking="true">
   <contract_verification required="true" blocking="true">
-    Before starting Stage 2, verify these contract files exist:
+    Before starting Stage 1, verify these contract files exist:
 
     <required_file path="plugins/$PLUGIN_NAME/.ideas/architecture.md" created_by="Stage 0" />
     <required_file path="plugins/$PLUGIN_NAME/.ideas/plan.md" created_by="Stage 0" />
     <required_file path="plugins/$PLUGIN_NAME/.ideas/creative-brief.md" created_by="ideation" />
     <required_file path="plugins/$PLUGIN_NAME/.ideas/parameter-spec.md" created_by="UI mockup finalization">
       <validation>
-        Stage 2 (foundation-shell-agent) requires COMPLETE parameter specification.
+        Stage 1 (foundation-shell-agent) requires COMPLETE parameter specification.
         Draft specification (parameter-spec-draft.md) is NOT sufficient for implementation.
 
         <check>
           IF parameter-spec.md exists:
-            Proceed to Stage 2
+            Proceed to Stage 1
           ELSE IF parameter-spec-draft.md exists:
             BLOCK with message:
             "Draft parameters found, but full specification required for implementation.
@@ -180,7 +180,7 @@ Each stage is fully documented in its own reference file in `references/` subdir
 
             Run: /dream [PluginName] → option 2 (Full UI mockup first)
 
-            After mockup finalized, parameter-spec.md will be generated and Stage 2 can proceed."
+            After mockup finalized, parameter-spec.md will be generated and Stage 1 can proceed."
           ELSE:
             BLOCK with error: "No parameter specification found. Run /dream [PluginName] to create mockup."
         </check>
@@ -318,16 +318,16 @@ Each stage is fully documented in its own reference file in `references/` subdir
       - Extract current_stage, next_action, next_phase
       - Resume at specified stage/phase
     ELSE:
-      - Start fresh at Stage 2
+      - Start fresh at Stage 1
       - No handoff context available
   </condition>
 
   <routing_logic>
     Based on current_stage value:
-    - Stage 2 → invoke foundation-shell-agent
-    - Stage 3 → invoke dsp-agent
-    - Stage 4 → invoke gui-agent
-    - Stage 5 → execute validation
+    - Stage 1 → invoke foundation-shell-agent
+    - Stage 2 → invoke dsp-agent
+    - Stage 3 → invoke gui-agent
+    - Stage 4 → execute validation
 
     If next_phase is set: Resume phased implementation at specified phase.
   </routing_logic>
@@ -365,7 +365,7 @@ Pre-Resume Checklist:
 **Entry point:** Called by /implement command or /continue command after plugin-planning completes.
 
 <enforcement_reminder ref="subagent-dispatch-only" severity="CRITICAL">
-This orchestrator MUST NEVER implement plugin code directly. ALL stages 2-5 MUST be delegated via Task tool.
+This orchestrator MUST NEVER implement plugin code directly. ALL stages 1-4 MUST be delegated via Task tool.
 </enforcement_reminder>
 
 ### Implementation
@@ -405,7 +405,7 @@ if [ -f "plugins/${PLUGIN_NAME}/.continue-here.md" ]; then
 else
     # Starting fresh after planning
     CURRENT_STAGE=2
-    echo "Starting implementation at Stage 2"
+    echo "Starting implementation at Stage 1"
 fi
 ```
 
@@ -418,12 +418,12 @@ See `references/state-management.md` for `checkStagePreconditions()` function.
 
   1. Verify state integrity (verifyStateIntegrity) → BLOCK if corrupted
   2. Check preconditions → If failed, BLOCK with reason
-  3. **AUTOMATIC: Brief sync before Stage 2** → Update brief from mockup if needed
+  3. **AUTOMATIC: Brief sync before Stage 1** → Update brief from mockup if needed
   4. Route to subagent based on stage number:
-     - Stage 2 → foundation-shell-agent (single-pass, creates build system + parameters)
-     - Stage 3 → dsp-agent (phase-aware dispatch)
-     - Stage 4 → gui-agent (phase-aware dispatch)
-     - Stage 5 → validation-agent (single-pass or direct execution)
+     - Stage 1 → foundation-shell-agent (single-pass, creates build system + parameters)
+     - Stage 2 → dsp-agent (phase-aware dispatch)
+     - Stage 3 → gui-agent (phase-aware dispatch)
+     - Stage 4 → validation-agent (single-pass or direct execution)
   5. Pass contracts and Required Reading to subagent
   6. Wait for subagent completion
 
@@ -435,7 +435,7 @@ See `references/state-management.md` for `checkStagePreconditions()` function.
 For Stages 3-4 with complexity ≥3, use phase-aware dispatch to incrementally implement complex plugins.
 
 **When to use:**
-- Stage 3 (DSP) or 4 (GUI)
+- Stage 2 (DSP) or 4 (GUI)
 - Complexity score ≥3 (from plan.md)
 - plan.md contains phase markers (### Phase 3.X or ### Phase 4.X)
 
@@ -457,18 +457,18 @@ For detailed algorithm, pseudocode, and examples, see [references/phase-aware-di
 <creative_brief_sync enforcement_level="AUTOMATIC">
   **Purpose:** Ensure creative brief reflects finalized mockup before implementation begins.
 
-  **When:** BEFORE dispatching Stage 2 (foundation-shell-agent), IF mockup exists.
+  **When:** BEFORE dispatching Stage 1 (foundation-shell-agent), IF mockup exists.
 
   **Implementation:**
 
-  Before dispatching Stage 2:
+  Before dispatching Stage 1:
 
   1. **Check for finalized mockup:**
      ```bash
      if [ -d "plugins/${PLUGIN_NAME}/.ideas/mockups" ] && [ -f "plugins/${PLUGIN_NAME}/.ideas/parameter-spec.md" ]; then
        # Mockup finalized, proceed to step 2
      else
-       # No mockup or not finalized, skip sync and proceed to Stage 2
+       # No mockup or not finalized, skip sync and proceed to Stage 1
      fi
      ```
 
@@ -476,7 +476,7 @@ For detailed algorithm, pseudocode, and examples, see [references/phase-aware-di
      - Read .continue-here.md for `brief_updated_from_mockup` flag
      - IF flag == true AND mockup version matches:
        - Skip sync (already done during finalization)
-       - Proceed to Stage 2 dispatch
+       - Proceed to Stage 1 dispatch
      - ELSE:
        - Present info message:
          ```
@@ -510,7 +510,7 @@ For detailed algorithm, pseudocode, and examples, see [references/phase-aware-di
      ```
      ✓ Creative brief updated from mockup v${VERSION}
 
-     Contracts aligned. Proceeding to Stage 2 (Foundation)...
+     Contracts aligned. Proceeding to Stage 1 (Foundation)...
      ```
 
   **No user interaction required** - automatic sync replaces validation gate.
@@ -967,20 +967,20 @@ Choose (1-5): _
 
 - `/implement` command (after plugin-planning completes)
 - `context-resume` skill (when resuming implementation stages)
-- `/continue` command (for stages 2-5)
+- `/continue` command (for stages 1-4)
 
 **ALWAYS invokes (via Task tool):**
 
-- `foundation-shell-agent` subagent (Stage 2) - REQUIRED, never implement directly
-- `dsp-agent` subagent (Stage 3) - REQUIRED, never implement directly
-- `gui-agent` subagent (Stage 4) - REQUIRED, never implement directly
-- `validation-agent` subagent (Stage 5) - Optional, can run directly
+- `foundation-shell-agent` subagent (Stage 1) - REQUIRED, never implement directly
+- `dsp-agent` subagent (Stage 2) - REQUIRED, never implement directly
+- `gui-agent` subagent (Stage 3) - REQUIRED, never implement directly
+- `validation-agent` subagent (Stage 4) - Optional, can run directly
 
 **Also invokes:**
 
 - `build-automation` skill (build coordination across stages)
 - `plugin-testing` skill (validation after stages 4, 5, 6)
-- `plugin-lifecycle` skill (if user chooses to install after Stage 6)
+- `plugin-lifecycle` skill (if user chooses to install after Stage 4)
 
 **Reads (contracts from plugin-planning):**
 
@@ -992,8 +992,8 @@ Choose (1-5): _
 **Creates:**
 
 - `.continue-here.md` (handoff file for checkpoints)
-- `CHANGELOG.md` (Stage 6)
-- `Presets/` directory (Stage 6)
+- `CHANGELOG.md` (Stage 4)
+- `Presets/` directory (Stage 4)
 
 **Updates:**
 
@@ -1004,7 +1004,7 @@ Choose (1-5): _
 
 ## Error Handling
 
-**If contract files missing before Stage 2:**
+**If contract files missing before Stage 1:**
 Block and instruct user to run `/plan [PluginName]` to complete stages 0-1.
 
 **If build fails during subagent execution:**
@@ -1029,12 +1029,12 @@ Continue anyway, log warning.
 
 Workflow is successful when:
 
-- All subagents (stages 2-4) invoked successfully via Task tool
+- All subagents (stages 1-3) invoked successfully via Task tool
 - Plugin compiles without errors at each stage
 - All stages completed in sequence (2 → 3 → 4 → 5)
 - Decision menus presented after EVERY stage
 - Tests pass (if run)
-- PLUGINS.md updated to ✅ Working after Stage 5
+- PLUGINS.md updated to ✅ Working after Stage 4
 - Handoff file updated after each stage
 - Git history shows atomic commits for each stage
 
@@ -1089,7 +1089,7 @@ Summary of subagent and system component contracts:
 | dsp-agent | 3 | Contracts + Required Reading | JSON report | Implement audio processing |
 | gui-agent | 4 | Contracts + Required Reading | JSON report | Integrate WebView UI |
 | validation-agent | 1-4 | Stage-specific expectations | JSON report | Advisory validation |
-| build-automation | 2-5 | Plugin name + build config | Build result | Verify compilation |
+| build-automation | 1-4 | Plugin name + build config | Build result | Verify compilation |
 | context-resume | N/A | Handoff context | Workflow resumption | Resume from checkpoint |
 | /implement | N/A | Plugin name | Full workflow | Entry point command |
 
@@ -1117,7 +1117,7 @@ For detailed error patterns, recovery strategies, and reporting format, see [ref
 <execution_guidance>
   <critical_reminders>
     <reminder priority="CRITICAL" ref="subagent-dispatch-only">
-      NEVER implement stages 2-5 directly - MUST use Task tool to invoke subagents
+      NEVER implement stages 1-4 directly - MUST use Task tool to invoke subagents
     </reminder>
 
     <reminder priority="CRITICAL" ref="stage-completion-checkpoint">
@@ -1141,7 +1141,7 @@ For detailed error patterns, recovery strategies, and reporting format, see [ref
     When executing this skill:
     1. Read contracts (architecture.md, plan.md) before starting
     2. Verify preconditions - block if contracts missing
-    3. Use Task tool for ALL stages 2-5 - no exceptions
+    3. Use Task tool for ALL stages 1-4 - no exceptions
     4. Stage reference files contain subagent prompts, not direct implementation instructions
     5. Decision menus use inline numbered lists, not AskUserQuestion tool
     6. Handoff files preserve orchestration state across sessions
@@ -1160,7 +1160,7 @@ For detailed error patterns, recovery strategies, and reporting format, see [ref
       ❌ Sending "Implement ALL phases" to subagent for Stages 4-5
       ✓ ALWAYS detect phases in plan.md and loop through them one at a time
 
-      This error caused DrumRoulette Stage 5 to fail with compilation errors.
+      This error caused DrumRoulette Stage 4 to fail with compilation errors.
       Phase-aware dispatch (lines 270-578) is MANDATORY for complex plugins.
     </anti_pattern>
 

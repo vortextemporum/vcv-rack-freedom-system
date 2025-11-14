@@ -54,7 +54,7 @@ ELSE IF status is 💡 Ideated or not found:
 - Not found (new plugin)
 
 **Blocking statuses:**
-- 🚧 Stage 2 or higher
+- 🚧 Stage 1 or higher
 - ✅ Complete
 
 ### Check 3: Existing Contract Detection

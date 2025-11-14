@@ -249,7 +249,7 @@ Available plugins:
 
 **In development (Status: 🚧):**
 ```
-❌ Cannot destroy plugin in development (Status: 🚧 Stage 4)
+❌ Cannot destroy plugin in development (Status: 🚧 Stage 3)
 
 Complete the workflow first:
 - /continue [PluginName] - Resume and finish
