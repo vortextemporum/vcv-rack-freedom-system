@@ -2,6 +2,7 @@
 # Generated: 2025-11-14
 # Plugin: PadForge
 # Version: v2 (fixing v1 layout issues)
+finalized: true
 
 window:
   width: 400
