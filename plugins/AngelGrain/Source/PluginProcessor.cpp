@@ -101,9 +101,8 @@ void AngelGrainAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBl
     grainBuffer.prepare(monoSpec);
     grainBuffer.reset();
 
-    // Prepare dry/wet mixer
-    dryWetMixer.prepare(spec);
-    dryWetMixer.reset();
+    // Note: Using manual linear dry/wet mixing instead of DryWetMixer
+    // for more intuitive behavior at 50% (full dry + full wet)
 
     // Pre-calculate Hann window table
     for (int i = 0; i < windowTableSize; ++i)
@@ -206,23 +205,18 @@ void AngelGrainAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
     // Calculate Tukey window alpha for character control (0.1 to 1.0)
     float tukeyAlpha = 0.1f + (characterAmount * 0.9f);
 
-    // Set dry/wet mix
-    dryWetMixer.setWetMixProportion(mixValue);
-
     // Get mono input pointer
     const float* monoInput = buffer.getReadPointer(0);
 
     // Clear wet buffer
     wetBuffer.clear();
 
-    // Store dry signal in mixer (duplicate mono to stereo for dry path)
+    // Store dry signal for later mixing (duplicate mono to stereo)
     for (int i = 0; i < numSamples; ++i)
     {
         dryBuffer.setSample(0, i, monoInput[i]);
         dryBuffer.setSample(1, i, monoInput[i]);
     }
-    juce::dsp::AudioBlock<float> dryBlock(dryBuffer.getArrayOfWritePointers(), 2, static_cast<size_t>(numSamples));
-    dryWetMixer.pushDrySamples(dryBlock);
 
     // Process sample by sample
     for (int sample = 0; sample < numSamples; ++sample)
@@ -304,13 +298,21 @@ void AngelGrainAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
         wetBuffer.setSample(1, sample, rightOutput);
     }
 
-    // Mix dry and wet signals
-    juce::dsp::AudioBlock<float> wetBlock(wetBuffer.getArrayOfWritePointers(), 2, static_cast<size_t>(numSamples));
-    dryWetMixer.mixWetSamples(wetBlock);
+    // Linear dry/wet mix (full dry + scaled wet for 0-100%)
+    // At 0%: dry only, At 100%: wet only, At 50%: full dry + full wet
+    float dryGain = 1.0f - mixValue;  // 1.0 at 0%, 0.0 at 100%
+    float wetGain = mixValue;          // 0.0 at 0%, 1.0 at 100%
 
-    // Copy result to output buffer
-    buffer.copyFrom(0, 0, wetBuffer, 0, 0, numSamples);
-    buffer.copyFrom(1, 0, wetBuffer, 1, 0, numSamples);
+    for (int i = 0; i < numSamples; ++i)
+    {
+        float dryL = dryBuffer.getSample(0, i);
+        float dryR = dryBuffer.getSample(1, i);
+        float wetL = wetBuffer.getSample(0, i);
+        float wetR = wetBuffer.getSample(1, i);
+
+        buffer.setSample(0, i, dryL * dryGain + wetL * wetGain);
+        buffer.setSample(1, i, dryR * dryGain + wetR * wetGain);
+    }
 }
 
 juce::AudioProcessorEditor* AngelGrainAudioProcessor::createEditor()

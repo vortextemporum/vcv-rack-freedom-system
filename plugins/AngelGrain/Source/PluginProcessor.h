@@ -67,8 +67,7 @@ private:
     static constexpr int windowTableSize = 4096;
     std::array<float, windowTableSize> hannWindow;
 
-    // Dry/wet mixer
-    juce::dsp::DryWetMixer<float> dryWetMixer;
+    // Note: Using manual linear dry/wet mixing for intuitive 50% behavior
 
     // Random number generator
     juce::Random random;
