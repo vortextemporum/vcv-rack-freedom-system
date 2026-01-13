@@ -1,12 +1,12 @@
-# PLUGIN REGISTRY
+# MODULE REGISTRY
 
 ## State Legend
 
 - **💡 Ideated** - Creative brief exists, no implementation
 - **💡 Ideated (Draft Params)** - Creative brief + draft parameters, ready for parallel workflow
 - **🚧 Stage N** - In development (specific stage number)
-- **✅ Working** - Completed Stage 6, not installed
-- **📦 Installed** - Deployed to system folders
+- **✅ Working** - Completed all stages, not installed
+- **📦 Installed** - Deployed to VCV Rack plugins folder
 - **🐛 Has Issues** - Known problems (combines with other states)
 - **🗑️ Archived** - Deprecated
 
@@ -19,28 +19,15 @@
 
 - All plugin builds managed by `build-automation` skill
 - Build logs: `logs/[PluginName]/build_TIMESTAMP.log`
-- Installed plugins: `~/Library/Audio/Plug-Ins/VST3/` and `~/Library/Audio/Plug-Ins/Components/`
+- Installed plugins: `~/Documents/Rack2/plugins/` or `~/.Rack2/plugins/`
+- Plugin format: `.vcvplugin` (zip containing plugin directory)
 
-## Plugin Registry
+## Module Registry
 
-| Plugin Name | Status | Version | Type | Last Updated |
-|-------------|--------|---------|------|--------------|
-| GainKnob | 📦 Installed | 1.2.3 | Audio Effect (Utility) | 2025-11-10 |
-| TapeAge | 📦 Installed | 1.1.1 | Audio Effect | 2025-11-15 |
-| ClapMachine | 💡 Ideated | - | - | 2025-11-10 |
-| DriveVerb | 📦 Installed | 1.0.2 | Audio Effect (Reverb) | 2025-11-12 |
-| FlutterVerb | 📦 Installed | 1.0.3 | Audio Effect (Reverb) | 2025-11-12 |
-| LushVerb | 💡 Ideated | - | Audio Effect (Reverb) | 2025-11-12 |
-| OrganicHats | 📦 Installed | 1.0.0 | Synth (Instrument) | 2025-11-12 |
-| DrumRoulette | 📦 Installed | 1.0.0 | Instrument (Drum Sampler) | 2025-11-12 |
-| Scatter | ✅ Working | 1.0.0 | Audio Effect (Granular Delay) | 2025-11-14 |
-| AutoClip | 📦 Installed | 1.0.1 | Audio Effect (Hard Clipper) | 2025-11-15 |
-| MinimalKick | 🚧 Stage 5 | - | Synth | 2025-11-13 |
-| Drum808 | 📦 Installed | 1.0.0 | Synth (Drum Instrument) | 2025-11-13 |
-| LushPad | 📦 Installed | 1.0.0 | Synth (Instrument) | 2025-11-13 |
-| Words | 💡 Ideated | - | Utility (MIDI Sequencer) | 2025-11-13 |
-| PadForge | 💡 Ideated | - | Synth (Instrument) | 2025-11-14 |
-| AngelGrain | 📦 Installed | 1.0.0 | Audio Effect (Granular Delay) | 2025-11-19 |
+| Plugin/Module | Status | Version | Type | Last Updated |
+|---------------|--------|---------|------|--------------|
+| Genesis/GenesisMono | 🚧 Stage 0 | - | Oscillator | 2026-01-13 |
+| Genesis/GenesisPoly | 🚧 Stage 0 | - | Oscillator (Polyphonic) | 2026-01-13 |
 
 **For detailed plugin information (lifecycle timeline, known issues, parameters, etc.), see:**
 `plugins/[PluginName]/NOTES.md`
@@ -50,18 +37,24 @@
 When adding new plugins to this registry, use this format:
 
 ```markdown
-| [PluginName] | [Emoji] [State] | [X.Y.Z or -] | [Type or -] | YYYY-MM-DD |
+| [PluginSlug]/[ModuleSlug] | [Emoji] [State] | [X.Y.Z or -] | [Type or -] | YYYY-MM-DD |
 ```
 
-Create corresponding `plugins/[PluginName]/NOTES.md` with full details:
+Create corresponding `plugins/[PluginSlug]/NOTES.md` with full details:
 
 ```markdown
-# [PluginName] Notes
+# [PluginSlug] Notes
 
 ## Status
 - **Current Status:** [emoji] [State Name]
 - **Version:** [X.Y.Z or N/A]
-- **Type:** [Type]
+- **Type:** [Module Type]
+
+## Modules
+
+| Module | Description | Tags |
+|--------|-------------|------|
+| [ModuleSlug] | [Description] | [Tags] |
 
 ## Lifecycle Timeline
 
@@ -75,5 +68,25 @@ Create corresponding `plugins/[PluginName]/NOTES.md` with full details:
 
 ## Additional Notes
 
-[Any other relevant information - description, parameters, DSP, GUI, validation, formats, installation locations, use cases, etc.]
+[Any other relevant information - description, parameters, DSP, panel design, validation, installation locations, use cases, etc.]
 ```
+
+## Module Type Tags
+
+VCV Rack modules are categorized by tags in plugin.json:
+
+**Sound Sources:**
+- Oscillator, VCO, LFO, Clock, Random/Noise
+
+**Sound Processors:**
+- Filter, VCF, Equalizer, Distortion, Dynamics, Compressor
+- Delay, Reverb, Flanger, Phaser, Chorus
+
+**Control:**
+- Envelope, VCA, Mixer, Utility, Attenuator, Sample and Hold
+
+**Sequencing:**
+- Sequencer, MIDI, Arpeggiator
+
+**Other:**
+- Polyphonic, Quad, Dual, Stereo, External, Recording, Visual
