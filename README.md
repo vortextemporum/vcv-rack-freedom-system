@@ -2,7 +2,8 @@
 
 An AI-assisted VCV Rack 2 module development system that enables conversational creation of professional modular synthesizer modules for VCV Rack. Design and build custom DSP modules through natural dialogue with Claude Code—no programming experience required.
 
-**Created by [TÂCHES](https://youtube.com/tachesteaches)**
+**Originally Created by [TÂCHES](https://youtube.com/tachesteaches)**
+**Forked and ported by [BERK aka Princess Camel](https://berkozdemir.com/)**
 
 ## Why This Exists
 
