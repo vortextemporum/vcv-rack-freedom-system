@@ -1,13 +1,13 @@
 ---
 name: plugin-planning
-description: Orchestrates Stage 0 research and planning for JUCE plugins - creates architecture.md and plan.md contracts through subagent delegation. Use when creative brief exists and plugin needs DSP architecture specification, complexity assessment, or implementation planning. Invoke via /plan command, natural language (plan architecture, research DSP), or as first implementation step.
+description: Orchestrates Stage 0 research and planning for VCV Rack modules - creates architecture.md and plan.md contracts through subagent delegation. Use when creative brief exists and module needs DSP architecture specification, complexity assessment, or implementation planning. Invoke via /plan command, natural language (plan architecture, research DSP), or as first implementation step.
 allowed-tools:
   - Read # For contracts and references
   - Write # For architecture.md, plan.md
   - Edit # For state updates (PLUGINS.md, .continue-here.md)
   - Bash # For git commits, precondition checks
   - Task # For subagent delegation
-  - WebSearch # For professional plugin research
+  - WebSearch # For professional module research
   - Grep # For searching existing implementations
   - Glob # For finding reference files
 preconditions:
@@ -31,7 +31,7 @@ preconditions:
 Quick validation:
 1. creative-brief.md must exist at `plugins/[Name]/.ideas/`
 2. Parameter specification required (parameter-spec.md OR parameter-spec-draft.md)
-3. Plugin status must be ≤ Stage 0 (not already in implementation)
+3. Module status must be ≤ Stage 0 (not already in implementation)
 4. Detect existing contracts (architecture.md, plan.md) for resume logic
 
 If all preconditions pass → proceed to Stage 0

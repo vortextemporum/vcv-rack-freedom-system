@@ -1,0 +1,27 @@
+{
+  "slug": "DrumRoulette",
+  "name": "DrumRoulette",
+  "version": "2.0.0",
+  "license": "proprietary",
+  "brand": "GLIX STUDIO (BETA)",
+  "author": "GLIX STUDIO",
+  "authorEmail": "",
+  "authorUrl": "",
+  "pluginUrl": "",
+  "manualUrl": "",
+  "sourceUrl": "",
+  "donateUrl": "",
+  "changelogUrl": "",
+  "modules": [
+    {
+      "slug": "DrumRoulette",
+      "name": "Drum Roulette",
+      "description": "8-voice synthesized drum kit with randomization",
+      "tags": [
+        "Drum",
+        "Synth Voice",
+        "Random"
+      ]
+    }
+  ]
+}

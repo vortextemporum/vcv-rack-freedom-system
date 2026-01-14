@@ -1,0 +1,25 @@
+{
+  "slug": "GainKnob",
+  "name": "GainKnob",
+  "version": "2.0.0",
+  "license": "GPL-3.0-or-later",
+  "brand": "GLIX STUDIO (BETA)",
+  "author": "GLIX STUDIO",
+  "authorEmail": "",
+  "pluginUrl": "",
+  "sourceUrl": "",
+  "manualUrl": "",
+  "modules": [
+    {
+      "slug": "GainKnob",
+      "name": "Gain Knob",
+      "description": "Stereo gain, pan, and DJ-style filter utility module",
+      "tags": [
+        "Utility",
+        "Panning",
+        "Filter",
+        "VCA"
+      ]
+    }
+  ]
+}

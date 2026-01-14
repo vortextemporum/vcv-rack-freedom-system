@@ -1,0 +1,24 @@
+{
+  "slug": "Genesis",
+  "name": "Genesis",
+  "version": "2.0.0",
+  "license": "GPL-3.0-or-later",
+  "brand": "GLIX STUDIO (beta)",
+  "author": "GLIX STUDIO",
+  "authorEmail": "info@pluginfreedom.com",
+  "sourceUrl": "https://github.com/pluginfreedom/Genesis",
+  "modules": [
+    {
+      "slug": "GenesisMono",
+      "name": "Genesis Mono",
+      "description": "Monophonic 16-bit digital oscillator with FM synthesis and bit crushing (8 HP)",
+      "tags": ["Oscillator", "Digital"]
+    },
+    {
+      "slug": "GenesisPoly",
+      "name": "Genesis Poly",
+      "description": "Polyphonic 16-bit digital oscillator with FM synthesis and bit crushing (10 HP, 16 voices)",
+      "tags": ["Oscillator", "Digital", "Polyphonic"]
+    }
+  ]
+}

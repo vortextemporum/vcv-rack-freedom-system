@@ -1,0 +1,27 @@
+{
+  "slug": "TapeAge",
+  "name": "TapeAge",
+  "version": "2.0.0",
+  "license": "proprietary",
+  "brand": "GLIX STUDIO (BETA)",
+  "author": "GLIX STUDIO",
+  "authorEmail": "",
+  "authorUrl": "",
+  "pluginUrl": "",
+  "manualUrl": "",
+  "sourceUrl": "",
+  "donateUrl": "",
+  "changelogUrl": "",
+  "modules": [
+    {
+      "slug": "TapeAge",
+      "name": "Tape Age",
+      "description": "Vintage tape emulation with saturation, wow/flutter, and aging effects",
+      "tags": [
+        "Effect",
+        "Distortion",
+        "Dynamics"
+      ]
+    }
+  ]
+}

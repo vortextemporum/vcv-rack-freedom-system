@@ -1,41 +1,42 @@
-# Plugin Freedom System
+# Module Freedom System
 
-An AI-assisted JUCE plugin development system that enables conversational creation of professional VST3 and AU audio plugins for macOS. Design and build custom audio processors through natural dialogue with Claude Code—no programming experience required.
+An AI-assisted VCV Rack 2 module development system that enables conversational creation of professional modular synthesizer modules for VCV Rack. Design and build custom DSP modules through natural dialogue with Claude Code—no programming experience required.
 
 **Created by [TÂCHES](https://youtube.com/tachesteaches)**
 
-[![Watch the Demo](https://img.shields.io/badge/▶_Watch_Demo-1.45hr_walkthrough-red?style=for-the-badge&logo=youtube)](https://youtu.be/RsZB1K8oH0c)
-
 ## Why This Exists
 
-Traditional plugin development demands deep expertise in C++, DSP algorithms, and the JUCE framework. This barrier keeps plugin creation restricted to experienced programmers, leaving musicians, producers, and sound designers dependent on commercial tools.
+Traditional VCV Rack module development demands deep expertise in C++, DSP algorithms, SVG panel design, and the Rack API. This barrier keeps module creation restricted to experienced programmers, leaving musicians, modular enthusiasts, and sound designers dependent on existing modules.
 
-The Plugin Freedom System removes that barrier entirely.
+The Module Freedom System removes that barrier entirely.
 
-By enabling conversational plugin development, this system:
+By enabling conversational module development, this system:
 
 - **Democratizes creation**: Anyone with an idea can build it, regardless of technical background
-- **Prioritizes creativity**: Focus on sonic goals and UX, not implementation details
-- **Accelerates iteration**: Ideas become working plugins in hours, not weeks
-- **Removes gatekeeping**: Opens audio software development to the people who actually use these tools
+- **Prioritizes creativity**: Focus on sonic goals and functionality, not implementation details
+- **Accelerates iteration**: Ideas become working modules in hours, not weeks
+- **Removes gatekeeping**: Opens modular synthesis development to the people who actually use these tools
 
 ## What You Can Build
 
-- **Effects**: Reverbs, delays, distortion, modulation, filters, dynamics processors
-- **Synthesizers**: Subtractive, FM, wavetable, granular, additive
-- **Utilities**: Analyzers, meters, routing tools, MIDI processors
+- **Oscillators**: Analog-style VCOs, wavetable, FM, additive, granular
+- **Filters**: SVF, ladder, formant, comb filters
+- **Modulators**: LFOs, envelopes, sequencers, S&H, slew limiters
+- **Effects**: Delays, reverbs, distortion, waveshapers, phasers
+- **Utilities**: VCAs, mixers, mults, logic, quantizers, clock dividers
+- **Sequencers**: Step sequencers, Euclidean patterns, generative systems
 - **Experimental**: Custom DSP algorithms, hybrid processors, generative tools
 
-All plugins compile to native VST3/AU formats compatible with any DAW (Ableton, Logic, Reaper, etc.).
+All modules compile to native VCV Rack 2 format (.vcvplugin) for macOS, compatible with VCV Rack 2.6.x.
 
 ## How It Works
 
 ### 1. Dream (`/dream`)
 
-Brainstorm your plugin concept through conversation:
-- **Creative brief** - Vision, sonic goals, UX principles
-- **Parameter specification** - All controls, ranges, and mappings
-- **UI mockups** - Visual design and layout
+Brainstorm your module concept through conversation:
+- **Creative brief** - Vision, sonic goals, functionality
+- **Parameter specification** - All controls, ports, ranges
+- **Panel mockups** - Visual design and layout (SVG-based)
 
 ### 2. Plan (`/plan`)
 
@@ -45,59 +46,56 @@ Research and design the technical architecture:
 
 ### 3. Implement (`/implement`)
 
-Transform your specifications into a fully functional plugin through an automated workflow:
+Transform your specifications into a fully functional module through an automated workflow:
 
-- **Build System Ready** (Stage 1): Project structure, CMake configuration, and all parameters implemented - validated automatically
-- **Audio Engine Working** (Stage 2): DSP algorithms and audio processing complete - validated automatically
-- **UI Integrated** (Stage 3): WebView interface connected to audio engine (or skip for headless plugins) - validated automatically with runtime tests
-- After Stage 3 validation passes: Plugin complete, ready to install
+- **Build System Ready** (Stage 1): Plugin/module structure, Makefile, and all parameters implemented - validated automatically
+- **DSP Engine Working** (Stage 2): Audio processing algorithms complete - validated automatically
+- **Panel Integrated** (Stage 3): SVG panel with widgets and components - validated automatically
+- After Stage 3 validation passes: Module complete, ready to install
 
 ### 4. Deploy & Iterate
 
-- `/install-plugin` - Install to system folders for DAW use
+- `/install-plugin` - Install to VCV Rack plugins folder
 - `/test` - Run automated validation suite
 - `/improve` - Add features or fix bugs (with regression testing)
 - `/reconcile` - Reconcile state between planning and implementation
 
-## Modern Interface Design
+## Panel Design
 
-Plugins use web-based interfaces (HTML/CSS/JS) rendered via JUCE's WebView instead of traditional GUI frameworks. This enables:
+Modules use SVG-based panels designed according to VCV Rack conventions:
 
-- **Rapid prototyping**: See design changes instantly without rebuilding
-- **Modern aesthetics**: Leverage contemporary web design patterns and animations
-- **Interactive mockups**: Test and refine interfaces before implementation
-- **Familiar tools**: Use web technologies many creators already understand
-- **Responsive layouts**: Easily adapt UIs to different sizes and contexts
+- **Eurorack standards**: 1 HP = 5.08mm = 15px (at 75 DPI)
+- **Standard heights**: 128.5mm = 380px panel height
+- **Component layer**: Hidden layer with colored circles marking widget positions
+- **Text-free graphics**: All text converted to paths for compatibility
 
-### GUI-Optional Workflow
+### Component Markers
 
-Plugins can skip custom UI and ship as "headless" plugins using DAW-provided controls:
-
-- **Faster iteration**: Test DSP immediately without waiting for UI implementation
-- **Progressive enhancement**: Add custom UI later via `/improve`
-- **Flexibility**: Decide when/if to build visual interface
-- **Zero overhead**: Smaller binary, faster compile, all parameters exposed to DAW
+| Component Type | Circle Color | ID Format |
+|---------------|--------------|-----------|
+| Param (knob) | Red `#FF0000` | `param_NAME` |
+| Input port | Green `#00FF00` | `input_NAME` |
+| Output port | Blue `#0000FF` | `output_NAME` |
+| Light | Magenta `#FF00FF` | `light_NAME` |
 
 ## Key Features
 
 ### Automated Build Pipeline
 
-7-phase build system (`scripts/build-and-install.sh`) handles validation, compilation, installation, and verification. No manual CMake commands or Xcode configuration required.
+Build system handles SDK configuration, compilation, and installation. Uses the Rack SDK's Makefile system with proper architecture detection (Intel/Apple Silicon).
 
 ### Quality Assurance
 
-- Automatic validation after each stage (compile-time + runtime tests)
-- validation-agent runs pluginval automatically (VST3/AU validation)
-- Validation is blocking - errors must be fixed before progressing
-- Regression testing on modifications
-- Backup verification before destructive operations
+- Automatic validation after each stage
 - Build failure detection and troubleshooting
+- Real-time safety verification (no allocations in process())
+- Backup verification before destructive operations
 
 ### Knowledge Base
 
-Dual-indexed troubleshooting database (`troubleshooting/`) captures solutions to build failures, runtime issues, GUI problems, and API misuse. The system learns from every problem encountered.
+Dual-indexed troubleshooting database (`troubleshooting/`) captures solutions to build failures, runtime issues, and API misuse. The system learns from every problem encountered.
 
-**Required Reading** (`juce8-critical-patterns.md`) automatically prevents repeat mistakes by injecting proven patterns into all subagent contexts.
+**Required Reading** (`vcv-rack-critical-patterns.md`) automatically prevents repeat mistakes by injecting proven patterns into all subagent contexts.
 
 ### Graduated Research Protocol
 
@@ -123,8 +121,8 @@ Dual-indexed troubleshooting database (`troubleshooting/`) captures solutions to
 
 ### Lifecycle Management
 
-- `/install-plugin` - Deploy to system folders
-- `/uninstall` - Remove binaries (keep source)
+- `/install-plugin` - Deploy to VCV Rack plugins folder
+- `/uninstall` - Remove plugin (keep source)
 - `/reset-to-ideation` - Roll back to concept stage
 - `/destroy` - Complete removal with verified backup
 - `/clean` - Interactive cleanup menu
@@ -133,13 +131,13 @@ Dual-indexed troubleshooting database (`troubleshooting/`) captures solutions to
 
 ### Contracts (Single Source of Truth)
 
-Every plugin has immutable contracts in `plugins/[Name]/.ideas/`:
+Every module has immutable contracts in `plugins/[Name]/.ideas/`:
 
-- `creative-brief.md` - Vision, sonic goals, UX principles
+- `creative-brief.md` - Vision, sonic goals, functionality
 - `parameter-spec.md` - Complete parameter definitions
 - `architecture.md` - DSP design and signal flow
 - `plan.md` - Implementation strategy
-- `ui-mockups/` - Visual design references
+- `panel-mockups/` - SVG design references
 
 **Zero drift**: All stages reference the same specs. No "telephone game" across workflows.
 
@@ -147,10 +145,10 @@ Every plugin has immutable contracts in `plugins/[Name]/.ideas/`:
 
 Each implementation stage runs in a fresh subagent context:
 
-- `foundation-shell-agent` (Stage 1) - Project structure and parameter management
+- `foundation-shell-agent` (Stage 1) - Plugin structure and parameter management
 - `dsp-agent` (Stage 2) - Audio processing
-- `gui-agent` (Stage 3) - WebView UI
-- `validation-agent` (after each stage) - Automatic validation with runtime tests
+- `panel-agent` (Stage 3) - SVG panel and widgets
+- `validation-agent` (after each stage) - Automatic validation
 
 **No context accumulation**: Clean separation prevents cross-contamination and keeps token usage minimal.
 
@@ -180,10 +178,10 @@ At every completion point:
 
 ### Prerequisites
 
-- macOS (Sonoma or later recommended)
+- macOS (Catalina 10.15 or later)
 - Claude Code CLI
 
-All other dependencies (Xcode Command Line Tools, JUCE, CMake, Python, pluginval) can be validated and installed via `/setup`.
+All other dependencies (Xcode Command Line Tools, Rack SDK, etc.) can be validated and installed via `/setup`.
 
 ### First-Time Setup
 
@@ -193,19 +191,19 @@ All other dependencies (Xcode Command Line Tools, JUCE, CMake, Python, pluginval
 
 # The setup wizard will:
 # - Detect your platform and installed tools
-# - Offer to install missing dependencies automatically or guide manual installation
+# - Check for Rack SDK (download if missing)
 # - Save configuration for build scripts
 # - Generate a system report
 ```
 
-### Create Your First Plugin
+### Create Your First Module
 
 ```bash
 # 1. Dream the concept
 /dream
 
-# Brainstorm your plugin idea through conversation
-# Creates: creative brief, parameter spec, UI mockups
+# Brainstorm your module idea through conversation
+# Creates: creative brief, parameter spec, panel mockups
 
 # 2. Plan the architecture
 /plan
@@ -216,15 +214,15 @@ All other dependencies (Xcode Command Line Tools, JUCE, CMake, Python, pluginval
 # 3. Build it
 /implement
 
-# Automated workflow builds the plugin
+# Automated workflow builds the module
 
 # 4. Install and test
 /install-plugin YourPluginName
 
-# Plugin now available in your DAW
+# Module now available in VCV Rack
 ```
 
-### Improve an Existing Plugin
+### Improve an Existing Module
 
 ```bash
 # Fix bugs or add features
@@ -249,16 +247,16 @@ All other dependencies (Xcode Command Line Tools, JUCE, CMake, Python, pluginval
 
 - `/setup` - Validate and configure system dependencies (first-time setup)
   - Detects platform, checks for required tools
-  - Offers automated installation or guided manual setup
+  - Verifies Rack SDK installation
   - Saves configuration to `.claude/system-config.json`
 
 ### Development Workflow
 
-- `/dream` - Brainstorm concept, create creative brief, parameter spec, and UI mockups
+- `/dream` - Brainstorm concept, create creative brief, parameter spec, and panel mockups
 - `/plan` - Research and design DSP architecture and implementation strategy
-- `/implement [Name]` - Build plugin through automated 3-stage workflow with continuous validation
+- `/implement [Name]` - Build module through automated 3-stage workflow with continuous validation
 - `/continue [Name]` - Resume paused workflow
-- `/improve [Name]` - Modify completed plugin (with regression testing)
+- `/improve [Name]` - Modify completed module (with regression testing)
 
 ### Quality Assurance
 
@@ -269,9 +267,8 @@ All other dependencies (Xcode Command Line Tools, JUCE, CMake, Python, pluginval
 
 ### Deployment
 
-- `/install-plugin [Name]` - Install to system folders
-- `/uninstall [Name]` - Remove binaries (keep source)
-- `/show-standalone [Name]` - Preview UI in standalone mode
+- `/install-plugin [Name]` - Install to VCV Rack plugins folder
+- `/uninstall [Name]` - Remove plugin (keep source)
 
 ### Lifecycle
 
@@ -284,7 +281,7 @@ All other dependencies (Xcode Command Line Tools, JUCE, CMake, Python, pluginval
 ## Project Structure
 
 ```
-plugin-freedom-system/
+module-freedom-system/
 ├── plugins/                          # Plugin source code
 │   └── [PluginName]/
 │       ├── .ideas/                   # Contracts (immutable during impl)
@@ -292,17 +289,22 @@ plugin-freedom-system/
 │       │   ├── parameter-spec.md
 │       │   ├── architecture.md
 │       │   ├── plan.md
-│       │   └── ui-mockups/
-│       ├── Source/                   # C++ implementation
-│       ├── WebUI/                    # HTML/CSS/JS interface
-│       └── CMakeLists.txt
+│       │   └── panel-mockups/
+│       ├── src/                      # C++ implementation
+│       │   ├── plugin.cpp
+│       │   ├── plugin.hpp
+│       │   └── [ModuleName].cpp
+│       ├── res/                      # SVG panels
+│       │   └── [ModuleName].svg
+│       ├── Makefile
+│       └── plugin.json               # Plugin manifest
 ├── .claude/
 │   ├── skills/                       # Specialized workflows
-│   │   ├── plugin-workflow/          # Orchestrator (Build → DSP → GUI → Validation)
-│   │   ├── plugin-planning/          # Research & design (Research Complete)
+│   │   ├── plugin-workflow/          # Orchestrator (Build → DSP → Panel → Validation)
+│   │   ├── plugin-planning/          # Research & design
 │   │   ├── plugin-ideation/          # Concept brainstorming
 │   │   ├── plugin-improve/           # Versioned modifications
-│   │   ├── ui-mockup/                # Visual design system
+│   │   ├── panel-mockup/             # SVG panel design system
 │   │   ├── plugin-testing/           # Validation suite
 │   │   ├── plugin-lifecycle/         # Install/uninstall/destroy
 │   │   ├── deep-research/            # 3-level investigation
@@ -311,33 +313,49 @@ plugin-freedom-system/
 │   ├── agents/                       # Implementation subagents
 │   │   ├── research-planning-agent/  # Research Complete (Stage 0)
 │   │   ├── foundation-shell-agent/   # Build System Ready (Stage 1)
-│   │   ├── dsp-agent/                # Audio Engine Working (Stage 2)
-│   │   ├── gui-agent/                # UI Integrated (Stage 3)
-│   │   ├── validation-agent/         # Automatic validation (after each stage)
-│   │   ├── ui-design-agent/          # UI mockup design
-│   │   ├── ui-finalization-agent/    # UI implementation scaffolding
+│   │   ├── dsp-agent/                # DSP Engine Working (Stage 2)
+│   │   ├── panel-agent/              # Panel Integrated (Stage 3)
+│   │   ├── validation-agent/         # Automatic validation
 │   │   └── troubleshoot-agent/       # Build failures
 │   ├── commands/                     # Slash command prompts
 │   └── hooks/                        # Validation gates
 ├── scripts/
-│   ├── build-and-install.sh          # 7-phase build pipeline
+│   ├── build-and-install.sh          # Build pipeline
 │   └── verify-backup.sh              # Backup integrity checks
 ├── troubleshooting/                  # Dual-indexed knowledge base
 │   ├── build-failures/
 │   ├── runtime-issues/
-│   ├── gui-issues/
-│   ├── dsp-issues/
 │   └── patterns/
-│       └── juce8-critical-patterns.md  # Required Reading
+│       └── vcv-rack-critical-patterns.md  # Required Reading
 ├── PLUGINS.md                        # Plugin registry
 └── .continue-here.md                 # Active workflow state
 ```
 
+## Voltage Standards
+
+VCV Rack uses specific voltage conventions:
+
+| Signal Type | Voltage Range | Notes |
+|-------------|---------------|-------|
+| **Audio** | ±5V | 10Vpp standard |
+| **Unipolar CV** | 0V to +10V | LFOs, envelopes |
+| **Bipolar CV** | ±5V | Modulation sources |
+| **1V/octave** | Any voltage | 1V = 1 octave, 0V = C4 (261.6Hz) |
+| **Gates** | 0V (off) / +10V (on) | Binary on/off |
+| **Triggers** | +10V pulse, 1ms | Use `dsp::PulseGenerator` |
+
+## Polyphony
+
+VCV Rack supports up to **16 polyphonic channels** per cable. Modules can:
+- Read channel count from inputs: `input.getChannels()`
+- Set output channel count: `output.setChannels(n)`
+- Use `getPolyVoltage(c)` for automatic mono-to-poly handling
+
 ## Philosophy
 
-This system treats plugin development as a **creative conversation**, not a coding task.
+This system treats module development as a **creative conversation**, not a coding task.
 
-You describe the sound, behavior, and appearance you want. The system handles the technical complexity—DSP implementation, parameter management, UI rendering, build configuration, validation, deployment.
+You describe the sound, behavior, and appearance you want. The system handles the technical complexity—DSP implementation, parameter management, panel layout, build configuration, validation, deployment.
 
 **Focus on what matters**: Creating tools that serve your music.
 
@@ -354,7 +372,6 @@ Build → Test → Find Issue → Research → Improve → Document → Validate
 - **deep-research** finds solutions (graduated 3-level protocol)
 - **plugin-improve** applies changes (with regression testing)
 - **troubleshooting-docs** captures knowledge (dual-indexed for fast lookup)
-- **ui-mockup finalization** auto-updates brief (treats mockup as source of truth)
 - **plugin-lifecycle** manages deployment (cache clearing, verification)
 - **Required Reading** prevents repeat mistakes (auto-injected into subagents)
 
@@ -368,7 +385,7 @@ Every problem encountered becomes institutional knowledge. The system learns and
 - ✓ **Phase 3**: Implementation Subagents
 - ✓ **Phase 4**: Build & Troubleshooting System
 - ✓ **Phase 5**: Validation System
-- ✓ **Phase 6**: WebView UI System
+- ✓ **Phase 6**: SVG Panel System
 - ✓ **Phase 7**: Polish & Enhancement
 
 **System status**: Production ready.
@@ -378,28 +395,26 @@ Every problem encountered becomes institutional knowledge. The system learns and
 ### Software
 
 **Required:**
-- macOS 13+ (Sonoma recommended)
+- macOS 10.15+ (Catalina or later)
 - Claude Code CLI
 
 **Dependencies (validated/installed via `/setup`):**
 - Xcode Command Line Tools (`xcode-select --install`)
-- JUCE 8.0.0+ (audio plugin framework)
-- Python 3.8+ (build scripts)
-- CMake 3.15+ (build system)
-- pluginval (plugin validation tool)
+- VCV Rack SDK 2.x (from https://vcvrack.com/downloads/)
+- Homebrew (for additional tools)
 - Git
 
 ### Hardware
 
 - Apple Silicon or Intel Mac
 - 8GB RAM minimum (16GB recommended)
-- 2GB free disk space per plugin
+- 500MB free disk space per plugin
 
 ### Knowledge
 
 - **Zero programming required**
-- Basic understanding of audio plugin concepts (parameters, presets, DAW usage)
-- Ability to describe sonic goals and UX preferences
+- Basic understanding of modular synthesis concepts (CV, gates, audio signals)
+- Ability to describe sonic goals and functionality preferences
 
 ## Contributing
 
@@ -413,7 +428,7 @@ MIT - Use freely, modify as needed, share what you learn.
 
 Built with:
 
-- [JUCE](https://juce.com/) - Cross-platform audio application framework
+- [VCV Rack](https://vcvrack.com/) - Open-source virtual modular synthesizer
 - [Claude Code](https://claude.com/claude-code) - AI-assisted development environment
 - [Anthropic](https://anthropic.com/) - Claude AI models
 

@@ -2,7 +2,7 @@
 
 ---
 name: build-automation
-description: Orchestrates plugin builds and installation via build script with comprehensive failure handling. Use when build or compile is needed, build fails, compilation errors occur, or during plugin installation. Invoked by plugin-workflow, plugin-improve, and plugin-lifecycle skills.
+description: Orchestrates module builds and installation via build script with comprehensive failure handling. Use when build or compile is needed, build fails, compilation errors occur, or during module installation. Invoked by plugin-workflow, plugin-improve, and plugin-lifecycle skills.
 ---
 
 <!--
@@ -32,13 +32,13 @@ This skill succeeds when:
 6. Control returned to invoking skill
 
 This skill fails when:
-- Plugin directory doesn't exist
+- Module directory doesn't exist
 - Build script not found or not executable
 - User chooses "Wait" and doesn't resume (partial success - workflow paused intentionally)
 
 ## Purpose
 
-Orchestrates plugin builds via `scripts/build-and-install.sh` with comprehensive failure handling.
+Orchestrates module builds via `scripts/build-and-install.sh` with comprehensive failure handling.
 
 **Invokers:** plugin-workflow (Stages 2-5), plugin-improve (Phase 7), plugin-lifecycle (verification)
 **Invokes:** build script, troubleshooter agent (on failure, user option 1)
@@ -55,7 +55,7 @@ When invoked, this skill receives context via invocation parameters:
 
 ```json
 {
-  "plugin_name": "PluginName",
+  "plugin_name": "ModuleName",
   "stage": 0 | 2 | 3 | 4 | 5 | null,  // Stage numbers: 0=Planning, 2=Foundation, 3=DSP, 4=GUI, 5=Validation
   "invoker": "plugin-workflow" | "plugin-improve" | "plugin-lifecycle" | "manual",
   "build_flags": ["--no-install"] | ["--dry-run"] | []
@@ -68,7 +68,7 @@ When invoked, this skill receives context via invocation parameters:
 - Determines build flags, success menu, and return behavior
 
 **Manual invocation detection:**
-- When `invoker: "manual"` (user says "build PluginName" directly without workflow context)
+- When `invoker: "manual"` (user says "build ModuleName" directly without workflow context)
 - Prompt: "Use --dry-run to preview build commands? (y/n)"
 - No stage-specific success menu (generic completion message only)
 
@@ -94,9 +94,9 @@ Build Progress:
 
 ### 1. Input Validation
 
-- Verify plugin name provided
-- Check plugin directory exists: `test -d "plugins/$PLUGIN_NAME"`
-- Validate CMakeLists.txt present: `test -f "plugins/$PLUGIN_NAME/CMakeLists.txt"`
+- Verify module name provided
+- Check module directory exists: `test -d "plugins/$MODULE_NAME"`
+- Validate Makefile present: `test -f "plugins/$MODULE_NAME/Makefile"`
 
 ### 2. Determine Build Flags
 
@@ -112,7 +112,7 @@ Context-aware flag selection:
 Execute build script with appropriate flags:
 
 ```bash
-./scripts/build-and-install.sh [PluginName] [flags]
+./scripts/build-and-install.sh [ModuleName] [flags]
 ```
 
 Display build progress in real-time using Bash tool.
@@ -136,7 +136,7 @@ Check build script exit code:
 Always show log file path after build attempt:
 
 ```
-Build log: logs/[PluginName]/build_TIMESTAMP.log
+Build log: logs/[ModuleName]/build_TIMESTAMP.log
 ```
 
 User can review full build output from log file if needed.
@@ -214,11 +214,11 @@ Use this template:
 ✓ Build successful
 
 Built and installed:
-- VST3: ~/Library/Audio/Plug-Ins/VST3/[ProductName].vst3
-- AU: ~/Library/Audio/Plug-Ins/Components/[ProductName].component
+- .vcvplugin: ~/Documents/Rack2/plugins/.vcvplugin/[ProductName].vcvplugin
+-  ~/Documents/Rack2/plugins/Components/[ProductName]
 
 Build time: [duration]
-Log: logs/[PluginName]/build_TIMESTAMP.log
+Log: logs/[ModuleName]/build_TIMESTAMP.log
 ```
 
 For `--no-install` builds (Stage 2):
@@ -227,11 +227,11 @@ For `--no-install` builds (Stage 2):
 ✓ Build successful (compilation verified, not installed)
 
 Built artifacts:
-- VST3: plugins/[PluginName]/build/[PluginName]_artefacts/Release/VST3/[ProductName].vst3
-- AU: plugins/[PluginName]/build/[PluginName]_artefacts/Release/AU/[ProductName].component
+- .vcvplugin: plugins/[ModuleName]/build/[ModuleName]_artefacts/Release/.vcvplugin/[ProductName].vcvplugin
+-  plugins/[ModuleName]/build/[ModuleName]_artefacts/Release/AU/[ProductName]
 
 Build time: [duration]
-Log: logs/[PluginName]/build_TIMESTAMP.log
+Log: logs/[ModuleName]/build_TIMESTAMP.log
 ```
 
 ### 3. Commit Build Success
@@ -241,7 +241,7 @@ Before presenting decision menu, commit the successful build:
 **If invoked from workflow** (plugin-workflow, plugin-improve):
 ```bash
 git add .
-git commit -m "chore: build [PluginName] successful"
+git commit -m "chore: build [ModuleName] successful"
 ```
 
 **If manual invocation**: Skip commit (user manages their own git workflow)
@@ -326,10 +326,10 @@ Reuse stored context on retry without re-prompting user.
 
 ### Handle Missing Dependencies
 
-If build script fails with dependency errors (CMake, Ninja, JUCE not found):
+If build script fails with dependency errors (Make, Make, VCV Rack not found):
 
 1. Display specific missing dependency
-2. Provide installation command (e.g., "Install with: brew install ninja")
+2. Provide installation command (e.g., "Install with: brew install make")
 3. Suggest: "Run /setup command to validate full environment configuration"
 4. After user installs, offer: "Retry build now?"
 
@@ -337,7 +337,7 @@ If build script fails with dependency errors (CMake, Ninja, JUCE not found):
 
 Extract meaningful error information for troubleshooter:
 
-- **CMake errors**: Configuration issues, missing modules, path problems
+- **Make errors**: Configuration issues, missing modules, path problems
 - **Compilation errors**: Syntax, type mismatches, missing declarations
 - **Linker errors**: Missing symbols, library issues
 - **Installation errors**: Permission issues, path conflicts

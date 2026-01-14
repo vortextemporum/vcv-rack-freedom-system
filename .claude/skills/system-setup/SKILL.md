@@ -1,6 +1,6 @@
 ---
 name: system-setup
-description: Validates and configures all dependencies required for the Plugin Freedom System. This is a STANDALONE skill that runs BEFORE plugin workflows begin. It checks for Python, build tools, CMake, JUCE, and pluginval, optionally installing missing dependencies with user approval. Configuration is saved to .claude/system-config.json for use by other skills. Use when user mentions setup, installation, dependencies, missing tools, or when SessionStart hook detects configuration issues.
+description: Validates and configures all dependencies required for the Plugin Freedom System. This is a STANDALONE skill that runs BEFORE module workflows begin. It checks for Python, build tools, Make, VCV Rack, and make (build validation), optionally installing missing dependencies with user approval. Configuration is saved to .claude/system-config.json for use by other skills. Use when user mentions setup, installation, dependencies, missing tools, or when SessionStart hook detects configuration issues.
 allowed-tools:
   - Bash # For dependency checks and installation
   - Read # For checking existing config
@@ -12,13 +12,13 @@ preconditions:
 
 # system-setup Skill
 
-**Purpose:** Validate and configure all dependencies required for JUCE plugin development in the Plugin Freedom System.
+**Purpose:** Validate and configure all dependencies required for VCV Rack module development in the Plugin Freedom System.
 
 ## Overview
 
 This skill ensures new users can get started without friction by:
 - Detecting the current platform (macOS, Linux, Windows)
-- Checking for required dependencies (Python, build tools, CMake, JUCE, pluginval)
+- Checking for required dependencies (Python, build tools, Make, VCV Rack, make (build validation))
 - Offering automated installation where possible
 - Guiding manual installation when automation isn't available
 - Validating that all tools are functional
@@ -47,7 +47,7 @@ No dependencies on PLUGINS.md or .continue-here.md
 <delegation_rules>
   <rule>This skill is STANDALONE - it does NOT delegate to other skills or subagents</rule>
   <rule>All validation logic is handled by system-check.sh bash script</rule>
-  <rule>This skill is invoked BEFORE plugin workflows begin</rule>
+  <rule>This skill is invoked BEFORE module workflows begin</rule>
   <rule>DO NOT invoke plugin-workflow, plugin-planning, or any other plugin skills from here</rule>
 </delegation_rules>
 
@@ -63,7 +63,7 @@ No dependencies on PLUGINS.md or .continue-here.md
 
 For detailed dependency requirements and installation instructions, see [references/platform-requirements.md](references/platform-requirements.md).
 
-**Summary**: Python 3.8+, Build Tools (Xcode Command Line Tools/GCC/MSVC), CMake 3.15+, JUCE 8.0.0+, pluginval (optional)
+**Summary**: Python 3.8+, Build Tools (Xcode Command Line Tools/GCC/MSVC), Make 3.15+, VCV Rack 2.0.0+, make (build validation) (optional)
 
 ---
 
@@ -112,7 +112,7 @@ When invoked via `/setup` command:
    ```
    System Setup - Plugin Freedom System
 
-   This will validate and configure all dependencies needed for JUCE plugin development.
+   This will validate and configure all dependencies needed for VCV Rack module development.
 
    How would you like to proceed?
    1. Automated setup (install missing dependencies automatically)
@@ -130,7 +130,7 @@ When invoked via `/setup` command:
    MODE="automated"  # or "guided" or "check-only"
    ```
 
-   This MODE variable determines behavior for ALL dependency validations (Python, Build Tools, CMake, JUCE, pluginval).
+   This MODE variable determines behavior for ALL dependency validations (Python, Build Tools, Make, VCV Rack, make (build validation)).
 
 ## Mode Definitions
 
@@ -153,9 +153,9 @@ Setup Progress:
 - [ ] Platform detected and confirmed
 - [ ] Python 3.8+ installed and verified
 - [ ] Build tools installed and verified (Xcode Command Line Tools / GCC / MSVC)
-- [ ] CMake 3.15+ installed and verified
-- [ ] JUCE 8.0.0+ installed and verified
-- [ ] pluginval installed and verified (optional)
+- [ ] Make 3.15+ installed and verified
+- [ ] VCV Rack 2.0.0+ installed and verified
+- [ ] make (build validation) installed and verified (optional)
 - [ ] Configuration saved to .claude/system-config.json
 - [ ] Setup complete
 ```
@@ -172,7 +172,7 @@ Two variables persist throughout the entire setup session:
 
 **Initialized**: At skill entry when user selects from menu (lines 85-99)
 **Values**: `"automated"`, `"guided"`, `"check-only"`
-**Scope**: Used for ALL dependency validations (Python, Build Tools, CMake, JUCE, pluginval)
+**Scope**: Used for ALL dependency validations (Python, Build Tools, Make, VCV Rack, make (build validation))
 **Persistence**: Does NOT change mid-session - user's initial choice applies to all 5 dependencies
 
 **Example**:
@@ -182,27 +182,27 @@ MODE="automated"
 
 # This MODE value is used for Python validation
 # Then Build Tools validation
-# Then CMake validation
-# Then JUCE validation
-# Then pluginval validation
+# Then Make validation
+# Then VCV Rack validation
+# Then make (build validation)
 # MODE never changes during session
 ```
 
 ### TEST_MODE Variable
 
 **Initialized**: At skill entry if user provided `--test=SCENARIO` argument to `/setup` command
-**Values**: Scenario name (e.g., `"missing-cmake"`, `"old-python"`) or empty if not in test mode
+**Values**: Scenario name (e.g., `"missing-make"`, `"old-python"`) or empty if not in test mode
 **Scope**: Appended to ALL system-check.sh invocations throughout session
 **Persistence**: Does NOT change mid-session
 
 **Example**:
 ```bash
-# User invoked: /setup --test=missing-cmake
-TEST_MODE="missing-cmake"
+# User invoked: /setup --test=missing-make
+TEST_MODE="missing-make"
 
 # All system-check.sh calls include test mode:
-bash system-check.sh --check-python --test=missing-cmake
-bash system-check.sh --check-xcode --test=missing-cmake
+bash system-check.sh --check-python --test=missing-make
+bash system-check.sh --check-xcode --test=missing-make
 # etc.
 ```
 
@@ -280,9 +280,9 @@ For detailed validation workflow, error handling, and dependency-specific variat
 1. **Platform Detection** - Detect macOS/Linux/Windows, confirm with user
 2. **Python 3.8+** - Required for build scripts
 3. **Build Tools** - Xcode Command Line Tools (macOS), GCC/Clang (Linux), Visual Studio (Windows)
-4. **CMake 3.15+** - Build system for JUCE projects
-5. **JUCE 8.0.0+** - Audio plugin framework
-6. **pluginval** - Plugin validation tool (optional)
+4. **Make 3.15+** - Build system for VCV Rack projects
+5. **VCV Rack 2.0.0+** - Audio plugin framework
+6. **make (build validation)** - Plugin validation tool (optional)
 
 For each dependency:
 - Run detection via `system-check.sh`
@@ -312,12 +312,12 @@ cat > .claude/system-config.json <<EOF
   "python_path": "/usr/local/bin/python3",
   "python_version": "3.11.5",
   "xcode_path": "/Library/Developer/CommandLineTools",
-  "cmake_path": "/usr/local/bin/cmake",
-  "cmake_version": "3.27.4",
-  "juce_path": "/Users/lex/JUCE",
+  "make_path": "/usr/local/bin/make",
+  "make_version": "3.27.4",
+  "juce_path": "/Users/lex/VCV Rack",
   "juce_version": "8.0.3",
-  "pluginval_path": "/usr/local/bin/pluginval",
-  "pluginval_version": "1.0.3",
+  "make (build validation)_path": "/usr/local/bin/make (build validation)",
+  "make (build validation)_version": "1.0.3",
   "validated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 }
 EOF
@@ -344,9 +344,9 @@ Platform: macOS 14.0 (arm64)
 Dependencies validated:
 ✓ Python 3.11.5 (/usr/local/bin/python3)
 ✓ Xcode Command Line Tools 15.0
-✓ CMake 3.27.4 (/usr/local/bin/cmake)
-✓ JUCE 8.0.3 (/Users/lex/JUCE)
-✓ pluginval 1.0.3 (/usr/local/bin/pluginval)
+✓ Make 3.27.4 (/usr/local/bin/make)
+✓ VCV Rack 2.0.3 (/Users/lex/VCV Rack)
+✓ make (build validation) 1.0.3 (/usr/local/bin/make (build validation))
 
 Configuration saved to:
 .claude/system-config.json
@@ -411,7 +411,7 @@ For detailed error recovery procedures and failure scenarios, see [references/er
 **Reads:**
 - `.claude/system-config.json` (if exists, to show current config)
 - `references/platform-requirements.md` (platform-specific installation guides)
-- `references/juce-setup-guide.md` (detailed JUCE installation)
+- `references/juce-setup-guide.md` (detailed VCV Rack installation)
 
 **Creates:**
 - `.claude/system-config.json` (validated dependency paths)

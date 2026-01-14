@@ -26,8 +26,8 @@
 
 | Plugin/Module | Status | Version | Type | Last Updated |
 |---------------|--------|---------|------|--------------|
-| Genesis/GenesisMono | 🚧 Stage 0 | - | Oscillator | 2026-01-13 |
-| Genesis/GenesisPoly | 🚧 Stage 0 | - | Oscillator (Polyphonic) | 2026-01-13 |
+| Genesis/GenesisMono | 📦 Installed | 2.0.0 | Oscillator | 2026-01-13 |
+| Genesis/GenesisPoly | 📦 Installed | 2.0.0 | Oscillator (Polyphonic) | 2026-01-13 |
 
 **For detailed plugin information (lifecycle timeline, known issues, parameters, etc.), see:**
 `plugins/[PluginName]/NOTES.md`

@@ -1,8 +1,8 @@
 #!/bin/bash
-# SessionStart hook - Validate development environment with proactive dependency checks
+# SessionStart hook - Validate VCV Rack development environment
 # Runs once at session start, provides warnings and actionable fixes
 
-echo "━━━ Plugin Freedom System - Environment Validation ━━━"
+echo "━━━ Module Freedom System - Environment Validation ━━━"
 echo ""
 
 # Clean expired cache entries
@@ -14,10 +14,10 @@ fi
 ERRORS=0
 WARNINGS=0
 
-# CRITICAL: Python 3 (required for validators)
+# CRITICAL: Python 3 (required for helper scripts)
 if ! command -v python3 &> /dev/null; then
   echo "❌ CRITICAL: python3 not found" >&2
-  echo "   Validators won't work - all plugin validation will fail" >&2
+  echo "   VCV Rack SDK helper scripts require Python" >&2
   echo "   FIX: brew install python3" >&2
   ERRORS=$((ERRORS + 1))
 else
@@ -36,27 +36,6 @@ else
   echo "✓ $JQ_VERSION"
 fi
 
-# CRITICAL: CMake (required for builds)
-if command -v cmake &> /dev/null; then
-  CMAKE_VERSION=$(cmake --version | head -1)
-  CMAKE_VER_NUM=$(cmake --version | head -1 | grep -oE '[0-9]+\.[0-9]+' | head -1)
-  echo "✓ $CMAKE_VERSION"
-
-  # Check minimum version (3.15+)
-  CMAKE_MAJOR=$(echo "$CMAKE_VER_NUM" | cut -d. -f1)
-  CMAKE_MINOR=$(echo "$CMAKE_VER_NUM" | cut -d. -f2)
-  if [ "$CMAKE_MAJOR" -lt 3 ] || { [ "$CMAKE_MAJOR" -eq 3 ] && [ "$CMAKE_MINOR" -lt 15 ]; }; then
-    echo "⚠️  WARNING: CMake $CMAKE_VER_NUM detected (JUCE 8 requires 3.15+)" >&2
-    echo "   FIX: brew upgrade cmake" >&2
-    WARNINGS=$((WARNINGS + 1))
-  fi
-else
-  echo "❌ CRITICAL: cmake not found" >&2
-  echo "   All plugin builds will fail" >&2
-  echo "   FIX: brew install cmake" >&2
-  ERRORS=$((ERRORS + 1))
-fi
-
 # CRITICAL: Build tools (platform-specific)
 if [[ "$OSTYPE" == "darwin"* ]]; then
   # macOS: Xcode required
@@ -69,18 +48,8 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     echo "   FIX: xcode-select --install" >&2
     ERRORS=$((ERRORS + 1))
   fi
-
-  # Check code signing tools
-  if ! command -v codesign &> /dev/null; then
-    echo "❌ CRITICAL: codesign not found" >&2
-    echo "   Plugins won't load in DAWs (signature validation required)" >&2
-    echo "   FIX: Install Xcode Command Line Tools" >&2
-    ERRORS=$((ERRORS + 1))
-  else
-    echo "✓ codesign available"
-  fi
 elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-  # Linux: gcc/g++ or clang required
+  # Linux: gcc/g++ required
   if command -v g++ &> /dev/null; then
     GCC_VERSION=$(g++ --version | head -1)
     echo "✓ $GCC_VERSION"
@@ -95,25 +64,66 @@ elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
   fi
 fi
 
-# CRITICAL: JUCE (required for plugin builds)
-JUCE_FOUND=0
-if [ -d "/Applications/JUCE" ]; then
-  echo "✓ JUCE found at /Applications/JUCE"
-  JUCE_FOUND=1
-elif [ -d "$HOME/JUCE" ]; then
-  echo "✓ JUCE found at $HOME/JUCE"
-  JUCE_FOUND=1
-elif [ -d "$HOME/Developer/JUCE" ]; then
-  echo "✓ JUCE found at $HOME/Developer/JUCE"
-  JUCE_FOUND=1
+# CRITICAL: VCV Rack SDK (required for plugin builds)
+RACK_SDK_FOUND=0
+RACK_SDK_PATH=""
+
+# Check standard locations for Rack SDK
+if [ -n "$RACK_DIR" ] && [ -d "$RACK_DIR" ]; then
+  # Environment variable set
+  RACK_SDK_PATH="$RACK_DIR"
+  RACK_SDK_FOUND=1
+  echo "✓ Rack SDK found at $RACK_DIR (via RACK_DIR env)"
+elif [ -d "$HOME/Rack-SDK" ]; then
+  RACK_SDK_PATH="$HOME/Rack-SDK"
+  RACK_SDK_FOUND=1
+  echo "✓ Rack SDK found at ~/Rack-SDK"
+elif [ -d "$HOME/Developer/Rack-SDK" ]; then
+  RACK_SDK_PATH="$HOME/Developer/Rack-SDK"
+  RACK_SDK_FOUND=1
+  echo "✓ Rack SDK found at ~/Developer/Rack-SDK"
+elif [ -d "/usr/local/Rack-SDK" ]; then
+  RACK_SDK_PATH="/usr/local/Rack-SDK"
+  RACK_SDK_FOUND=1
+  echo "✓ Rack SDK found at /usr/local/Rack-SDK"
 fi
 
-if [ $JUCE_FOUND -eq 0 ]; then
-  echo "❌ CRITICAL: JUCE not found at standard locations" >&2
-  echo "   All plugin builds will fail" >&2
-  echo "   FIX: git clone https://github.com/juce-framework/JUCE.git ~/JUCE" >&2
-  echo "        OR download from https://juce.com/" >&2
+if [ $RACK_SDK_FOUND -eq 0 ]; then
+  echo "❌ CRITICAL: VCV Rack SDK not found" >&2
+  echo "   All module builds will fail" >&2
+  echo "   FIX: Download from https://vcvrack.com/downloads/" >&2
+  echo "        Extract to ~/Rack-SDK" >&2
+  echo "        OR set RACK_DIR environment variable" >&2
   ERRORS=$((ERRORS + 1))
+else
+  # Check SDK version by looking at helper.py or version file
+  if [ -f "$RACK_SDK_PATH/helper.py" ]; then
+    echo "  → SDK helper.py available"
+  fi
+fi
+
+# HIGH PRIORITY: VCV Rack application (for testing)
+VCV_RACK_FOUND=0
+if [ -d "/Applications/VCV Rack 2 Free.app" ]; then
+  echo "✓ VCV Rack 2 Free found in /Applications"
+  VCV_RACK_FOUND=1
+elif [ -d "/Applications/VCV Rack 2 Pro.app" ]; then
+  echo "✓ VCV Rack 2 Pro found in /Applications"
+  VCV_RACK_FOUND=1
+elif [ -d "$HOME/Applications/VCV Rack 2 Free.app" ]; then
+  echo "✓ VCV Rack 2 Free found in ~/Applications"
+  VCV_RACK_FOUND=1
+elif [ -d "$HOME/Applications/VCV Rack 2 Pro.app" ]; then
+  echo "✓ VCV Rack 2 Pro found in ~/Applications"
+  VCV_RACK_FOUND=1
+fi
+
+if [ $VCV_RACK_FOUND -eq 0 ]; then
+  echo "⚠️  WARNING: VCV Rack 2 not found" >&2
+  echo "   You won't be able to test modules without it" >&2
+  echo "   FIX: brew install --cask vcv-rack" >&2
+  echo "        OR download from https://vcvrack.com/Rack" >&2
+  WARNINGS=$((WARNINGS + 1))
 fi
 
 # HIGH PRIORITY: Git (required for version control)
@@ -127,25 +137,25 @@ else
   WARNINGS=$((WARNINGS + 1))
 fi
 
-# MEDIUM PRIORITY: Ninja (optional but recommended)
-if command -v ninja &> /dev/null; then
-  NINJA_VERSION=$(ninja --version 2>&1)
-  echo "✓ ninja $NINJA_VERSION (fast builds enabled)"
+# MEDIUM PRIORITY: Make (should be included with Xcode CLT)
+if command -v make &> /dev/null; then
+  MAKE_VERSION=$(make --version 2>&1 | head -1)
+  echo "✓ $MAKE_VERSION"
 else
-  echo "ℹ️  INFO: ninja not found (builds will use default generator)" >&2
-  echo "   FIX (optional): brew install ninja" >&2
+  echo "❌ CRITICAL: make not found" >&2
+  echo "   VCV Rack SDK uses Makefile build system" >&2
+  echo "   FIX: xcode-select --install" >&2
+  ERRORS=$((ERRORS + 1))
 fi
 
-# LOW PRIORITY: pluginval (optional for validation testing)
-if command -v pluginval &> /dev/null; then
-  echo "✓ pluginval available (validation testing enabled)"
-elif [ -f "$HOME/pluginval" ]; then
-  echo "✓ pluginval found at $HOME/pluginval"
-elif [ -f "/Applications/pluginval.app/Contents/MacOS/pluginval" ]; then
-  echo "✓ pluginval found in /Applications"
+# LOW PRIORITY: Inkscape (optional for SVG panel editing)
+if command -v inkscape &> /dev/null; then
+  echo "✓ Inkscape available (SVG editing enabled)"
+elif [ -d "/Applications/Inkscape.app" ]; then
+  echo "✓ Inkscape.app found in /Applications"
 else
-  echo "ℹ️  INFO: pluginval not found (validation testing unavailable)" >&2
-  echo "   FIX (optional): Download from https://github.com/Tracktion/pluginval/releases" >&2
+  echo "ℹ️  INFO: Inkscape not found (SVG editing limited)" >&2
+  echo "   FIX (optional): brew install --cask inkscape" >&2
 fi
 
 echo ""
@@ -156,9 +166,12 @@ if [ $ERRORS -gt 0 ]; then
   echo ""
   echo "Quick fix command:"
   if [[ "$OSTYPE" == "darwin"* ]]; then
-    echo "  brew install python3 jq cmake && xcode-select --install"
+    echo "  brew install python3 jq && xcode-select --install"
+    echo ""
+    echo "  Download Rack SDK from: https://vcvrack.com/downloads/"
+    echo "  Extract to: ~/Rack-SDK"
   else
-    echo "  sudo apt install python3 jq cmake build-essential"
+    echo "  sudo apt install python3 jq build-essential"
   fi
   echo ""
   echo "Session will continue, but workflows will fail until dependencies are installed"

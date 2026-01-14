@@ -1,8 +1,8 @@
 # Genesis Notes
 
 ## Status
-- **Current Status:** 🚧 Stage 0
-- **Version:** N/A
+- **Current Status:** 📦 Installed
+- **Version:** 2.0.0
 - **Type:** VCV Rack Oscillator Plugin
 
 ## Modules
@@ -15,6 +15,10 @@
 ## Lifecycle Timeline
 
 - **2026-01-13 (Stage 0):** Research & Planning complete - Architecture and plan documented (Complexity 5.0)
+- **2026-01-13 (Stage 1):** Foundation complete - Makefile, plugin.json, module skeletons
+- **2026-01-13 (Stage 2):** DSP complete - All 4 phases (waveforms, FM, bit crushing, polyphony)
+- **2026-01-13 (Stage 3):** Widgets complete - SVG panels finalized
+- **2026-01-13 (v2.0.0):** Installed to VCV Rack 2 plugins folder
 
 ## Known Issues
 

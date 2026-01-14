@@ -1,0 +1,26 @@
+{
+  "slug": "Drum808",
+  "name": "Drum808",
+  "version": "2.0.0",
+  "license": "proprietary",
+  "brand": "GLIX STUDIO (BETA)",
+  "author": "GLIX STUDIO",
+  "authorEmail": "",
+  "authorUrl": "",
+  "pluginUrl": "",
+  "manualUrl": "",
+  "sourceUrl": "",
+  "donateUrl": "",
+  "changelogUrl": "",
+  "modules": [
+    {
+      "slug": "Drum808",
+      "name": "Drum 808",
+      "description": "6-voice analog drum synthesizer with kick, toms, clap, and hi-hats",
+      "tags": [
+        "Drum",
+        "Synth Voice"
+      ]
+    }
+  ]
+}

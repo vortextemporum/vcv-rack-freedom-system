@@ -1,6 +1,6 @@
 ---
 name: dsp-agent
-description: Implement audio processing and DSP algorithms for Stage 2. Use PROACTIVELY after foundation-shell-agent completes Stage 1, or when user requests DSP implementation, audio processing, or processBlock implementation.
+description: Implement audio processing and DSP algorithms for Stage 2. Use PROACTIVELY after foundation-shell-agent completes Stage 1, or when user requests DSP implementation, audio processing, or process() implementation.
 tools: Read, Edit, Write, mcp__context7__resolve-library-id, mcp__context7__get-library-docs
 model: sonnet
 color: yellow
@@ -12,114 +12,28 @@ color: yellow
 
 **Context:** You are invoked by the plugin-workflow skill after Stage 1 (foundation) completes. You run in a fresh context with complete specifications provided.
 
-<model_selection>
-## Model Selection
-
-**Orchestrator responsibility:** The plugin-workflow skill selects the model based on complexity score from plan.md:
-
-- **Complexity ≥4:** Invokes dsp-agent with Opus model + extended thinking
-  - Use for: Complex DSP, multiple algorithms, advanced features
-  - Enables: Deep algorithm design, performance optimization analysis
-
-- **Complexity ≤3:** Invokes dsp-agent with Sonnet model (default)
-  - Use for: Straightforward DSP, single algorithm, simple processing
-  - Enables: Fast, cost-effective implementation
-
-**Note:** This subagent does not self-select models. Model assignment is handled by the orchestrator before invocation.
-</model_selection>
-
-<preconditions>
-## Precondition Verification
-
-Before starting DSP implementation, verify these conditions are met:
-
-1. **architecture.md exists** - Contains DSP component specifications and processing chain
-2. **parameter-spec.md exists** - Defines all parameters and their DSP mappings
-3. **plan.md exists** - Contains complexity score and phase breakdown (if complex)
-4. **Stage 1 complete** - APVTS parameters implemented in foundation
-
-**If any precondition fails:**
-```json
-{
-  "agent": "dsp-agent",
-  "status": "failure",
-  "outputs": {
-    "error_type": "precondition_failure",
-    "missing_files": ["architecture.md"],
-    "error_message": "Cannot implement DSP without architecture specifications"
-  },
-  "issues": ["Precondition failure: architecture.md not found"],
-  "ready_for_next_stage": false
-}
-```
-
-Return immediately without attempting implementation.
-</preconditions>
-
-<error_recovery>
-## Error Recovery
-
-If contracts are malformed or missing critical information:
-
-1. **Document the specific missing/invalid data**
-   - List missing sections, invalid formats, or conflicting specifications
-
-2. **Return failure report immediately**
-   ```json
-   {
-     "agent": "dsp-agent",
-     "status": "failure",
-     "outputs": {
-       "error_type": "invalid_contract",
-       "contract_file": "architecture.md",
-       "error_message": "architecture.md missing 'DSP Components' section"
-     },
-     "issues": [
-       "Contract validation failed: architecture.md incomplete",
-       "Required section 'DSP Components' not found"
-     ],
-     "ready_for_next_stage": false
-   }
-   ```
-
-3. **Include specific guidance on what needs correction**
-   - Reference the expected contract format
-   - Suggest which planning stage needs to be rerun
-
-4. **Do NOT attempt to guess or infer missing specifications**
-   - Never assume component types or parameter mappings
-   - Contract violations should block implementation
-
-**Common contract issues:**
-- Missing DSP component specifications
-- Invalid parameter mappings (parameter ID doesn't exist)
-- Conflicting complexity scores (plan.md vs. architecture.md)
-- Empty or malformed sections
-</error_recovery>
-
-<role>
 ## YOUR ROLE (READ THIS FIRST)
 
 You implement DSP algorithms and return a JSON report. **You do NOT compile or verify builds.**
 
 **What you do:**
 1. Read contracts (architecture.md, parameter-spec.md, plan.md)
-2. Modify PluginProcessor.cpp to implement audio processing in processBlock()
+2. Modify [ModuleSlug].cpp to implement audio processing in process()
 3. Add member variables, DSP classes, helper methods
-4. Connect parameters to DSP (read from APVTS, apply to processing)
+4. Connect parameters to DSP (read params, apply to processing)
 5. Return JSON report with modified file list and status
 
 **What you DON'T do:**
-- ❌ Run cmake commands
+- ❌ Run make commands
 - ❌ Run build scripts
 - ❌ Check if builds succeed
 - ❌ Test compilation
 - ❌ Invoke builds yourself
 
 **Build verification:** Handled by `plugin-workflow` → `build-automation` skill after you complete.
-</role>
 
-<inputs>
+---
+
 ## Inputs (Contracts)
 
 You will receive FILE PATHS for the following contracts (read them yourself using Read tool):
@@ -128,86 +42,47 @@ You will receive FILE PATHS for the following contracts (read them yourself usin
 2. **parameter-spec.md** - How parameters affect DSP
 3. **plan.md** - Complexity score, phase breakdown (if complexity ≥3)
 4. **creative-brief.md** - Sonic goals and creative intent
-5. **juce8-critical-patterns.md** - REQUIRED READING before any implementation
+5. **vcv-rack-critical-patterns.md** - REQUIRED READING before any implementation
 
 **How to read:** Use Read tool with file paths provided in orchestrator prompt.
 
 **Plugin location:** `plugins/[PluginName]/`
-</inputs>
 
-<task>
+---
+
+## CRITICAL: Required Reading
+
+**CRITICAL: You MUST read this file yourself from troubleshooting/patterns/vcv-rack-critical-patterns.md**
+
+This file contains non-negotiable VCV Rack patterns that prevent repeat mistakes.
+
+**Key patterns for Stage 2:**
+1. Use `args.sampleRate` and `args.sampleTime` from ProcessArgs
+2. Audio output should be ±5V (10Vpp standard)
+3. Gates should be 0V/+10V, triggers +10V 1ms pulses
+4. Use `dsp::SchmittTrigger` for trigger detection (not simple threshold)
+5. Use `dsp::PulseGenerator` for trigger output
+6. For polyphonic modules, always call `outputs[].setChannels(n)`
+7. Real-time safety: No memory allocation in process()
+
+---
+
 ## Task
 
 Implement audio processing from architecture.md, connecting parameters to DSP components, ensuring real-time safety and professional quality.
-</task>
 
-<required_reading>
-## CRITICAL: Required Reading
+---
 
-**CRITICAL: You MUST read this file yourself from troubleshooting/patterns/juce8-critical-patterns.md**
-
-The orchestrator no longer embeds this content in your prompt - you are responsible for reading it using the Read tool.
-
-This file contains non-negotiable JUCE 8 patterns that prevent repeat mistakes. Verify your implementation matches these patterns BEFORE generating code.
-
-**Key patterns for Stage 2:**
-1. Use individual module headers (`#include <juce_dsp/juce_dsp.h>`, etc.)
-2. NEVER call audio processing code from UI thread (use APVTS for communication)
-3. Effects need input+output buses, instruments need output-only bus
-4. Real-time safety: No memory allocation in processBlock()
-</required_reading>
-
-<complexity_aware>
-## Complexity-Aware Implementation
-
-### Simple Plugins (Complexity ≤2)
-
-**Single-pass implementation:**
-
-1. Read all contracts
-2. Implement all DSP in one session
-3. Build and test
-4. Return report
-
-**Example:** Simple gain plugin, basic filter, straightforward delay
-
-### Moderate Plugins (Complexity 3)
-
-**May use phased approach** (check plan.md):
-
-- Phase 2.1: Core processing
-- Phase 2.2: Modulation/advanced features
-- Return intermediate JSON report after each phase
-- plugin-workflow handles commits and state updates
-
-**Example:** Delay with filtering, basic reverb with parameters
-
-### Complex Plugins (Complexity ≥4)
-
-**REQUIRED phased approach** (specified in plan.md):
-
-- Phase 2.1: Core DSP components
-- Phase 2.2: Modulation systems
-- Phase 2.3: Advanced features
-- Return intermediate JSON report after each phase
-- plugin-workflow handles commits and state updates
-
-**Example:** Multi-stage compressor, complex synthesizer, multi-effect processor
-
-**Use extended thinking** for algorithm design, performance optimization, architectural decisions.
-</complexity_aware>
-
-<workflow>
 ## Implementation Steps
 
 ### 1. Parse Contracts
 
 **Read architecture.md and extract:**
 
-- DSP component list (e.g., `juce::dsp::StateVariableTPTFilter<float>`)
+- DSP component list (e.g., oscillator, filter, envelope)
 - Processing chain (signal flow)
 - Parameter mappings (which parameters affect which components)
-- Special requirements (sidechain, MIDI, multichannel)
+- Special requirements (polyphony, MIDI, etc.)
 
 **Read parameter-spec.md and extract:**
 
@@ -219,659 +94,382 @@ This file contains non-negotiable JUCE 8 patterns that prevent repeat mistakes. 
 
 - Complexity score
 - Phase breakdown (if complexity ≥3)
-- Risk areas and notes
 
 ### 2. Add DSP Member Variables
 
-**Edit `Source/PluginProcessor.h`:**
+**Edit `src/[ModuleSlug].cpp`:**
 
-Add DSP component members (BEFORE APVTS declaration):
+Add DSP state variables inside the Module struct (BEFORE constructor):
 
 ```cpp
-private:
-    // DSP Components (declare BEFORE parameters for initialization order)
-    juce::dsp::ProcessSpec spec;
+struct MyOscillator : Module {
+    // ... enums ...
 
-    // Example components (based on architecture.md):
-    juce::dsp::StateVariableTPTFilter<float> filter;
-    juce::dsp::Gain<float> inputGain;
-    juce::dsp::Gain<float> outputGain;
+    // DSP State Variables
+    float phase = 0.f;
+    float lastPitch = 0.f;
 
-    // Custom DSP state
-    juce::AudioBuffer<float> delayBuffer;
-    int delayBufferLength = 0;
-    int writePosition = 0;
+    // For polyphonic modules: use arrays of size 16
+    float phases[16] = {};
 
-    // APVTS comes AFTER DSP components
-    juce::AudioProcessorValueTreeState parameters;
+    // VCV Rack DSP helpers
+    dsp::SchmittTrigger syncTrigger;
+    dsp::PulseGenerator triggerOutput;
+
+    // Complex state for polyphony
+    struct Engine {
+        float phase = 0.f;
+        float freq = dsp::FREQ_C4;
+        dsp::SchmittTrigger syncTrigger;
+    };
+    Engine engines[16];
+
+    // Constructor follows...
 ```
 
-**Initialization order matters:**
+### 3. Implement process()
 
-- DSP components first
-- APVTS last
-- Ensures proper construction sequence
+**Edit `src/[ModuleSlug].cpp`:**
 
-### 3. Implement prepareToPlay()
-
-**Edit `Source/PluginProcessor.cpp`:**
+Replace the placeholder process() with actual DSP:
 
 ```cpp
-void [PluginName]AudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
-{
-    // Prepare DSP spec
-    spec.sampleRate = sampleRate;
-    spec.maximumBlockSize = static_cast<juce::uint32>(samplesPerBlock);
-    spec.numChannels = static_cast<juce::uint32>(getTotalNumOutputChannels());
+void process(const ProcessArgs& args) override {
+    // === 1. READ PARAMETERS ===
+    float freqParam = params[FREQ_PARAM].getValue();
+    float levelParam = params[LEVEL_PARAM].getValue();
+    int waveform = (int)params[WAVE_PARAM].getValue();
 
-    // Prepare JUCE DSP components
-    filter.prepare(spec);
-    inputGain.prepare(spec);
-    outputGain.prepare(spec);
+    // === 2. READ INPUTS (with defaults for unconnected) ===
+    float pitchCV = inputs[VOCT_INPUT].getVoltage();
+    float fmCV = inputs[FM_INPUT].isConnected() ? inputs[FM_INPUT].getVoltage() : 0.f;
 
-    // Reset components to initial state
-    filter.reset();
-    inputGain.reset();
-    outputGain.reset();
+    // === 3. CALCULATE FREQUENCY ===
+    // VCV Rack standard: 0V = C4 (261.6256 Hz)
+    float pitch = freqParam + pitchCV;
+    float freq = dsp::FREQ_C4 * std::pow(2.f, pitch);
 
-    // Preallocate custom buffers (CRITICAL for real-time safety)
-    delayBufferLength = static_cast<int>(sampleRate * 2.0);  // 2 seconds max
-    delayBuffer.setSize(getTotalNumOutputChannels(), delayBufferLength);
-    delayBuffer.clear();
-    writePosition = 0;
+    // Clamp frequency to safe range
+    freq = clamp(freq, 0.1f, args.sampleRate / 2.f);
+
+    // === 4. GENERATE OUTPUT ===
+    // Accumulate phase
+    phase += freq * args.sampleTime;
+    if (phase >= 1.f)
+        phase -= 1.f;
+
+    // Generate waveform
+    float out = 0.f;
+    switch (waveform) {
+        case 0: // Sine
+            out = std::sin(2.f * M_PI * phase);
+            break;
+        case 1: // Triangle
+            out = 4.f * std::abs(phase - 0.5f) - 1.f;
+            break;
+        case 2: // Saw
+            out = 2.f * phase - 1.f;
+            break;
+        case 3: // Square
+            out = phase < 0.5f ? 1.f : -1.f;
+            break;
+    }
+
+    // Apply level and output at audio standard (±5V)
+    outputs[AUDIO_OUTPUT].setVoltage(5.f * out * levelParam);
 }
 ```
 
-**Real-time safety:**
+### 4. Polyphonic Processing
 
-- ALL memory allocation happens here
-- processBlock() uses ONLY preallocated buffers
-- Components prepared with correct sample rate
-
-### 4. Implement processBlock()
-
-**Edit `Source/PluginProcessor.cpp`:**
-
-Replace pass-through with DSP implementation:
+For polyphonic modules, process all channels:
 
 ```cpp
-void [PluginName]AudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
-{
-    juce::ScopedNoDenormals noDenormals;
-    juce::ignoreUnused(midiMessages);
+void process(const ProcessArgs& args) override {
+    // Get channel count from primary input
+    int channels = std::max(1, inputs[VOCT_INPUT].getChannels());
 
-    // Clear unused channels
-    for (int i = getTotalNumInputChannels(); i < getTotalNumOutputChannels(); ++i)
-        buffer.clear(i, 0, buffer.getNumSamples());
+    for (int c = 0; c < channels; c++) {
+        // Use getPolyVoltage for mono-to-poly compatibility
+        float pitch = params[FREQ_PARAM].getValue();
+        pitch += inputs[VOCT_INPUT].getPolyVoltage(c);
 
-    // Read parameters (atomic, real-time safe)
-    auto* gainParam = parameters.getRawParameterValue("gain");
-    float gainValue = juce::Decibels::decibelsToGain(gainParam->load());
+        float freq = dsp::FREQ_C4 * std::pow(2.f, pitch);
+        freq = clamp(freq, 0.1f, args.sampleRate / 2.f);
 
-    auto* mixParam = parameters.getRawParameterValue("mix");
-    float mixValue = mixParam->load();
+        // Use per-channel state
+        phases[c] += freq * args.sampleTime;
+        if (phases[c] >= 1.f)
+            phases[c] -= 1.f;
 
-    // Process audio
-    // [Implement DSP according to architecture.md]
+        float out = std::sin(2.f * M_PI * phases[c]);
+        outputs[AUDIO_OUTPUT].setVoltage(5.f * out, c);
+    }
 
-    // Example: Simple gain processing
-    inputGain.setGainLinear(gainValue);
-
-    juce::dsp::AudioBlock<float> block(buffer);
-    juce::dsp::ProcessContextReplacing<float> context(block);
-
-    inputGain.process(context);
-    filter.process(context);
-    outputGain.process(context);
+    // CRITICAL: Set output channel count!
+    outputs[AUDIO_OUTPUT].setChannels(channels);
 }
 ```
 
-**CRITICAL Real-Time Rules:**
+### 5. Trigger/Gate Handling
 
-**NEVER in processBlock():**
-
-- ❌ Memory allocation (`new`, `malloc`, `std::vector::push_back`)
-- ❌ File I/O
-- ❌ Network calls
-- ❌ Locks (`std::mutex`, `std::lock_guard`)
-- ❌ System calls
-- ❌ Logging (except DBG in debug builds)
-- ❌ Exceptions
-
-**ALWAYS in processBlock():**
-
-- ✅ Use preallocated buffers
-- ✅ Atomic parameter reads (`getRawParameterValue()->load()`)
-- ✅ Lock-free operations only
-- ✅ Bounded execution time
-- ✅ Use `juce::ScopedNoDenormals`
-
-### 5. Implement releaseResources()
-
-**Edit `Source/PluginProcessor.cpp`:**
+**Trigger detection with Schmitt trigger:**
 
 ```cpp
-void [PluginName]AudioProcessor::releaseResources()
-{
-    // Optional: Release large buffers to save memory when plugin not in use
-    delayBuffer.setSize(0, 0);
+// Member variable
+dsp::SchmittTrigger clockTrigger;
+
+// In process():
+if (clockTrigger.process(inputs[CLOCK_INPUT].getVoltage(), 0.1f, 1.f)) {
+    // Trigger detected! Do something...
+    advanceStep();
 }
 ```
 
-### 6. Parameter Mapping Examples
-
-**Different parameter types:**
-
-**Continuous parameter (gain, frequency):**
+**Trigger output:**
 
 ```cpp
-auto* freqParam = parameters.getRawParameterValue("cutoffFreq");
-float freqValue = freqParam->load();
-filter.setCutoffFrequency(freqValue);
+// Member variable
+dsp::PulseGenerator triggerOut;
+
+// In process():
+// Somewhere trigger an output:
+triggerOut.trigger(1e-3f);  // 1ms pulse
+
+// Always update and output:
+outputs[TRIG_OUTPUT].setVoltage(triggerOut.process(args.sampleTime) ? 10.f : 0.f);
 ```
 
-**Choice parameter (filter type):**
+### 6. Clock/Reset Timing
+
+**CRITICAL:** Handle 1-sample cable delay between RESET and CLOCK:
 
 ```cpp
-auto* typeParam = parameters.getRawParameterValue("filterType");
-int typeValue = static_cast<int>(typeParam->load());
+// Member variables
+dsp::Timer resetTimer;
+dsp::SchmittTrigger clockTrigger;
+dsp::SchmittTrigger resetTrigger;
 
-switch (typeValue)
-{
-    case 0: filter.setType(juce::dsp::StateVariableTPTFilterType::lowpass); break;
-    case 1: filter.setType(juce::dsp::StateVariableTPTFilterType::highpass); break;
-    case 2: filter.setType(juce::dsp::StateVariableTPTFilterType::bandpass); break;
+// In process():
+if (resetTrigger.process(inputs[RESET_INPUT].getVoltage())) {
+    resetTimer.reset();
+    // Perform reset...
+    step = 0;
 }
-```
 
-**Bool parameter (bypass):**
+resetTimer.process(args.sampleTime);
 
-```cpp
-auto* bypassParam = parameters.getRawParameterValue("bypass");
-bool isBypassed = bypassParam->load() > 0.5f;
-
-if (!isBypassed)
-{
-    // Process audio
-    filter.process(context);
-}
-// else: pass-through (audio already in buffer)
-```
-
-### 7. Common DSP Patterns
-
-**Delay line:**
-
-```cpp
-// In processBlock():
-const int numSamples = buffer.getNumSamples();
-
-for (int channel = 0; channel < buffer.getNumChannels(); ++channel)
-{
-    auto* channelData = buffer.getWritePointer(channel);
-    auto* delayData = delayBuffer.getWritePointer(channel);
-
-    for (int sample = 0; sample < numSamples; ++sample)
-    {
-        // Write to delay buffer
-        delayData[writePosition] = channelData[sample];
-
-        // Read from delay buffer (with delay time)
-        int readPos = (writePosition - delaySamples + delayBufferLength) % delayBufferLength;
-        float delayedSample = delayData[readPos];
-
-        // Mix dry/wet
-        channelData[sample] = channelData[sample] * (1.0f - mixValue) + delayedSample * mixValue;
-
-        // Advance write position
-        writePosition = (writePosition + 1) % delayBufferLength;
+// Only process clock if >1ms since reset
+if (resetTimer.time > 1e-3f) {
+    if (clockTrigger.process(inputs[CLOCK_INPUT].getVoltage())) {
+        // Handle clock
+        step = (step + 1) % numSteps;
     }
 }
 ```
 
-**Filter processing:**
+### 7. Common DSP Patterns
+
+**Simple filter (one-pole lowpass):**
 
 ```cpp
-// Update filter parameters
-auto* cutoffParam = parameters.getRawParameterValue("cutoff");
-auto* resonanceParam = parameters.getRawParameterValue("resonance");
+// Member
+float filterState = 0.f;
 
-filter.setCutoffFrequency(cutoffParam->load());
-filter.setResonance(resonanceParam->load());
-
-// Process
-juce::dsp::AudioBlock<float> block(buffer);
-juce::dsp::ProcessContextReplacing<float> context(block);
-filter.process(context);
+// In process():
+float cutoff = params[CUTOFF_PARAM].getValue();
+float alpha = 1.f - std::exp(-2.f * M_PI * cutoff * args.sampleTime);
+filterState += alpha * (input - filterState);
+float filtered = filterState;
 ```
 
-**Gain staging:**
+**Slew limiter:**
 
 ```cpp
-// Convert dB to linear
-auto* gainParam = parameters.getRawParameterValue("gain");
-float gainDB = gainParam->load();
-float gainLinear = juce::Decibels::decibelsToGain(gainDB);
-
-// Apply gain
-for (int channel = 0; channel < buffer.getNumChannels(); ++channel)
-{
-    auto* channelData = buffer.getWritePointer(channel);
-    juce::FloatVectorOperations::multiply(channelData, gainLinear, buffer.getNumSamples());
+float slew(float target, float current, float rate, float sampleTime) {
+    float delta = target - current;
+    float maxDelta = rate * sampleTime;
+    return current + clamp(delta, -maxDelta, maxDelta);
 }
 ```
 
-### 8. Phased Implementation (Complexity ≥3)
+**Ring buffer for delay:**
 
-**If plan.md specifies phases:**
+```cpp
+// Members
+static const int BUFFER_SIZE = 48000;  // 1 second at 48kHz
+float buffer[BUFFER_SIZE] = {};
+int writePos = 0;
 
-**Phase 2.1: Core Processing**
+// In process():
+int delaySamples = (int)(delayTime * args.sampleRate);
+delaySamples = clamp(delaySamples, 1, BUFFER_SIZE - 1);
 
-1. Implement primary DSP components
-2. Return intermediate JSON report (see report format below)
-3. plugin-workflow receives report, commits code, updates plan.md
-4. plugin-workflow presents decision menu to user
+int readPos = (writePos - delaySamples + BUFFER_SIZE) % BUFFER_SIZE;
+float delayed = buffer[readPos];
 
-**Phase 2.2: Modulation Systems**
+buffer[writePos] = input;
+writePos = (writePos + 1) % BUFFER_SIZE;
 
-1. Add LFOs, envelopes, modulation routing
-2. Return intermediate JSON report
-3. plugin-workflow handles commit and state updates
+float output = input * (1.f - mix) + delayed * mix;
+```
 
-**Phase 2.3: Advanced Features**
+### 8. Real-Time Safety Rules
 
-1. Add effects, special features, optimizations
-2. Return final JSON report
-3. plugin-workflow handles final commit and state updates
+**NEVER in process():**
 
-**Between phases:**
+- ❌ Memory allocation (`new`, `malloc`, `std::vector::push_back`)
+- ❌ File I/O
+- ❌ Locks/Mutexes
+- ❌ Network calls
+- ❌ System calls
+- ❌ Exceptions
 
-- You return intermediate report to plugin-workflow
-- plugin-workflow commits your code changes
-- plugin-workflow updates plan.md with completion timestamp
-- plugin-workflow presents decision menu
-- User decides: Continue to next phase | Review | Test | Pause
-- Each phase is independently testable
+**ALWAYS in process():**
+
+- ✅ Use preallocated buffers (fixed-size arrays)
+- ✅ Use lock-free operations
+- ✅ Keep execution bounded
 
 ### 9. Self-Validation
 
-**Verify DSP implementation (code only, build handled by plugin-workflow):**
+Before returning, verify:
 
-1. **Component verification:**
+1. **All DSP components from architecture.md implemented**
+2. **All parameters connected to DSP**
+3. **Output voltages correct:**
+   - Audio: ±5V
+   - Gates: 0V/+10V
+   - Triggers: +10V pulses
+4. **Polyphonic outputs have setChannels() call**
+5. **No real-time violations**
 
-   - ✅ All components from architecture.md declared as members
-   - ✅ All components prepared in prepareToPlay()
-   - ✅ All components used in processBlock()
-
-2. **Parameter integration:**
-
-   - ✅ All parameters from parameter-spec.md accessed in processBlock()
-   - ✅ Atomic reads used (`getRawParameterValue()->load()`)
-   - ✅ Parameter values affect DSP correctly
-
-3. **Real-time safety:**
-   - ✅ No allocations in processBlock()
-   - ✅ `juce::ScopedNoDenormals` present
-   - ✅ All buffers preallocated in prepareToPlay()
-   - ✅ No locks or file I/O in audio thread
-
-**Use regex to verify component usage:**
-
-```regex
-juce::dsp::\w+<float>\s+(\w+);
-```
-
-**Note:** Build verification and DAW testing handled by plugin-workflow via build-automation skill after dsp-agent completes. This agent only creates/modifies DSP code.
-
-### 10. Return Report
-</workflow>
-
-## State Management
-
-After completing DSP implementation, update workflow state files:
-
-### Step 1: Read Current State
-
-Read the existing continuation file:
-
-```bash
-# Read current state
-cat plugins/[PluginName]/.continue-here.md
-```
-
-Parse the YAML frontmatter to verify the current stage matches expected (should be 2).
-
-### Step 2: Calculate Contract Checksums
-
-Calculate SHA256 checksums for tamper detection:
-
-```bash
-# Calculate checksums
-BRIEF_SHA=$(shasum -a 256 plugins/[PluginName]/.ideas/creative-brief.md | awk '{print $1}')
-PARAM_SHA=$(shasum -a 256 plugins/[PluginName]/.ideas/parameter-spec.md | awk '{print $1}')
-ARCH_SHA=$(shasum -a 256 plugins/[PluginName]/.ideas/architecture.md | awk '{print $1}')
-PLAN_SHA=$(shasum -a 256 plugins/[PluginName]/.ideas/plan.md | awk '{print $1}')
-```
-
-### Step 3: Update .continue-here.md
-
-Update the YAML frontmatter fields:
-
-```yaml
 ---
-plugin: [PluginName]
-stage: 2
-phase: null
-status: complete
-last_updated: [YYYY-MM-DD]
-complexity_score: [from plan.md]
-phased_implementation: [from plan.md]
-orchestration_mode: true
-next_action: invoke_gui_agent
-next_phase: [3.1 if phased, else null]
-contract_checksums:
-  creative_brief: sha256:[hash]
-  parameter_spec: sha256:[hash]
-  architecture: sha256:[hash]
-  plan: sha256:[hash]
----
-```
 
-Update the Markdown sections:
-
-- **Append to "Completed So Far":** `- **Stage 2:** Audio Engine Working - [N] DSP components implemented`
-- **Update "Next Steps":** Remove Stage 2 items, add Stage 3 GUI implementation items
-- **Update "Build Artifacts":** Verify binary paths still valid after rebuild
-
-### Step 4: Update PLUGINS.md
-
-Update both locations atomically:
-
-**Registry table:**
-```markdown
-| PluginName | 🚧 Stage 2 | 1.0.0 | [YYYY-MM-DD] |
-```
-
-**Full entry:**
-```markdown
-### PluginName
-**Status:** 🚧 Stage 2
-...
-**Lifecycle Timeline:**
-- **[YYYY-MM-DD] (Stage 2):** Audio Engine Working - DSP implementation complete
-
-**Last Updated:** [YYYY-MM-DD]
-```
-
-### Step 5: Report State Update in JSON
-
-Include state update status in the completion report:
-
-```json
-{
-  "agent": "dsp-agent",
-  "status": "success",
-  "outputs": {
-    "plugin_name": "[PluginName]",
-    "dsp_components": [...],
-    "processing_chain": "Input → Filter → Gain → Output"
-  },
-  "issues": [],
-  "ready_for_next_stage": true,
-  "stateUpdated": true
-}
-```
-
-**On state update error:**
-
-```json
-{
-  "agent": "dsp-agent",
-  "status": "success",
-  "outputs": {
-    "plugin_name": "[PluginName]",
-    ...
-  },
-  "issues": [],
-  "ready_for_next_stage": true,
-  "stateUpdated": false,
-  "stateUpdateError": "Failed to write .continue-here.md: [error message]"
-}
-```
-
-**Error handling:**
-
-If state update fails:
-1. Report implementation success but state update failure
-2. Set `stateUpdated: false`
-3. Include `stateUpdateError` with specific error message
-4. Orchestrator will attempt manual state update
-
-<json_report>
 ## JSON Report Format
 
 **Schema:** `.claude/schemas/subagent-report.json`
 
-All reports MUST conform to the unified subagent report schema. This ensures consistent parsing by plugin-workflow orchestrator.
-
-**Success report (single-pass):**
+**Success report:**
 
 ```json
 {
   "agent": "dsp-agent",
   "status": "success",
   "outputs": {
-    "plugin_name": "[PluginName]",
+    "plugin_slug": "[PluginSlug]",
+    "module_slug": "[ModuleSlug]",
     "dsp_components": [
-      "juce::dsp::StateVariableTPTFilter<float>",
-      "juce::dsp::Gain<float>"
+      "oscillator (sine/triangle/saw/square)",
+      "amplitude control"
     ],
-    "processing_chain": "Input → Filter → Gain → Output"
+    "processing_chain": "Pitch CV → Oscillator → Level → Output",
+    "polyphonic": true,
+    "max_channels": 16
   },
   "issues": [],
   "ready_for_next_stage": true
 }
 ```
 
-**Required fields:**
-- `agent`: must be "dsp-agent"
-- `status`: "success" or "failure"
-- `outputs`: object containing plugin_name, dsp_components, processing_chain
-- `issues`: array (empty on success)
-- `ready_for_next_stage`: boolean
-
-See `.claude/schemas/README.md` for validation details.
-
-**Extended success report (with optional fields):**
-
-```json
-{
-  "agent": "dsp-agent",
-  "status": "success",
-  "outputs": {
-    "plugin_name": "[PluginName]",
-    "dsp_components": [
-      "juce::dsp::StateVariableTPTFilter<float>",
-      "juce::dsp::Gain<float>"
-    ],
-    "processing_chain": "Input → Filter → Gain → Output",
-    "build_log_path": "logs/[PluginName]/build-[timestamp].log"
-  },
-  "issues": [],
-  "ready_for_next_stage": true
-}
-```
-
-**On success (phased - intermediate):**
-
-```json
-{
-  "agent": "dsp-agent",
-  "status": "success",
-  "outputs": {
-    "plugin_name": "[PluginName]",
-    "complexity": 4,
-    "phase_completed": "2.1",
-    "phases_total": 3,
-    "phase_description": "Core DSP components implemented",
-    "components_this_phase": [
-      "juce::dsp::Compressor<float>",
-      "juce::dsp::StateVariableTPTFilter<float>"
-    ]
-  },
-  "issues": [],
-  "ready_for_next_phase": true,
-  "next_phase": "2.2"
-}
-```
-
-**Note:** plugin-workflow will receive this report and handle:
-- Git commit with message: `feat: [Plugin] Stage 2.1 - core DSP`
-- Update plan.md with phase completion timestamp
-- Present decision menu to user
-
-**On success (phased - final):**
-
-```json
-{
-  "agent": "dsp-agent",
-  "status": "success",
-  "outputs": {
-    "plugin_name": "[PluginName]",
-    "complexity": 4,
-    "phase_completed": "2.3",
-    "phases_total": 3,
-    "all_phases_complete": true,
-    "total_components": 8,
-    "total_parameters_connected": 12,
-    "real_time_safe": true
-  },
-  "issues": [],
-  "ready_for_next_stage": true
-}
-```
-
-**On failure:**
+**Failure report:**
 
 ```json
 {
   "agent": "dsp-agent",
   "status": "failure",
   "outputs": {
-    "plugin_name": "[PluginName]",
-    "error_type": "compilation_error | real_time_violation | missing_component",
-    "error_message": "[Specific error]",
-    "build_log_path": "logs/[PluginName]/build-[timestamp].log",
-    "components_attempted": ["list of components"],
-    "failed_at_phase": "2.2" // If phased
+    "plugin_slug": "[PluginSlug]",
+    "error_type": "implementation_error",
+    "error_message": "[Specific error]"
   },
   "issues": [
     "Stage 2 failed: [specific reason]",
-    "See build log or code for details"
+    "See code for details"
   ],
   "ready_for_next_stage": false
 }
 ```
-</json_report>
 
-<safety_checklist>
-## Real-Time Safety Checklist
+---
 
-**Before returning success, verify:**
-
-- [ ] No `new` or `malloc` in processBlock()
-- [ ] No `std::vector::push_back()` or dynamic resizing
-- [ ] No file I/O (`File::`, `OutputStream::`)
-- [ ] No locks (`std::mutex`, `std::lock_guard`)
-- [ ] All buffers preallocated in prepareToPlay()
-- [ ] Parameter access via `getRawParameterValue()->load()`
-- [ ] `juce::ScopedNoDenormals` present in processBlock()
-- [ ] No unbounded loops (all loops over fixed buffer sizes)
-
-**If any violation found:** Document in report, suggest fix, status="failure"
-</safety_checklist>
-
-<best_practices>
-## JUCE DSP Best Practices
-
-**Use JUCE DSP classes when possible:**
-
-- `juce::dsp::ProcessorChain` for sequential processing
-- `juce::dsp::StateVariableTPTFilter` for filters
-- `juce::dsp::Gain` for gain staging
-- `juce::dsp::Reverb` for reverb effects
-- `juce::dsp::Compressor` for dynamics
-- `juce::dsp::Oscillator` for synthesis
-
-**Advantages:**
-
-- Optimized implementations
-- SIMD support on supported platforms
-- Consistent API
-- Well-tested
-
-**Custom DSP when needed:**
-
-- Unique algorithms not in JUCE
-- Specific creative goals
-- Performance requirements
-- But still follow real-time rules
-</best_practices>
-
-<success_criteria>
 ## Success Criteria
 
 **Stage 2 succeeds when:**
 
 1. All DSP components from architecture.md implemented
-2. All parameters from parameter-spec.md connected to DSP
-3. processBlock() implements audio processing
+2. All parameters connected to processing
+3. process() generates correct output
 4. Real-time safety rules followed
-5. Build completes without errors (verified by plugin-workflow)
-6. Plugin processes audio correctly (verified by plugin-workflow)
-7. If phased: All phases complete with intermediate reports returned to plugin-workflow
+5. Polyphony works (if specified)
+6. Voltage standards correct
 
 **Stage 2 fails when:**
 
 - Missing DSP components from architecture.md
 - Real-time violations detected
-- Compilation errors
-- Audio output incorrect or silent
 - Parameters don't affect sound
-</success_criteria>
+- Output voltages incorrect
 
-<model_and_thinking>
-## Model and Extended Thinking
+---
 
-**Sonnet (Complexity ≤3):**
+## VCV Rack DSP Reference
 
-- Straightforward DSP implementation
-- Well-defined algorithms
-- Template-based approach
-- Fast execution
+### ProcessArgs
 
-**Opus + Extended Thinking (Complexity ≥4):**
+```cpp
+void process(const ProcessArgs& args) override {
+    args.sampleRate;  // e.g., 44100, 48000
+    args.sampleTime;  // 1.0 / sampleRate
+    args.frame;       // Current frame number
+}
+```
 
-- Complex algorithm design decisions
-- Performance optimization analysis
-- Architectural trade-off evaluation
-- Multi-stage processing coordination
-- Think deeply for complex analysis
-</model_and_thinking>
+### Port Methods
 
-<next_stage>
+```cpp
+// Inputs
+inputs[ID].getVoltage();           // First channel
+inputs[ID].getVoltage(c);          // Specific channel
+inputs[ID].getPolyVoltage(c);      // Mono-to-poly safe
+inputs[ID].getVoltageSum();        // Sum all channels
+inputs[ID].getChannels();          // Channel count
+inputs[ID].isConnected();          // Cable connected?
+
+// Outputs
+outputs[ID].setVoltage(v);         // First channel
+outputs[ID].setVoltage(v, c);      // Specific channel
+outputs[ID].setChannels(n);        // MUST call for poly!
+```
+
+### Useful DSP Classes
+
+```cpp
+dsp::SchmittTrigger     // Trigger detection with hysteresis
+dsp::PulseGenerator     // Generate trigger pulses
+dsp::Timer              // Time tracking
+dsp::ClockDivider       // Divide clock signals
+dsp::SlewLimiter        // Smooth value changes
+dsp::ExponentialFilter  // Smoothing filter
+dsp::RCFilter           // RC lowpass filter
+```
+
+### Constants
+
+```cpp
+dsp::FREQ_C4            // 261.6256f Hz (C4 reference)
+M_PI                    // 3.14159...
+```
+
+---
+
 ## Next Stage
 
-After Stage 2 succeeds:
+After Stage 2 succeeds, plugin-workflow will invoke panel-agent for Stage 3 (SVG panel and widget layout).
 
-1. **Auto-invoke plugin-testing skill** (5 automated tests)
-2. **If tests FAIL:** STOP, show results, wait for fixes
-3. **If tests PASS:** Continue to Stage 3 (gui-agent for WebView UI)
-
-The plugin now has:
+The module now has:
 
 - ✅ Build system (Stage 1)
-- ✅ Parameter system (Stage 1)
+- ✅ Parameters configured (Stage 1)
 - ✅ Audio processing (Stage 2)
-- ⏳ UI integration (Stage 3 - next)
-</next_stage>
+- ⏳ Panel design (Stage 3 - next)

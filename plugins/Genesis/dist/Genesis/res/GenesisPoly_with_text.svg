@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="50.8mm"
+   height="128.5mm"
+   viewBox="0 0 50.8 128.5"
+   version="1.1"
+   xmlns="http://www.w3.org/2000/svg">
+
+  <!-- Background -->
+  <rect style="fill:#1a1a1a" width="50.8" height="128.5" x="0" y="0"/>
+
+  <!-- Header area -->
+  <rect style="fill:#252525" width="50.8" height="14" x="0" y="0"/>
+
+  <!-- Blue + Red accent lines -->
+  <rect style="fill:#0088ff" width="50.8" height="0.5" x="0" y="14"/>
+  <rect style="fill:#ff4444" width="50.8" height="0.5" x="0" y="14.5"/>
+
+  <!-- Left column background (params) -->
+  <rect style="fill:#202020" width="22" height="100" x="1.7" y="16" rx="1"/>
+
+  <!-- Right column background (I/O) -->
+  <rect style="fill:#181818" width="22" height="100" x="27.1" y="16" rx="1"/>
+
+  <!-- Bottom accent -->
+  <rect style="fill:#ff4444" width="50.8" height="0.8" x="0" y="120"/>
+
+  <!-- Footer area -->
+  <rect style="fill:#252525" width="50.8" height="7.7" x="0" y="120.8"/>
+
+  <!-- Panel border -->
+  <rect style="fill:none;stroke:#333333;stroke-width:0.5" width="50.3" height="128" x="0.25" y="0.25"/>
+
+  <!-- Title text -->
+  <text style="font-family:Arial;font-size:4px;fill:#ffffff;font-weight:bold;text-anchor:middle" x="25.4" y="7">GENESIS</text>
+  <text style="font-family:Arial;font-size:2.5px;fill:#ff6666;text-anchor:middle" x="25.4" y="11">POLY</text>
+
+  <!-- Left column labels -->
+  <text style="font-family:Arial;font-size:2px;fill:#aaaaaa;text-anchor:middle" x="12.7" y="19">FREQ</text>
+  <text style="font-family:Arial;font-size:2px;fill:#aaaaaa;text-anchor:middle" x="12.7" y="34">FINE</text>
+  <text style="font-family:Arial;font-size:2px;fill:#aaaaaa;text-anchor:middle" x="12.7" y="47">WAVE</text>
+  <text style="font-family:Arial;font-size:2px;fill:#aaaaaa;text-anchor:middle" x="12.7" y="60">PW</text>
+  <text style="font-family:Arial;font-size:2px;fill:#aaaaaa;text-anchor:middle" x="12.7" y="73">BITS</text>
+  <text style="font-family:Arial;font-size:2px;fill:#aaaaaa;text-anchor:middle" x="12.7" y="86">RATE</text>
+  <text style="font-family:Arial;font-size:2px;fill:#aaaaaa;text-anchor:middle" x="12.7" y="99">FM AMT</text>
+  <text style="font-family:Arial;font-size:2px;fill:#aaaaaa;text-anchor:middle" x="12.7" y="112">RATIO</text>
+
+  <!-- Right column labels -->
+  <text style="font-family:Arial;font-size:2px;fill:#aaaaaa;text-anchor:middle" x="38.1" y="19">LEVEL</text>
+  <text style="font-family:Arial;font-size:2px;fill:#aaaaaa;text-anchor:middle" x="38.1" y="34">V/OCT</text>
+  <text style="font-family:Arial;font-size:2px;fill:#aaaaaa;text-anchor:middle" x="38.1" y="47">FM</text>
+  <text style="font-family:Arial;font-size:2px;fill:#aaaaaa;text-anchor:middle" x="38.1" y="60">SYNC</text>
+  <text style="font-family:Arial;font-size:2px;fill:#aaaaaa;text-anchor:middle" x="38.1" y="73">BITS</text>
+  <text style="font-family:Arial;font-size:2px;fill:#aaaaaa;text-anchor:middle" x="38.1" y="112">OUT</text>
+
+  <!-- Brand -->
+  <text style="font-family:Arial;font-size:1.5px;fill:#666666;text-anchor:middle" x="25.4" y="125">GLIX STUDIO</text>
+</svg>

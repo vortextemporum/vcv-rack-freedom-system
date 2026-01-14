@@ -2,16 +2,15 @@
 set -e
 
 # ============================================================================
-# build-and-install.sh - JUCE Plugin Build & Installation Script
+# build-and-install.sh - VCV Rack Plugin Build & Installation Script
 # ============================================================================
-# 7-Phase Pipeline:
+# 6-Phase Pipeline:
 #   1. Pre-flight Validation
-#   2. Parallel Build (VST3 + AU)
-#   3. Extract PRODUCT_NAME
+#   2. Build Plugin
+#   3. Extract Plugin Info
 #   4. Remove Old Versions
-#   5. Install New Versions
-#   6. Clear DAW Caches
-#   7. Verification
+#   5. Install New Version
+#   6. Verification
 # ============================================================================
 
 # Color output functions
@@ -33,25 +32,33 @@ info() {
 
 # Global variables
 PLUGIN_NAME=""
-PRODUCT_NAME=""
+PLUGIN_SLUG=""
 DRY_RUN=false
 NO_INSTALL=false
 VERBOSE=false
-RECONFIGURE=false
+CLEAN_BUILD=false
 LOG_FILE=""
 START_TIME=$(date +%s)
+
+# Detect architecture
+ARCH=$(uname -m)
+if [[ "$ARCH" == "arm64" ]]; then
+    ARCH_SUFFIX="mac-arm64"
+else
+    ARCH_SUFFIX="mac-x64"
+fi
 
 # Parse arguments
 parse_args() {
     if [ $# -eq 0 ]; then
-        echo "Usage: $0 <PluginName> [--dry-run] [--no-install] [--verbose] [--reconfigure]"
+        echo "Usage: $0 <PluginName> [--dry-run] [--no-install] [--verbose] [--clean]"
         echo ""
         echo "Arguments:"
         echo "  <PluginName>   Name of plugin directory in plugins/"
         echo "  --dry-run      Show commands without executing"
         echo "  --no-install   Build only, skip installation"
         echo "  --verbose      Show detailed output"
-        echo "  --reconfigure  Force CMake reconfiguration (delete build/ first)"
+        echo "  --clean        Clean build (make clean first)"
         exit 1
     fi
 
@@ -69,8 +76,8 @@ parse_args() {
             --verbose)
                 VERBOSE=true
                 ;;
-            --reconfigure)
-                RECONFIGURE=true
+            --clean)
+                CLEAN_BUILD=true
                 ;;
             *)
                 error "Unknown flag: $1"
@@ -90,7 +97,8 @@ setup_logging() {
     info "Log file: $LOG_FILE"
     echo "Build started at $(date)" > "$LOG_FILE"
     echo "Plugin: $PLUGIN_NAME" >> "$LOG_FILE"
-    echo "Flags: DRY_RUN=$DRY_RUN NO_INSTALL=$NO_INSTALL VERBOSE=$VERBOSE RECONFIGURE=$RECONFIGURE" >> "$LOG_FILE"
+    echo "Architecture: $ARCH ($ARCH_SUFFIX)" >> "$LOG_FILE"
+    echo "Flags: DRY_RUN=$DRY_RUN NO_INSTALL=$NO_INSTALL VERBOSE=$VERBOSE CLEAN_BUILD=$CLEAN_BUILD" >> "$LOG_FILE"
     echo "---" >> "$LOG_FILE"
 }
 
@@ -134,41 +142,58 @@ phase_1_preflight_validation() {
         exit 1
     fi
 
-    # Check CMakeLists.txt exists
-    info "  - Checking CMakeLists.txt..."
-    if [ ! -f "plugins/$PLUGIN_NAME/CMakeLists.txt" ]; then
-        error "CMakeLists.txt not found in plugins/$PLUGIN_NAME/"
-        echo "ERROR: CMakeLists.txt not found" >> "$LOG_FILE"
+    # Check Makefile exists
+    info "  - Checking Makefile..."
+    if [ ! -f "plugins/$PLUGIN_NAME/Makefile" ]; then
+        error "Makefile not found in plugins/$PLUGIN_NAME/"
+        echo "ERROR: Makefile not found" >> "$LOG_FILE"
         exit 1
     fi
 
-    # Check PRODUCT_NAME in CMakeLists.txt
-    info "  - Checking PRODUCT_NAME..."
-    if ! grep -q "PRODUCT_NAME" "plugins/$PLUGIN_NAME/CMakeLists.txt"; then
-        warning "PRODUCT_NAME not found in CMakeLists.txt (will use directory name as fallback)"
-        echo "WARNING: PRODUCT_NAME not found" >> "$LOG_FILE"
-    fi
-
-    # Check CMake available
-    info "  - Checking CMake..."
-    if ! command -v cmake &> /dev/null; then
-        error "CMake not found. Install with: brew install cmake"
-        echo "ERROR: CMake not found" >> "$LOG_FILE"
+    # Check plugin.json exists
+    info "  - Checking plugin.json..."
+    if [ ! -f "plugins/$PLUGIN_NAME/plugin.json" ]; then
+        error "plugin.json not found in plugins/$PLUGIN_NAME/"
+        echo "ERROR: plugin.json not found" >> "$LOG_FILE"
         exit 1
     fi
 
-    # Check Ninja available
-    info "  - Checking Ninja..."
-    if ! command -v ninja &> /dev/null; then
-        error "Ninja not found. Install with: brew install ninja"
-        echo "ERROR: Ninja not found" >> "$LOG_FILE"
+    # Check RACK_DIR is set or can be found
+    info "  - Checking RACK_DIR..."
+    if [ -z "$RACK_DIR" ]; then
+        # Try common locations
+        if [ -d "$HOME/Rack-SDK" ]; then
+            export RACK_DIR="$HOME/Rack-SDK"
+            info "  - Using RACK_DIR=$RACK_DIR"
+        elif [ -d "$HOME/Developer/Rack-SDK" ]; then
+            export RACK_DIR="$HOME/Developer/Rack-SDK"
+            info "  - Using RACK_DIR=$RACK_DIR"
+        elif [ -d "/usr/local/Rack-SDK" ]; then
+            export RACK_DIR="/usr/local/Rack-SDK"
+            info "  - Using RACK_DIR=$RACK_DIR"
+        else
+            error "RACK_DIR not set and Rack SDK not found at standard locations"
+            echo "ERROR: RACK_DIR not set" >> "$LOG_FILE"
+            exit 1
+        fi
+    else
+        info "  - RACK_DIR=$RACK_DIR"
+    fi
+    echo "RACK_DIR: $RACK_DIR" >> "$LOG_FILE"
+
+    # Verify Rack SDK exists
+    if [ ! -f "$RACK_DIR/plugin.mk" ]; then
+        error "Invalid Rack SDK: $RACK_DIR/plugin.mk not found"
+        echo "ERROR: Invalid Rack SDK" >> "$LOG_FILE"
         exit 1
     fi
 
-    # Optional: Check JUCE (usually found via CMake)
-    if [ -n "$JUCE_DIR" ]; then
-        info "  - Using JUCE_DIR: $JUCE_DIR"
-        echo "JUCE_DIR: $JUCE_DIR" >> "$LOG_FILE"
+    # Check make available
+    info "  - Checking make..."
+    if ! command -v make &> /dev/null; then
+        error "make not found. Install with: xcode-select --install"
+        echo "ERROR: make not found" >> "$LOG_FILE"
+        exit 1
     fi
 
     success "Pre-flight validation passed"
@@ -176,43 +201,43 @@ phase_1_preflight_validation() {
 }
 
 # ============================================================================
-# Phase 2: Parallel Build
+# Phase 2: Build Plugin
 # ============================================================================
 phase_2_build() {
     echo ""
-    info "Phase 2: Parallel Build"
-    echo "Phase 2: Parallel Build" >> "$LOG_FILE"
+    info "Phase 2: Build Plugin"
+    echo "Phase 2: Build Plugin" >> "$LOG_FILE"
 
-    local build_dir="build"
+    local plugin_dir="plugins/$PLUGIN_NAME"
 
-    # Handle --reconfigure flag
-    if [ "$RECONFIGURE" = true ] && [ -d "$build_dir" ]; then
-        info "  - Removing build directory for reconfiguration..."
+    # Handle --clean flag
+    if [ "$CLEAN_BUILD" = true ]; then
+        info "  - Cleaning previous build..."
         if [ "$DRY_RUN" = true ]; then
-            echo "[DRY-RUN] rm -rf \"$build_dir\""
+            echo "[DRY-RUN] make -C \"$plugin_dir\" clean"
         else
-            rm -rf "$build_dir"
-            echo "Removed build directory for reconfiguration" >> "$LOG_FILE"
+            make -C "$plugin_dir" clean >> "$LOG_FILE" 2>&1 || true
+            echo "Cleaned previous build" >> "$LOG_FILE"
         fi
     fi
 
-    # One-time configure at root (only if build/ doesn't exist)
-    if [ ! -d "$build_dir" ]; then
-        info "  - Configuring CMake at root with Ninja generator..."
-        if ! execute cmake -B "$build_dir" -G Ninja -DCMAKE_BUILD_TYPE=Release; then
-            error "CMake configuration failed"
-            echo "ERROR: CMake configuration failed" >> "$LOG_FILE"
-            exit 1
-        fi
-    else
-        info "  - Build directory exists, skipping configure (use --reconfigure to force)"
-    fi
+    # Build the plugin
+    info "  - Building $PLUGIN_NAME..."
+    local make_cmd="make -C \"$plugin_dir\" -j$(sysctl -n hw.ncpu)"
 
-    # Build specific plugin using --target flags
-    info "  - Building ${PLUGIN_NAME} (VST3 + AU) in parallel..."
-    if ! execute cmake --build "$build_dir" --config Release --target "${PLUGIN_NAME}_VST3" --target "${PLUGIN_NAME}_AU" --parallel; then
+    if ! execute $make_cmd; then
         error "Build failed"
         echo "ERROR: Build failed" >> "$LOG_FILE"
+        echo ""
+        echo "Build log: $LOG_FILE"
+        exit 1
+    fi
+
+    # Create distribution package
+    info "  - Creating distribution package..."
+    if ! execute "make -C \"$plugin_dir\" dist"; then
+        error "Distribution package creation failed"
+        echo "ERROR: dist failed" >> "$LOG_FILE"
         exit 1
     fi
 
@@ -221,30 +246,34 @@ phase_2_build() {
 }
 
 # ============================================================================
-# Phase 3: Extract PRODUCT_NAME
+# Phase 3: Extract Plugin Info
 # ============================================================================
-phase_3_extract_product_name() {
+phase_3_extract_plugin_info() {
     echo ""
-    info "Phase 3: Extract PRODUCT_NAME"
-    echo "Phase 3: Extract PRODUCT_NAME" >> "$LOG_FILE"
+    info "Phase 3: Extract Plugin Info"
+    echo "Phase 3: Extract Plugin Info" >> "$LOG_FILE"
 
-    # Parse PRODUCT_NAME from CMakeLists.txt
-    info "  - Parsing CMakeLists.txt..."
-    PRODUCT_NAME=$(grep 'PRODUCT_NAME' "plugins/$PLUGIN_NAME/CMakeLists.txt" | \
-                   sed -E 's/.*PRODUCT_NAME[[:space:]]+"([^"]+)".*/\1/' | \
-                   head -1)
+    local plugin_json="plugins/$PLUGIN_NAME/plugin.json"
 
-    # Validate extraction succeeded
-    if [ -z "$PRODUCT_NAME" ]; then
-        warning "Could not extract PRODUCT_NAME, using directory name as fallback"
-        PRODUCT_NAME="$PLUGIN_NAME"
-        echo "WARNING: Using fallback PRODUCT_NAME=$PRODUCT_NAME" >> "$LOG_FILE"
+    # Extract slug from plugin.json
+    info "  - Parsing plugin.json..."
+    PLUGIN_SLUG=$(jq -r '.slug' "$plugin_json")
+
+    if [ -z "$PLUGIN_SLUG" ] || [ "$PLUGIN_SLUG" = "null" ]; then
+        warning "Could not extract slug, using directory name as fallback"
+        PLUGIN_SLUG="$PLUGIN_NAME"
+        echo "WARNING: Using fallback PLUGIN_SLUG=$PLUGIN_SLUG" >> "$LOG_FILE"
     else
-        info "  - Product name: $PRODUCT_NAME"
-        echo "PRODUCT_NAME: $PRODUCT_NAME" >> "$LOG_FILE"
+        info "  - Plugin slug: $PLUGIN_SLUG"
+        echo "PLUGIN_SLUG: $PLUGIN_SLUG" >> "$LOG_FILE"
     fi
 
-    success "Product name extracted: $PRODUCT_NAME"
+    # Extract version
+    local version=$(jq -r '.version' "$plugin_json")
+    info "  - Plugin version: $version"
+    echo "VERSION: $version" >> "$LOG_FILE"
+
+    success "Plugin info extracted: $PLUGIN_SLUG v$version"
 }
 
 # ============================================================================
@@ -255,223 +284,185 @@ phase_4_remove_old_versions() {
     info "Phase 4: Remove Old Versions"
     echo "Phase 4: Remove Old Versions" >> "$LOG_FILE"
 
-    local vst3_dir="$HOME/Library/Audio/Plug-Ins/VST3"
-    local au_dir="$HOME/Library/Audio/Plug-Ins/Components"
+    # VCV Rack 2 plugins directory
+    local rack_plugins_dir
 
-    # Search for existing VST3
-    info "  - Searching for old VST3..."
-    if [ -d "$vst3_dir/$PRODUCT_NAME.vst3" ]; then
-        if [ "$DRY_RUN" = true ]; then
-            echo "[DRY-RUN] Would remove: $vst3_dir/$PRODUCT_NAME.vst3"
-        else
-            info "  - Removing old VST3: $vst3_dir/$PRODUCT_NAME.vst3"
-            rm -rf "$vst3_dir/$PRODUCT_NAME.vst3"
-            echo "Removed old VST3: $vst3_dir/$PRODUCT_NAME.vst3" >> "$LOG_FILE"
-        fi
+    # Check for Rack 2 plugins directory
+    if [ -d "$HOME/Documents/Rack2/plugins" ]; then
+        rack_plugins_dir="$HOME/Documents/Rack2/plugins"
+    elif [ -d "$HOME/.Rack2/plugins" ]; then
+        rack_plugins_dir="$HOME/.Rack2/plugins"
+    elif [ -d "$HOME/Library/Application Support/Rack2/plugins" ]; then
+        rack_plugins_dir="$HOME/Library/Application Support/Rack2/plugins"
     else
-        info "  - No old VST3 found"
-        echo "No old VST3 found" >> "$LOG_FILE"
+        warning "VCV Rack 2 plugins directory not found"
+        echo "WARNING: Rack plugins directory not found" >> "$LOG_FILE"
+        return 0
     fi
 
-    # Search for existing AU
-    info "  - Searching for old AU..."
-    if [ -d "$au_dir/$PRODUCT_NAME.component" ]; then
+    info "  - Plugins directory: $rack_plugins_dir"
+    echo "PLUGINS_DIR: $rack_plugins_dir" >> "$LOG_FILE"
+
+    # Search for existing plugin
+    info "  - Searching for old plugin..."
+    if [ -d "$rack_plugins_dir/$PLUGIN_SLUG" ]; then
         if [ "$DRY_RUN" = true ]; then
-            echo "[DRY-RUN] Would remove: $au_dir/$PRODUCT_NAME.component"
+            echo "[DRY-RUN] Would remove: $rack_plugins_dir/$PLUGIN_SLUG"
         else
-            info "  - Removing old AU: $au_dir/$PRODUCT_NAME.component"
-            rm -rf "$au_dir/$PRODUCT_NAME.component"
-            echo "Removed old AU: $au_dir/$PRODUCT_NAME.component" >> "$LOG_FILE"
+            info "  - Removing old plugin: $rack_plugins_dir/$PLUGIN_SLUG"
+            rm -rf "$rack_plugins_dir/$PLUGIN_SLUG"
+            echo "Removed old plugin: $rack_plugins_dir/$PLUGIN_SLUG" >> "$LOG_FILE"
         fi
     else
-        info "  - No old AU found"
-        echo "No old AU found" >> "$LOG_FILE"
+        info "  - No old plugin found"
+        echo "No old plugin found" >> "$LOG_FILE"
     fi
 
     success "Old versions removed"
 }
 
 # ============================================================================
-# Phase 5: Install New Versions
+# Phase 5: Install New Version
 # ============================================================================
-phase_5_install_new_versions() {
+phase_5_install_new_version() {
     echo ""
-    info "Phase 5: Install New Versions"
-    echo "Phase 5: Install New Versions" >> "$LOG_FILE"
+    info "Phase 5: Install New Version"
+    echo "Phase 5: Install New Version" >> "$LOG_FILE"
 
-    local vst3_dir="$HOME/Library/Audio/Plug-Ins/VST3"
-    local au_dir="$HOME/Library/Audio/Plug-Ins/Components"
-    local vst3_build="build/plugins/$PLUGIN_NAME/${PLUGIN_NAME}_artefacts/Release/VST3/$PRODUCT_NAME.vst3"
-    local au_build="build/plugins/$PLUGIN_NAME/${PLUGIN_NAME}_artefacts/Release/AU/$PRODUCT_NAME.component"
+    # VCV Rack 2 plugins directory
+    local rack_plugins_dir
 
-    # Verify VST3 artifact exists (skip in dry-run)
-    info "  - Locating VST3 build artifact..."
-    if [ "$DRY_RUN" = false ] && [ ! -d "$vst3_build" ]; then
-        error "VST3 build artifact not found: $vst3_build"
-        echo "ERROR: VST3 artifact not found" >> "$LOG_FILE"
-        exit 1
-    fi
-
-    # Verify AU artifact exists (skip in dry-run)
-    info "  - Locating AU build artifact..."
-    if [ "$DRY_RUN" = false ] && [ ! -d "$au_build" ]; then
-        error "AU build artifact not found: $au_build"
-        echo "ERROR: AU artifact not found" >> "$LOG_FILE"
-        exit 1
-    fi
-
-    # Install VST3
-    info "  - Installing VST3 to $vst3_dir/"
-    if [ "$DRY_RUN" = true ]; then
-        echo "[DRY-RUN] cp -R \"$vst3_build\" \"$vst3_dir/\""
-        echo "[DRY-RUN] chmod -R 755 \"$vst3_dir/$PRODUCT_NAME.vst3\""
+    # Check for Rack 2 plugins directory
+    if [ -d "$HOME/Documents/Rack2/plugins" ]; then
+        rack_plugins_dir="$HOME/Documents/Rack2/plugins"
+    elif [ -d "$HOME/.Rack2/plugins" ]; then
+        rack_plugins_dir="$HOME/.Rack2/plugins"
+    elif [ -d "$HOME/Library/Application Support/Rack2/plugins" ]; then
+        rack_plugins_dir="$HOME/Library/Application Support/Rack2/plugins"
     else
-        cp -R "$vst3_build" "$vst3_dir/"
-        chmod -R 755 "$vst3_dir/$PRODUCT_NAME.vst3"
-        echo "Installed VST3: $vst3_dir/$PRODUCT_NAME.vst3" >> "$LOG_FILE"
+        # Create default directory
+        rack_plugins_dir="$HOME/Documents/Rack2/plugins"
+        mkdir -p "$rack_plugins_dir"
+        info "  - Created plugins directory: $rack_plugins_dir"
     fi
 
-    # Install AU
-    info "  - Installing AU to $au_dir/"
-    if [ "$DRY_RUN" = true ]; then
-        echo "[DRY-RUN] cp -R \"$au_build\" \"$au_dir/\""
-        echo "[DRY-RUN] chmod -R 755 \"$au_dir/$PRODUCT_NAME.component\""
-    else
-        cp -R "$au_build" "$au_dir/"
-        chmod -R 755 "$au_dir/$PRODUCT_NAME.component"
-        echo "Installed AU: $au_dir/$PRODUCT_NAME.component" >> "$LOG_FILE"
+    # Find the built .vcvplugin file
+    local plugin_dir="plugins/$PLUGIN_NAME"
+    local dist_dir="$plugin_dir/dist"
+
+    # Look for the plugin package
+    local plugin_file=""
+    if [ -f "$dist_dir/$PLUGIN_SLUG-*.vcvplugin" ]; then
+        plugin_file=$(ls -t "$dist_dir"/$PLUGIN_SLUG-*.vcvplugin 2>/dev/null | head -1)
     fi
 
-    success "New versions installed"
-}
+    # Fallback: look for any .vcvplugin
+    if [ -z "$plugin_file" ]; then
+        plugin_file=$(ls -t "$dist_dir"/*.vcvplugin 2>/dev/null | head -1)
+    fi
 
-# ============================================================================
-# Phase 6: Clear DAW Caches
-# ============================================================================
-phase_6_clear_daw_caches() {
-    echo ""
-    info "Phase 6: Clear DAW Caches"
-    echo "Phase 6: Clear DAW Caches" >> "$LOG_FILE"
-
-    local ableton_prefs="$HOME/Library/Preferences/Ableton"
-    local au_cache="$HOME/Library/Caches/AudioUnitCache"
-
-    # Clear Ableton plugin database (forces rescan)
-    info "  - Clearing Ableton plugin database..."
-    if [ "$DRY_RUN" = true ]; then
-        echo "[DRY-RUN] rm -f \"$ableton_prefs\"/*/PluginScanDb.txt"
-    else
-        if [ -d "$ableton_prefs" ]; then
-            rm -f "$ableton_prefs"/*/PluginScanDb.txt 2>/dev/null || true
-            echo "Cleared Ableton plugin database" >> "$LOG_FILE"
+    if [ -z "$plugin_file" ] || [ ! -f "$plugin_file" ]; then
+        # Alternative: check if plugin directory exists (unzipped format)
+        if [ -d "$plugin_dir/plugin" ]; then
+            info "  - Installing from unzipped plugin directory..."
+            if [ "$DRY_RUN" = true ]; then
+                echo "[DRY-RUN] cp -R \"$plugin_dir/plugin\" \"$rack_plugins_dir/$PLUGIN_SLUG\""
+            else
+                cp -R "$plugin_dir/plugin" "$rack_plugins_dir/$PLUGIN_SLUG"
+                echo "Installed from directory: $plugin_dir/plugin" >> "$LOG_FILE"
+            fi
         else
-            info "  - Ableton preferences directory not found (skipping)"
-            echo "Ableton preferences not found" >> "$LOG_FILE"
+            error "Plugin package not found in $dist_dir/"
+            echo "ERROR: Plugin package not found" >> "$LOG_FILE"
+            exit 1
+        fi
+    else
+        # Install from .vcvplugin file (it's a zip)
+        info "  - Installing from: $plugin_file"
+        if [ "$DRY_RUN" = true ]; then
+            echo "[DRY-RUN] unzip -o \"$plugin_file\" -d \"$rack_plugins_dir/\""
+        else
+            unzip -o "$plugin_file" -d "$rack_plugins_dir/" >> "$LOG_FILE" 2>&1
+            echo "Installed: $plugin_file" >> "$LOG_FILE"
         fi
     fi
 
-    # Clear Audio Unit cache
-    info "  - Clearing Audio Unit cache..."
-    if [ "$DRY_RUN" = true ]; then
-        echo "[DRY-RUN] rm -rf \"$au_cache\"/*"
-    else
-        if [ -d "$au_cache" ]; then
-            rm -rf "$au_cache"/* 2>/dev/null || true
-            echo "Cleared AU cache" >> "$LOG_FILE"
-        else
-            info "  - AU cache directory not found (skipping)"
-            echo "AU cache not found" >> "$LOG_FILE"
-        fi
-    fi
-
-    # Kill AudioComponentRegistrar process
-    info "  - Killing AudioComponentRegistrar..."
-    if [ "$DRY_RUN" = true ]; then
-        echo "[DRY-RUN] killall -9 AudioComponentRegistrar 2>/dev/null || true"
-    else
-        killall -9 AudioComponentRegistrar 2>/dev/null || true
-        echo "Killed AudioComponentRegistrar" >> "$LOG_FILE"
-    fi
-
-    success "DAW caches cleared"
+    success "New version installed"
 }
 
 # ============================================================================
-# Phase 7: Verification
+# Phase 6: Verification
 # ============================================================================
-phase_7_verification() {
+phase_6_verification() {
     echo ""
-    info "Phase 7: Verification"
-    echo "Phase 7: Verification" >> "$LOG_FILE"
+    info "Phase 6: Verification"
+    echo "Phase 6: Verification" >> "$LOG_FILE"
 
-    local vst3_dir="$HOME/Library/Audio/Plug-Ins/VST3"
-    local au_dir="$HOME/Library/Audio/Plug-Ins/Components"
-    local vst3_path="$vst3_dir/$PRODUCT_NAME.vst3"
-    local au_path="$au_dir/$PRODUCT_NAME.component"
+    # VCV Rack 2 plugins directory
+    local rack_plugins_dir
 
-    # Check VST3 exists (skip in dry-run)
-    info "  - Checking VST3 exists..."
-    if [ "$DRY_RUN" = false ] && [ ! -d "$vst3_path" ]; then
-        error "VST3 not found at: $vst3_path"
-        echo "ERROR: VST3 verification failed" >> "$LOG_FILE"
-        exit 1
+    if [ -d "$HOME/Documents/Rack2/plugins" ]; then
+        rack_plugins_dir="$HOME/Documents/Rack2/plugins"
+    elif [ -d "$HOME/.Rack2/plugins" ]; then
+        rack_plugins_dir="$HOME/.Rack2/plugins"
+    elif [ -d "$HOME/Library/Application Support/Rack2/plugins" ]; then
+        rack_plugins_dir="$HOME/Library/Application Support/Rack2/plugins"
     fi
 
-    # Check AU exists (skip in dry-run)
-    info "  - Checking AU exists..."
-    if [ "$DRY_RUN" = false ] && [ ! -d "$au_path" ]; then
-        error "AU not found at: $au_path"
-        echo "ERROR: AU verification failed" >> "$LOG_FILE"
+    local plugin_path="$rack_plugins_dir/$PLUGIN_SLUG"
+
+    # Check plugin exists (skip in dry-run)
+    info "  - Checking plugin exists..."
+    if [ "$DRY_RUN" = false ] && [ ! -d "$plugin_path" ]; then
+        error "Plugin not found at: $plugin_path"
+        echo "ERROR: Plugin verification failed" >> "$LOG_FILE"
         exit 1
     fi
 
     if [ "$DRY_RUN" = true ]; then
         # In dry-run mode, just show what would be verified
-        info "  - Would check timestamps..."
-        info "  - Would check file sizes..."
+        info "  - Would check plugin files..."
         echo ""
         success "Verification complete (dry-run)"
         echo ""
         info "Would verify:"
-        echo "  VST3: $vst3_path"
-        echo "  AU:   $au_path"
+        echo "  Plugin: $plugin_path"
     else
-        # Check timestamps (modified within last 60 seconds)
-        info "  - Checking timestamps..."
-        local now=$(date +%s)
-        local vst3_mtime=$(stat -f %m "$vst3_path" 2>/dev/null || echo 0)
-        local au_mtime=$(stat -f %m "$au_path" 2>/dev/null || echo 0)
-        local vst3_age=$((now - vst3_mtime))
-        local au_age=$((now - au_mtime))
+        # Check required files
+        info "  - Checking plugin files..."
 
-        if [ $vst3_age -gt 60 ]; then
-            warning "VST3 timestamp is older than 60 seconds (${vst3_age}s) - may not be fresh build"
-            echo "WARNING: VST3 timestamp: ${vst3_age}s old" >> "$LOG_FILE"
+        local has_plugin_json=false
+        local has_dylib=false
+
+        if [ -f "$plugin_path/plugin.json" ]; then
+            has_plugin_json=true
         fi
 
-        if [ $au_age -gt 60 ]; then
-            warning "AU timestamp is older than 60 seconds (${au_age}s) - may not be fresh build"
-            echo "WARNING: AU timestamp: ${au_age}s old" >> "$LOG_FILE"
+        if ls "$plugin_path"/*.dylib >/dev/null 2>&1; then
+            has_dylib=true
         fi
 
-        # Get file sizes
-        info "  - Checking file sizes..."
-        local vst3_size=$(du -sh "$vst3_path" | cut -f1)
-        local au_size=$(du -sh "$au_path" | cut -f1)
+        if [ "$has_plugin_json" = false ]; then
+            warning "plugin.json not found in installed plugin"
+        fi
+
+        if [ "$has_dylib" = false ]; then
+            warning "No .dylib found in installed plugin"
+        fi
+
+        # Get plugin size
+        local plugin_size=$(du -sh "$plugin_path" | cut -f1)
 
         echo ""
         success "Verification complete"
         echo ""
-        info "Installed plugins:"
-        echo "  VST3: $vst3_path"
-        echo "        Size: $vst3_size, Age: ${vst3_age}s"
-        echo "  AU:   $au_path"
-        echo "        Size: $au_size, Age: ${au_age}s"
+        info "Installed plugin:"
+        echo "  Path: $plugin_path"
+        echo "  Size: $plugin_size"
 
         echo "" >> "$LOG_FILE"
         echo "Verification: PASS" >> "$LOG_FILE"
-        echo "VST3: $vst3_path ($vst3_size, ${vst3_age}s old)" >> "$LOG_FILE"
-        echo "AU: $au_path ($au_size, ${au_age}s old)" >> "$LOG_FILE"
+        echo "Plugin: $plugin_path ($plugin_size)" >> "$LOG_FILE"
     fi
 }
 
@@ -483,7 +474,7 @@ main() {
     setup_logging
 
     echo "============================================================================"
-    echo "JUCE Plugin Build & Installation: $PLUGIN_NAME"
+    echo "VCV Rack Plugin Build & Installation: $PLUGIN_NAME"
     echo "============================================================================"
 
     # Phase 1: Pre-flight Validation
@@ -508,20 +499,17 @@ main() {
         exit 0
     fi
 
-    # Phase 3: Extract PRODUCT_NAME
-    phase_3_extract_product_name
+    # Phase 3: Extract Plugin Info
+    phase_3_extract_plugin_info
 
     # Phase 4: Remove Old Versions
     phase_4_remove_old_versions
 
-    # Phase 5: Install New Versions
-    phase_5_install_new_versions
+    # Phase 5: Install New Version
+    phase_5_install_new_version
 
-    # Phase 6: Clear DAW Caches
-    phase_6_clear_daw_caches
-
-    # Phase 7: Verification
-    phase_7_verification
+    # Phase 6: Verification
+    phase_6_verification
 
     # Final success message
     echo ""
@@ -533,6 +521,9 @@ main() {
     local duration=$((end_time - START_TIME))
     info "Total time: ${duration}s"
     info "Log: $LOG_FILE"
+
+    echo ""
+    info "To test: Open VCV Rack and add the module from the browser"
 
     echo "" >> "$LOG_FILE"
     echo "Build completed at $(date)" >> "$LOG_FILE"

@@ -1,30 +1,30 @@
 ---
 name: test
-description: Validate plugins through automated tests
+description: Validate modules through automated tests
 ---
 
 # /test
 
-When user runs `/test [PluginName?] [mode?]`, invoke the plugin-testing skill or build-automation skill.
+When user runs `/test [ModuleName?] [mode?]`, invoke the plugin-testing skill or build-automation skill.
 
 ## Preconditions
 
 <preconditions enforcement="blocking">
-  <check target="PLUGINS.md" condition="plugin_exists">
-    Plugin entry MUST exist in PLUGINS.md
+  <check target="PLUGINS.md" condition="module_exists">
+    Module entry MUST exist in PLUGINS.md
   </check>
   <check target="PLUGINS.md::status" condition="not_equals(💡 Ideated)">
     Status MUST NOT be 💡 Ideated (requires implementation to test)
   </check>
   <rejection_message status="💡 Ideated">
-[PluginName] is not implemented yet (Status: 💡 Ideated).
-Use /implement [PluginName] to build it first.
+[ModuleName] is not implemented yet (Status: 💡 Ideated).
+Use /implement [ModuleName] to build it first.
   </rejection_message>
 </preconditions>
 
 <state_interactions>
   <reads>
-    - PLUGINS.md (plugin status, test capabilities)
+    - PLUGINS.md (module status, test capabilities)
   </reads>
   <writes>
     - None (testing results logged to console, skills handle any state updates)
@@ -34,7 +34,7 @@ Use /implement [PluginName] to build it first.
 ## Three Test Methods
 
 **Mode: automated (plugin-testing skill)**
-- **Requirement:** plugins/{PluginName}/Tests/ directory exists
+- **Requirement:** plugins/{ModuleName}/Tests/ directory exists
 - **Invocation:** Invoke the plugin-testing skill via Skill tool
 - **Duration:** ~2 minutes
 - **Tests:** Parameter stability (all combinations, edge cases), state save/restore (preset corruption), processing stability (buffer sizes, sample rates), thread safety (concurrent access), edge case handling (silence, extremes, denormals)
@@ -43,7 +43,7 @@ Use /implement [PluginName] to build it first.
 - **Requirement:** Always available (no dependencies)
 - **Invocation:** Invoke the build-automation skill via Skill tool
 - **Duration:** 5-10 minutes
-- **Steps:** Build Release mode (VST3 + AU), run pluginval validation tool with strict settings (level 10), install to system folders, clear DAW caches
+- **Steps:** Run make to build .vcvplugin, install to ~/Documents/Rack2/plugins/, verify module loads in VCV Rack
 
 **Mode: manual (checklist only)**
 - **Requirement:** Always available
@@ -54,9 +54,9 @@ Use /implement [PluginName] to build it first.
 
 <behavior>
   <case arguments="none">
-    List available plugins with test status from PLUGINS.md
+    List available modules with test status from PLUGINS.md
   </case>
-  <case arguments="plugin_only">
+  <case arguments="module_only">
     Present test method decision menu (adapt based on Tests/ directory existence)
   </case>
   <case arguments="plugin_and_mode">
@@ -71,12 +71,12 @@ This command is auto-invoked by plugin-workflow after Stages 2 (DSP) and 3 (GUI)
 ## Error Handling
 
 <error_handling>
-  <on_failure type="automated_tests|build|pluginval">
+  <on_failure type="automated_tests|build|make (build validation)">
     Present standard failure menu:
     1. Investigate (trigger deep-research skill)
     2. Show me the code
     3. Show full output
-    4. I'll fix it manually (or continue anyway for pluginval)
+    4. I'll fix it manually (or continue anyway for make (build validation))
   </on_failure>
 </error_handling>
 

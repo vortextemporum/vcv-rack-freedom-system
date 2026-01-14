@@ -1,6 +1,6 @@
 ---
 name: plugin-workflow
-description: Orchestrates JUCE plugin implementation through stages 1-3 (Foundation, DSP, GUI) using subagent delegation with automatic validation after each stage. Use when implementing plugins after planning completes, or when resuming with /continue command. Invoked by /implement command.
+description: Orchestrates VCV Rack module implementation through stages 1-3 (Foundation, DSP, Widget) using subagent delegation with automatic validation after each stage. Use when implementing modules after planning completes, or when resuming with /continue command. Invoked by /implement command.
 allowed-tools:
   - Task # REQUIRED - All stages 1-3 MUST invoke subagents
   - Bash # For git commits
@@ -11,40 +11,40 @@ preconditions:
   - architecture.md must exist (from /plan)
   - plan.md must exist (from /plan)
   - Status must be 🚧 Planning Complete OR resuming from 🚧 Stage 1+
-  - Plugin must NOT be ✅ Working or 📦 Installed (use /improve instead)
+  - Module must NOT be ✅ Working or 📦 Installed (use /improve instead)
 ---
 
 # plugin-workflow Skill
 
-**Purpose:** Pure orchestrator for stages 1-3 of JUCE plugin implementation with automatic validation after each stage. This skill delegates to specialized subagents and validation-agent for continuous quality assurance.
+**Purpose:** Pure orchestrator for stages 1-3 of VCV Rack module implementation with automatic validation after each stage. This skill delegates to specialized subagents and validation-agent for continuous quality assurance.
 
 ## Overview
 
 Implementation milestones:
-- **Build System Ready** (Stage 1): Create build system and implement parameters (foundation-shell-agent)
+- **Build System Ready** (Stage 1): Create build system and implement parameters (foundation-agent)
 - **Audio Engine Working** (Stage 2): Implement audio processing (dsp-agent)
-- **UI Integrated** (Stage 3): Connect WebView interface to audio engine (gui-agent)
+- **UI Integrated** (Stage 3): Connect SVG panel interface to audio engine (widget-agent)
 
 Stage 0 (Research & Planning) is handled by `plugin-planning` skill.
 
-After Stage 3 completes, plugin is ready for installation (no separate validation stage - validation is automatic and continuous).
+After Stage 3 completes, module is ready for installation (no separate validation stage - validation is automatic and continuous).
 
 ## Delegation Protocol
 
-**CRITICAL:** Stages 1-3 MUST invoke subagents via Task tool. This skill is a pure orchestrator and NEVER implements plugin code directly.
+**CRITICAL:** Stages 1-3 MUST invoke subagents via Task tool. This skill is a pure orchestrator and NEVER implements module code directly.
 
 **Delegation sequence for every stage:**
 1. Load contracts in parallel (architecture.md, plan.md, parameter-spec.md, creative-brief.md)
-2. Read Required Reading (juce8-critical-patterns.md) once at workflow start
-3. Construct minimal prompt with plugin name + stage + Required Reading
+2. Read Required Reading (vcv-rack-critical-patterns.md) once at workflow start
+3. Construct minimal prompt with module name + stage + Required Reading
 4. Invoke subagent via Task tool
 5. After subagent returns, invoke validation-agent (ALL stages 1-3)
 6. Execute checkpoint protocol (see references/checkpoint-protocol.md)
 
 **Stage routing:**
-- Stage 1 → foundation-shell-agent
+- Stage 1 → foundation-agent
 - Stage 2 → dsp-agent
-- Stage 3 → gui-agent
+- Stage 3 → widget-agent
 
 **Validation routing:**
 After each stage completes, validation-agent runs automatically with enhanced runtime validation (compile-time + runtime tests). If validation fails with `continue_to_next_stage: false`, workflow BLOCKS until issues resolved.
@@ -52,22 +52,22 @@ After each stage completes, validation-agent runs automatically with enhanced ru
 ## Preconditions
 
 Before starting Stage 1, verify these contract files exist:
-- `plugins/$PLUGIN_NAME/.ideas/architecture.md` (from Stage 0)
-- `plugins/$PLUGIN_NAME/.ideas/plan.md` (from Stage 0)
-- `plugins/$PLUGIN_NAME/.ideas/creative-brief.md` (from ideation)
-- `plugins/$PLUGIN_NAME/.ideas/parameter-spec.md` (from UI mockup finalization)
+- `plugins/$MODULE_NAME/.ideas/architecture.md` (from Stage 0)
+- `plugins/$MODULE_NAME/.ideas/plan.md` (from Stage 0)
+- `plugins/$MODULE_NAME/.ideas/creative-brief.md` (from ideation)
+- `plugins/$MODULE_NAME/.ideas/parameter-spec.md` (from UI mockup finalization)
 
 **If parameter-spec-draft.md exists but parameter-spec.md missing:**
-Block with message: "Draft parameters found, but full specification required. Complete UI mockup workflow to generate parameter-spec.md. Run: /dream [PluginName] → option 2 (Full UI mockup first)"
+Block with message: "Draft parameters found, but full specification required. Complete UI mockup workflow to generate parameter-spec.md. Run: /dream [ModuleName] → option 2 (Full UI mockup first)"
 
 **If contracts missing:**
-Block and instruct user to run `/plan [PluginName]` to complete Stage 0.
+Block and instruct user to run `/plan [ModuleName]` to complete Stage 0.
 
 See [references/precondition-checks.md](references/precondition-checks.md) for implementation.
 
 ## Resume Entry Point
 
-When resuming via `/continue [PluginName]`:
+When resuming via `/continue [ModuleName]`:
 
 1. Verify state integrity (see references/state-management.md#verifyStateIntegrity)
 2. Parse `.continue-here.md` for current stage and workflow mode
@@ -90,7 +90,7 @@ Determine whether to auto-progress (express mode) or present menus (manual mode)
 **Express mode behavior:**
 - Auto-progress through stages without menus
 - Drops to manual on ANY error (build failures, validation failures, etc.)
-- Final menu always appears after Stage 3 (plugin complete)
+- Final menu always appears after Stage 3 (module complete)
 
 See [references/workflow-mode.md](references/workflow-mode.md) for implementation.
 
@@ -191,10 +191,10 @@ See [references/state-management.md](references/state-management.md) for fallbac
 
 ## Required Reading Injection
 
-All subagents (stages 1-3) receive `troubleshooting/patterns/juce8-critical-patterns.md` to prevent repeat mistakes.
+All subagents (stages 1-3) receive `troubleshooting/patterns/vcv-rack-critical-patterns.md` to prevent repeat mistakes.
 
 **Implementation:**
-1. Read juce8-critical-patterns.md ONCE at workflow start
+1. Read vcv-rack-critical-patterns.md ONCE at workflow start
 2. Prepend to all subagent prompts with clear separator
 3. Pass to each subagent invocation from memory (no re-reading)
 
@@ -202,9 +202,9 @@ All subagents (stages 1-3) receive `troubleshooting/patterns/juce8-critical-patt
 
 Each stage has detailed documentation in references/:
 
-- [stage-1-foundation-shell.md](references/stage-1-foundation-shell.md) - foundation-shell-agent prompt template
+- [stage-1-foundation-shell.md](references/stage-1-foundation-shell.md) - foundation-agent prompt template
 - [stage-2-dsp.md](references/stage-2-dsp.md) - dsp-agent prompt template
-- [stage-3-gui.md](references/stage-3-gui.md) - gui-agent prompt template
+- [stage-3-gui.md](references/stage-3-gui.md) - widget-agent prompt template
 - [state-management.md](references/state-management.md) - State functions
 - [dispatcher-pattern.md](references/dispatcher-pattern.md) - Routing logic
 - [precondition-checks.md](references/precondition-checks.md) - Contract validation
@@ -224,9 +224,9 @@ Each stage has detailed documentation in references/:
 - `context-resume` skill (when resuming implementation)
 
 **Invokes via Task tool:**
-- `foundation-shell-agent` (Stage 1) - REQUIRED
+- `foundation-agent` (Stage 1) - REQUIRED
 - `dsp-agent` (Stage 2) - REQUIRED
-- `gui-agent` (Stage 3) - REQUIRED
+- `widget-agent` (Stage 3) - REQUIRED
 - `validation-agent` (Stages 1-3) - REQUIRED, BLOCKING on runtime failures
 
 **Also invokes:**
@@ -244,12 +244,12 @@ Each stage has detailed documentation in references/:
 - .continue-here.md (after each stage)
 
 **Deletes after Stage 3:**
-- .continue-here.md (workflow complete, plugin ready for installation)
+- .continue-here.md (workflow complete, module ready for installation)
 
 ## Error Handling
 
 **Contract files missing before Stage 1:**
-Block and instruct user to run `/plan [PluginName]`.
+Block and instruct user to run `/plan [ModuleName]`.
 
 **Build fails during subagent execution:**
 Subagent returns error. Present menu:
@@ -259,7 +259,7 @@ Subagent returns error. Present menu:
 4. Manual fix (resume with /continue)
 
 **State mismatch detected (exit 2):**
-BLOCKING error - user must run `/reconcile [PluginName]` to fix.
+BLOCKING error - user must run `/reconcile [ModuleName]` to fix.
 
 **Validation fails with continue_to_next_stage: false:**
 BLOCKING error. Present menu with investigation options. Workflow cannot proceed until issues resolved.
@@ -329,7 +329,7 @@ Common pitfalls to AVOID:
 
 **HIGH:**
 - ❌ Skipping phase detection for Stages 2-3 when complexity ≥3
-- ✓ Read plan.md to check for phases BEFORE invoking dsp-agent or gui-agent
+- ✓ Read plan.md to check for phases BEFORE invoking dsp-agent or widget-agent
 
 **HIGH:**
 - ❌ Skipping validation after subagent completes
@@ -337,4 +337,4 @@ Common pitfalls to AVOID:
 
 **MEDIUM:**
 - ❌ Not injecting Required Reading to subagents
-- ✓ Always pass juce8-critical-patterns.md to prevent repeat mistakes
+- ✓ Always pass vcv-rack-critical-patterns.md to prevent repeat mistakes

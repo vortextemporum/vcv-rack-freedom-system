@@ -1,0 +1,20 @@
+{
+  "slug": "AutoClip",
+  "name": "AutoClip",
+  "version": "2.0.0",
+  "license": "GPL-3.0-or-later",
+  "brand": "GLIX STUDIO (BETA)",
+  "author": "GLIX STUDIO",
+  "modules": [
+    {
+      "slug": "AutoClip",
+      "name": "Auto Clip",
+      "description": "Lookahead hard clipper with automatic gain compensation",
+      "tags": [
+        "Limiter",
+        "Dynamics",
+        "Distortion"
+      ]
+    }
+  ]
+}

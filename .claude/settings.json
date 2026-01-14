@@ -8,7 +8,7 @@
             "type": "command",
             "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/SessionStart.sh",
             "timeout": 5000,
-            "description": "Validate development environment at session start"
+            "description": "Validate VCV Rack development environment at session start"
           }
         ]
       }
@@ -21,7 +21,7 @@
             "type": "command",
             "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/PostToolUse.sh",
             "timeout": 2000,
-            "description": "Real-time code quality validation for JUCE best practices"
+            "description": "Real-time code quality validation for VCV Rack best practices"
           }
         ]
       }

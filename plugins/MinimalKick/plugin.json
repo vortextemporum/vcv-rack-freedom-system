@@ -1,0 +1,24 @@
+{
+  "slug": "MinimalKick",
+  "name": "MinimalKick",
+  "version": "2.0.0",
+  "license": "GPL-3.0-or-later",
+  "brand": "GLIX STUDIO (BETA)",
+  "author": "GLIX STUDIO",
+  "authorEmail": "",
+  "pluginUrl": "",
+  "sourceUrl": "",
+  "manualUrl": "",
+  "modules": [
+    {
+      "slug": "MinimalKick",
+      "name": "Minimal Kick",
+      "description": "Simple kick drum synthesizer with pitch envelope and saturation",
+      "tags": [
+        "Drum",
+        "Oscillator",
+        "Envelope Generator"
+      ]
+    }
+  ]
+}

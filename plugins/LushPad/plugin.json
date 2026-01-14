@@ -1,0 +1,27 @@
+{
+  "slug": "LushPad",
+  "name": "LushPad",
+  "version": "2.0.0",
+  "license": "proprietary",
+  "brand": "GLIX STUDIO (BETA)",
+  "author": "GLIX STUDIO",
+  "authorEmail": "",
+  "authorUrl": "",
+  "pluginUrl": "",
+  "manualUrl": "",
+  "sourceUrl": "",
+  "donateUrl": "",
+  "changelogUrl": "",
+  "modules": [
+    {
+      "slug": "LushPad",
+      "name": "Lush Pad",
+      "description": "8-voice polyphonic pad synthesizer with FM feedback, filter, and reverb",
+      "tags": [
+        "Synth Voice",
+        "Polyphonic",
+        "Reverb"
+      ]
+    }
+  ]
+}

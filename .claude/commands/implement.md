@@ -1,13 +1,13 @@
 ---
 name: implement
 description: Build plugin through implementation stages 1-4
-argument-hint: [PluginName?]
+argument-hint: [ModuleName?]
 allowed-tools: Bash(test:*)
 ---
 
 # /implement
 
-When user runs `/implement [PluginName?]`, invoke the plugin-workflow skill to build the plugin (stages 1-3).
+When user runs `/implement [ModuleName?]`, invoke the plugin-workflow skill to build the plugin (stages 1-3).
 
 <prerequisite>
   Planning (Stage 0) must be completed first via `/plan` command.
@@ -27,9 +27,9 @@ When user runs `/implement [PluginName?]`, invoke the plugin-workflow skill to b
 
     <blocked_state status="💡 Ideated" action="redirect">
       <error_message>
-        [PluginName] planning is not complete.
+        [ModuleName] planning is not complete.
 
-        Run /plan [PluginName] first to complete Stage 0 (Research & Planning):
+        Run /plan [ModuleName] first to complete Stage 0 (Research & Planning):
         - Creates architecture.md (DSP specification)
         - Creates plan.md (implementation strategy)
 
@@ -39,25 +39,25 @@ When user runs `/implement [PluginName?]`, invoke the plugin-workflow skill to b
 
     <blocked_state status="✅ Working" action="redirect">
       <error_message>
-        [PluginName] is already implemented and working.
+        [ModuleName] is already implemented and working.
 
-        Use /improve [PluginName] to make changes or add features.
+        Use /improve [ModuleName] to make changes or add features.
       </error_message>
     </blocked_state>
   </decision_gate>
 
   <decision_gate type="contract_verification" blocking="true">
     <required_contracts>
-      <contract path="plugins/${PLUGIN_NAME}/.ideas/architecture.md" created_by="Stage 0"/>
-      <contract path="plugins/${PLUGIN_NAME}/.ideas/plan.md" created_by="Stage 0"/>
-      <contract path="plugins/${PLUGIN_NAME}/.ideas/parameter-spec.md" created_by="ideation"/>
+      <contract path="plugins/${MODULE_NAME}/.ideas/architecture.md" created_by="Stage 0"/>
+      <contract path="plugins/${MODULE_NAME}/.ideas/plan.md" created_by="Stage 0"/>
+      <contract path="plugins/${MODULE_NAME}/.ideas/parameter-spec.md" created_by="ideation"/>
     </required_contracts>
 
     <validation_command>
       # See .claude/skills/plugin-workflow/references/precondition-checks.sh for reusable check functions
-      test -f "plugins/${PLUGIN_NAME}/.ideas/architecture.md" &amp;&amp; \
-      test -f "plugins/${PLUGIN_NAME}/.ideas/plan.md" &amp;&amp; \
-      test -f "plugins/${PLUGIN_NAME}/.ideas/parameter-spec.md"
+      test -f "plugins/${MODULE_NAME}/.ideas/architecture.md" &amp;&amp; \
+      test -f "plugins/${MODULE_NAME}/.ideas/plan.md" &amp;&amp; \
+      test -f "plugins/${MODULE_NAME}/.ideas/parameter-spec.md"
     </validation_command>
 
     <on_failure action="BLOCK">
@@ -74,12 +74,12 @@ When user runs `/implement [PluginName?]`, invoke the plugin-workflow skill to b
         [✓/✗] parameter-spec.md - [exists/MISSING]
 
         HOW TO UNBLOCK:
-        1. Run: /plan [PluginName]
+        1. Run: /plan [ModuleName]
            - Completes Stage 0 (Research) → architecture.md
            - Completes Stage 0 (Planning) → plan.md
 
         2. If parameter-spec.md missing:
-           - Run: /dream [PluginName]
+           - Run: /dream [ModuleName]
            - Create and finalize UI mockup
            - Finalization generates parameter-spec.md
 
@@ -91,13 +91,13 @@ When user runs `/implement [PluginName?]`, invoke the plugin-workflow skill to b
 
 ## Behavior
 
-**If no plugin name provided:**
+**If no module name provided:**
 1. Read PLUGINS.md and filter for plugins with status 🚧 Stage 0 or 🚧 Stage 1-4
 2. Present numbered menu of eligible plugins with current stage
 3. Wait for user selection
 
-**If plugin name provided:**
-1. Parse plugin name and flags from arguments
+**If module name provided:**
+1. Parse module name and flags from arguments
 2. Read preferences.json (if exists) and determine workflow mode
 3. Apply flag precedence (flag > preferences > default)
 4. Verify preconditions (status check, contract verification)
@@ -117,13 +117,13 @@ When user runs `/implement [PluginName?]`, invoke the plugin-workflow skill to b
 
 **Flag parsing:**
 ```bash
-# Parse plugin name and flags from arguments
+# Parse module name and flags from arguments
 # Input examples:
-#   "/implement PluginName"
-#   "/implement PluginName --express"
-#   "/implement PluginName --manual"
+#   "/implement ModuleName"
+#   "/implement ModuleName --express"
+#   "/implement ModuleName --manual"
 
-PLUGIN_NAME=""
+MODULE_NAME=""
 FLAG_MODE=""
 
 for arg in "$@"; do
@@ -138,7 +138,7 @@ for arg in "$@"; do
       # Skip command itself
       ;;
     *)
-      PLUGIN_NAME="$arg"
+      MODULE_NAME="$arg"
       ;;
   esac
 done
@@ -204,7 +204,7 @@ See `.claude/skills/plugin-workflow/SKILL.md` for checkpoint protocol details.
 CRITICAL: Always parse status from FULL ENTRY section (canonical source), not registry table.
 
 Implementation:
-1. Find full entry: grep -A 10 "^### ${PLUGIN_NAME}$" PLUGINS.md
+1. Find full entry: grep -A 10 "^### ${MODULE_NAME}$" PLUGINS.md
 2. Extract status line: grep "^\*\*Status:\*\*"
 3. Strip Markdown: sed 's/\*\*//g; s/__//g; s/_//g; s/Status://g'
 4. Parse stage: Extract "Stage N" or "Stage N.M" pattern
@@ -225,7 +225,7 @@ Why this approach:
 If implementing status checks in bash/scripts, use the `getPluginStatus()` and `validateRegistryConsistency()` functions from `.claude/skills/plugin-workflow/references/state-management.md` to ensure accurate parsing and detect drift.
 
 **Skill invocation:**
-Invoke the plugin-workflow skill with the plugin name and starting stage. The skill handles stages 1-4 implementation using the subagent dispatcher pattern.
+Invoke the plugin-workflow skill with the module name and starting stage. The skill handles stages 1-4 implementation using the subagent dispatcher pattern.
 
 ## The Implementation Stages
 
@@ -268,14 +268,14 @@ If user pauses:
 - PLUGINS.md status updated
 - Changes committed
 
-Resume with `/continue [PluginName]`
+Resume with `/continue [ModuleName]`
 
 ## Output
 
 <expected_output>
   By completion, plugin has:
-  - Compiling VST3 + AU plugins
-  - Working audio processing + functional WebView UI
+  - Compiling .vcvplugin plugins
+  - Working audio processing + functional SVG panel UI
   - Pluginval compliant with factory presets
   - Complete git history for all stages
 </expected_output>
@@ -283,7 +283,7 @@ Resume with `/continue [PluginName]`
 ## Workflow Integration
 
 Complete plugin development flow:
-1. `/dream [PluginName]` - Creative brief + UI mockup
-2. `/plan [PluginName]` - Research and planning (Stage 0)
-3. `/implement [PluginName]` - Build plugin (Stages 1-3)
-4. `/install-plugin [PluginName]` - Deploy to system folders
+1. `/dream [ModuleName]` - Creative brief + UI mockup
+2. `/plan [ModuleName]` - Research and planning (Stage 0)
+3. `/implement [ModuleName]` - Build plugin (Stages 1-3)
+4. `/install-plugin [ModuleName]` - Deploy to system folders

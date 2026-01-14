@@ -6,19 +6,19 @@
 
 ## What Makes a Pattern "Critical"?
 
-Critical patterns are mistakes the system keeps making across different plugins. They get injected into subagent prompts so the pattern is seen BEFORE code generation.
+Critical patterns are mistakes the system keeps making across different modules. They get injected into subagent prompts so the pattern is seen BEFORE code generation.
 
 **Signs a pattern is critical:**
-- You've fixed this same issue 2+ times on different plugins
+- You've fixed this same issue 2+ times on different modules
 - The solution is non-obvious (not a simple typo)
-- It's a JUCE 8 requirement that differs from JUCE 7
-- Foundational (affects CMake, build system, threading, APVTS)
+- It's a VCV Rack 2 requirement
+- Foundational (affects Makefile, build system, threading, DSP)
 - Must be followed every time (not optional)
 
 **Examples of critical patterns:**
-- ✅ `juce_generate_juce_header()` required in CMakeLists.txt
-- ✅ WebView needs `juce::juce_gui_extra` + `JUCE_WEB_BROWSER=1`
-- ✅ Effects need input+output bus, instruments need output-only
+- ✅ Correct `plugin.json` slug/version format
+- ✅ Module widget SVG panel path resolution
+- ✅ Proper sample rate handling in `process()` method
 - ❌ One-off bug in specific DSP code (not critical)
 - ❌ Typo in variable name (not critical)
 
@@ -45,8 +45,8 @@ Critical patterns are mistakes the system keeps making across different plugins.
    6. Other
    ```
 5. Choose **Option 2**
-6. Claude extracts the pattern and adds to `juce8-critical-patterns.md`
-7. Done - next plugin will see this pattern
+6. Claude extracts the pattern and adds to `vcv-rack-critical-patterns.md`
+7. Done - next module will see this pattern
 
 **Advantages:**
 - Problem is fully documented first
@@ -67,7 +67,7 @@ Critical patterns are mistakes the system keeps making across different plugins.
    - "add critical pattern"
    - Or explicitly: `/add-critical-pattern [name]`
 3. Claude extracts pattern from conversation
-4. Adds to `juce8-critical-patterns.md`
+4. Adds to `vcv-rack-critical-patterns.md`
 5. Done - no documentation file created
 
 **Advantages:**
@@ -107,16 +107,16 @@ Critical patterns are mistakes the system keeps making across different plugins.
 
 ## What Happens After Promotion?
 
-1. Pattern is added to `troubleshooting/patterns/juce8-critical-patterns.md`
+1. Pattern is added to `troubleshooting/patterns/vcv-rack-critical-patterns.md`
 2. Format: ❌ WRONG vs ✅ CORRECT with code examples
-3. Next time ANY subagent runs (foundation, shell, dsp, gui):
+3. Next time ANY subagent runs (foundation, dsp, widget):
    - Subagent prompt includes "CRITICAL: Required Reading"
-   - Claude reads `juce8-critical-patterns.md` BEFORE generating code
+   - Claude reads `vcv-rack-critical-patterns.md` BEFORE generating code
    - Sees your pattern, follows correct approach
    - Mistake is prevented
 
 **Impact:**
-- Prevents repeat mistakes across ALL future plugins
+- Prevents repeat mistakes across ALL future modules
 - No token cost bloat (single curated file vs all docs)
 - Self-improving system (gets smarter as you use it)
 
@@ -124,21 +124,21 @@ Critical patterns are mistakes the system keeps making across different plugins.
 
 ## Example Scenarios
 
-### Scenario 1: Third Time Seeing JuceHeader Error
+### Scenario 1: Third Time Seeing plugin.json Slug Error
 
 ```
-You: [Fix JuceHeader issue by adding juce_generate_juce_header()]
-You: "That's the third plugin with this error. Add to required reading."
+You: [Fix plugin.json slug by matching directory name]
+You: "That's the third module with this error. Add to required reading."
 
 Claude: [Extracts pattern]
 Claude: ✓ Added to Required Reading
 
-Pattern #1: CMake Header Generation
-Location: troubleshooting/patterns/juce8-critical-patterns.md
+Pattern #1: Plugin Slug Configuration
+Location: troubleshooting/patterns/vcv-rack-critical-patterns.md
 
 All subagents will see this pattern before code generation.
 
-Next plugin: foundation-agent reads pattern → includes juce_generate_juce_header() automatically
+Next module: foundation-agent reads pattern → configures plugin.json correctly
 ```
 
 ---
@@ -146,11 +146,11 @@ Next plugin: foundation-agent reads pattern → includes juce_generate_juce_head
 ### Scenario 2: Documented Problem, Unsure If Critical
 
 ```
-You: [Fix WebView parameter binding issue]
+You: [Fix SVG panel path resolution issue]
 You: "That worked"
 
 Claude: ✓ Solution documented
-        File: troubleshooting/api-usage/webview-parameter-binding-...md
+        File: troubleshooting/gui-issues/svg-panel-path-...md
 
         What's next?
         1. Continue workflow
@@ -161,7 +161,7 @@ You: [Choose 1 - Continue workflow]
 
 [Later, after seeing same issue again]
 
-You: "/add-critical-pattern WebView Event Format"
+You: "/add-critical-pattern SVG Panel Path"
 
 Claude: [Extracts from previous doc + current context]
 Claude: ✓ Added to Required Reading
@@ -172,7 +172,7 @@ Claude: ✓ Added to Required Reading
 ### Scenario 3: System Suggests, You Decline
 
 ```
-You: [Fix obscure AudioBuffer sizing issue]
+You: [Fix obscure buffer sizing issue in process() method]
 You: "/doc-fix"
 
 Claude: ✓ Solution documented
@@ -194,15 +194,15 @@ Claude: [Returns to workflow, pattern stays in docs but not Required Reading]
 ## When to Promote vs When to Keep as Doc
 
 ### Promote to Required Reading when:
-- ✅ Affects multiple plugins (not one-off)
+- ✅ Affects multiple modules (not one-off)
 - ✅ Non-obvious solution (not a simple typo)
-- ✅ Foundational (build system, JUCE API, threading)
+- ✅ Foundational (build system, Rack SDK API, threading)
 - ✅ Must be followed every time
 - ✅ You've seen it 2+ times
 
 ### Keep as documentation only when:
 - ❌ One-off bug in specific DSP implementation
-- ❌ Plugin-specific edge case
+- ❌ Module-specific edge case
 - ❌ Obvious mistake (typo, syntax error)
 - ❌ Solution is situation-dependent
 - ❌ First time seeing this issue
@@ -213,16 +213,16 @@ Claude: [Returns to workflow, pattern stays in docs but not Required Reading]
 
 ## Managing the Critical Patterns File
 
-**Location:** `troubleshooting/patterns/juce8-critical-patterns.md`
+**Location:** `troubleshooting/patterns/vcv-rack-critical-patterns.md`
 
 **When to review:**
 - Monthly: Are patterns still relevant?
-- After JUCE version upgrade: Do patterns need updates?
+- After Rack SDK version upgrade: Do patterns need updates?
 - When promoting new pattern: Does it overlap with existing?
 
 **When to remove patterns:**
-- JUCE API changed (pattern obsolete)
-- Issue was fixed upstream in JUCE
+- Rack SDK API changed (pattern obsolete)
+- Issue was fixed upstream in VCV Rack
 - Pattern merged with broader pattern
 
 **Editing manually:** You can directly edit the file. It's markdown. Just maintain the format:

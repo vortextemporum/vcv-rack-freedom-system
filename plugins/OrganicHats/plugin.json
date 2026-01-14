@@ -1,0 +1,27 @@
+{
+  "slug": "OrganicHats",
+  "name": "OrganicHats",
+  "version": "2.0.0",
+  "license": "proprietary",
+  "brand": "GLIX STUDIO (BETA)",
+  "author": "GLIX STUDIO",
+  "authorEmail": "",
+  "authorUrl": "",
+  "pluginUrl": "",
+  "manualUrl": "",
+  "sourceUrl": "",
+  "donateUrl": "",
+  "changelogUrl": "",
+  "modules": [
+    {
+      "slug": "OrganicHats",
+      "name": "Organic Hats",
+      "description": "Hi-hat synthesizer with closed and open hats, choke logic, and noise color control",
+      "tags": [
+        "Drum",
+        "Noise",
+        "Synth Voice"
+      ]
+    }
+  ]
+}

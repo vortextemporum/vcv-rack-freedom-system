@@ -1,0 +1,27 @@
+{
+  "slug": "AngelGrain",
+  "name": "AngelGrain",
+  "version": "2.0.0",
+  "license": "proprietary",
+  "brand": "GLIX STUDIO (BETA)",
+  "author": "GLIX STUDIO",
+  "authorEmail": "",
+  "authorUrl": "",
+  "pluginUrl": "",
+  "manualUrl": "",
+  "sourceUrl": "",
+  "donateUrl": "",
+  "changelogUrl": "",
+  "modules": [
+    {
+      "slug": "AngelGrain",
+      "name": "Angel Grain",
+      "description": "32-voice granular delay with chaos, character, and pitch quantization",
+      "tags": [
+        "Effect",
+        "Granular",
+        "Delay"
+      ]
+    }
+  ]
+}

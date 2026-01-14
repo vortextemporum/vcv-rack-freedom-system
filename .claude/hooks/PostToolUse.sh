@@ -1,5 +1,5 @@
 #!/bin/bash
-# PostToolUse hook - Real-time code quality validation for JUCE best practices
+# PostToolUse hook - Real-time code quality validation for VCV Rack best practices
 # Layer 1 validation: Fast pattern matching (<2s), blocks on real-time safety violations
 # Layer 2 validation: Silent failure detection (runs after file modifications)
 
@@ -14,7 +14,7 @@ fi
 FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null)
 
 # Layer 0: Contract immutability enforcement (CRITICAL)
-# Block modifications to contract files during Stages 1-4
+# Block modifications to contract files during Stages 1-3
 if [[ "$FILE_PATH" =~ plugins/([^/]+)/.ideas/(creative-brief|parameter-spec|architecture|plan)\.md$ ]]; then
   # Extract plugin name from regex match
   PLUGIN_NAME="${BASH_REMATCH[1]}"
@@ -25,23 +25,23 @@ if [[ "$FILE_PATH" =~ plugins/([^/]+)/.ideas/(creative-brief|parameter-spec|arch
     # Extract current stage
     STAGE=$(grep -E '^stage:' "$PLUGIN_PATH/.continue-here.md" | head -1 | sed 's/stage: *//')
 
-    # Block if in implementation stages (1-4)
-    if [[ "$STAGE" =~ ^[1-4]$ ]]; then
+    # Block if in implementation stages (1-3)
+    if [[ "$STAGE" =~ ^[1-3]$ ]]; then
       CONTRACT_FILE=$(basename "$FILE_PATH")
       echo "" >&2
       echo "❌ CONTRACT IMMUTABILITY VIOLATION" >&2
       echo "" >&2
       echo "Cannot modify $CONTRACT_FILE during Stage $STAGE (implementation)." >&2
       echo "" >&2
-      echo "Contracts are immutable during Stages 1-4 to prevent drift." >&2
+      echo "Contracts are immutable during Stages 1-3 to prevent drift." >&2
       echo "All implementation stages reference the same contract specifications." >&2
       echo "" >&2
       echo "If you need to modify contracts:" >&2
-      echo "  1. Return to Stage 0-1 (planning)" >&2
+      echo "  1. Return to Stage 0 (planning)" >&2
       echo "  2. Update contracts" >&2
       echo "  3. Restart implementation from Stage 1" >&2
       echo "" >&2
-      echo "Alternatively, use /improve after Stage 4 to make changes with versioning." >&2
+      echo "Alternatively, use /improve after Stage 3 to make changes with versioning." >&2
       exit 1
     fi
   fi
@@ -51,10 +51,10 @@ fi
 PLUGIN_SOURCE=false
 PLUGIN_FILE=false
 
-if [[ "$FILE_PATH" =~ plugins/.*/Source/.*\.(cpp|h)$ ]]; then
+if [[ "$FILE_PATH" =~ plugins/.*/src/.*\.(cpp|hpp)$ ]]; then
   PLUGIN_SOURCE=true
   PLUGIN_FILE=true
-elif [[ "$FILE_PATH" =~ plugins/.*/(CMakeLists\.txt|ui/.*\.(html|js))$ ]]; then
+elif [[ "$FILE_PATH" =~ plugins/.*/(Makefile|plugin\.json|res/.*\.svg)$ ]]; then
   PLUGIN_FILE=true
 fi
 
@@ -74,43 +74,35 @@ if [ -z "$FILE_CONTENT" ]; then
   exit 0
 fi
 
-# Layer 1: Real-time safety checks (processBlock only, for C++ source files)
+# Layer 1: Real-time safety checks (process() function only, for C++ source files)
 if [ "$PLUGIN_SOURCE" = true ]; then
-  # Extract processBlock function for real-time safety checks
-  PROCESS_BLOCK=$(echo "$FILE_CONTENT" | awk '/void.*processBlock.*AudioBuffer/{flag=1} flag{print} /^}$/{if(flag) exit}')
+  # Extract process() function for real-time safety checks
+  PROCESS_FUNC=$(echo "$FILE_CONTENT" | awk '/void.*process\(const ProcessArgs/{flag=1} flag{print} /^[[:space:]]*}[[:space:]]*$/{if(flag) exit}')
 
-  if [ -n "$PROCESS_BLOCK" ]; then
+  if [ -n "$PROCESS_FUNC" ]; then
 
-# Real-time safety violation checks
-ERRORS=""
+    # Real-time safety violation checks
+    ERRORS=""
 
-# Check for heap allocation
-if echo "$PROCESS_BLOCK" | grep -qE '\bnew\s+|delete\s+|malloc|free\b'; then
-  ERRORS="${ERRORS}\nERROR: Heap allocation detected in processBlock (new/delete/malloc/free)"
-fi
+    # Check for heap allocation
+    if echo "$PROCESS_FUNC" | grep -qE '\bnew\s+|delete\s+|malloc|free\b|std::vector.*push_back'; then
+      ERRORS="${ERRORS}\nERROR: Heap allocation detected in process() (new/delete/malloc/push_back)"
+    fi
 
-# Check for blocking locks
-if echo "$PROCESS_BLOCK" | grep -qE 'std::mutex|\.lock\(\)|\.try_lock\(\)|std::lock_guard|std::unique_lock'; then
-  ERRORS="${ERRORS}\nERROR: Blocking mutex/lock detected in processBlock"
-fi
+    # Check for blocking locks
+    if echo "$PROCESS_FUNC" | grep -qE 'std::mutex|\.lock\(\)|\.try_lock\(\)|std::lock_guard|std::unique_lock'; then
+      ERRORS="${ERRORS}\nERROR: Blocking mutex/lock detected in process()"
+    fi
 
-# Check for I/O operations
-if echo "$PROCESS_BLOCK" | grep -qE 'File::|URL::|FileOutputStream|FileInputStream'; then
-  ERRORS="${ERRORS}\nERROR: File I/O operations detected in processBlock"
-fi
+    # Check for I/O operations
+    if echo "$PROCESS_FUNC" | grep -qE 'fopen|fclose|fread|fwrite|std::ifstream|std::ofstream'; then
+      ERRORS="${ERRORS}\nERROR: File I/O operations detected in process()"
+    fi
 
-# Check for console output
-if echo "$PROCESS_BLOCK" | grep -qE 'std::cout|std::cerr|printf|fprintf'; then
-  ERRORS="${ERRORS}\nERROR: Console output detected in processBlock (std::cout/printf)"
-fi
-
-# Best practice warnings (advisory only)
-WARNINGS=""
-
-# Check for ScopedNoDenormals
-if ! echo "$PROCESS_BLOCK" | grep -q 'ScopedNoDenormals'; then
-  WARNINGS="${WARNINGS}\nWARNING: Missing ScopedNoDenormals in processBlock"
-fi
+    # Check for console output
+    if echo "$PROCESS_FUNC" | grep -qE 'std::cout|std::cerr|printf|fprintf'; then
+      ERRORS="${ERRORS}\nERROR: Console output detected in process() (std::cout/printf)"
+    fi
 
     # Report results
     if [ -n "$ERRORS" ]; then
@@ -118,35 +110,55 @@ fi
       echo -e "$ERRORS" >&2
       echo "" >&2
       echo "These violations can cause audio dropouts, glitches, or crashes." >&2
-      echo "processBlock must be real-time safe (no allocations, locks, or I/O)." >&2
+      echo "process() must be real-time safe (no allocations, locks, or I/O)." >&2
       exit 1  # Block workflow on ERROR
     fi
+  fi
 
-    if [ -n "$WARNINGS" ]; then
-      echo "Code quality recommendations for $FILE_PATH:" >&2
-      echo -e "$WARNINGS" >&2
-      # Don't block on warnings, just inform
-    fi
+  # VCV Rack specific checks
+  WARNINGS=""
+
+  # Check for missing enum terminators
+  if echo "$FILE_CONTENT" | grep -qE 'enum ParamId' && ! echo "$FILE_CONTENT" | grep -qE 'PARAMS_LEN'; then
+    WARNINGS="${WARNINGS}\nWARNING: Missing PARAMS_LEN enum terminator"
+  fi
+
+  if echo "$FILE_CONTENT" | grep -qE 'enum InputId' && ! echo "$FILE_CONTENT" | grep -qE 'INPUTS_LEN'; then
+    WARNINGS="${WARNINGS}\nWARNING: Missing INPUTS_LEN enum terminator"
+  fi
+
+  if echo "$FILE_CONTENT" | grep -qE 'enum OutputId' && ! echo "$FILE_CONTENT" | grep -qE 'OUTPUTS_LEN'; then
+    WARNINGS="${WARNINGS}\nWARNING: Missing OUTPUTS_LEN enum terminator"
+  fi
+
+  # Check for polyphonic output without setChannels
+  if echo "$FILE_CONTENT" | grep -qE 'getChannels\(\)' && ! echo "$FILE_CONTENT" | grep -qE 'setChannels'; then
+    WARNINGS="${WARNINGS}\nWARNING: Reading polyphonic channels but setChannels() not found (required for poly outputs)"
+  fi
+
+  if [ -n "$WARNINGS" ]; then
+    echo "Code quality recommendations for $FILE_PATH:" >&2
+    echo -e "$WARNINGS" >&2
+    # Don't block on warnings, just inform
   fi
 fi
 
-# Layer 2: Silent failure pattern detection (all plugin files)
-# Run comprehensive scan on Write/Edit to catch known silent failures
-echo "Running silent failure pattern detection..." >&2
-python3 .claude/hooks/validators/validate-silent-failures.py
-RESULT=$?
-
-if [ $RESULT -eq 1 ]; then
-  # Critical patterns detected - workflow blocked
-  echo "" >&2
-  echo "❌ PostToolUse validation FAILED: Silent failure patterns detected" >&2
-  echo "Fix these issues before proceeding (they compile but fail at runtime)" >&2
-  exit 1
-elif [ $RESULT -eq 2 ]; then
-  # Warnings detected - inform but don't block
-  echo "" >&2
-  echo "⚠️  PostToolUse validation: Warnings detected (see above)" >&2
-  echo "Consider addressing these issues for better code quality" >&2
+# Layer 2: SVG validation (for panel files)
+if [[ "$FILE_PATH" =~ \.svg$ ]]; then
+  # Check for text elements (not allowed in VCV Rack panels)
+  if echo "$FILE_CONTENT" | grep -qE '<text[^>]*>'; then
+    echo "" >&2
+    echo "❌ SVG VALIDATION FAILED" >&2
+    echo "" >&2
+    echo "Text elements detected in SVG panel: $FILE_PATH" >&2
+    echo "VCV Rack does not support text in SVG panels." >&2
+    echo "" >&2
+    echo "Resolution: Convert all text to paths in Inkscape:" >&2
+    echo "  1. Select text" >&2
+    echo "  2. Path → Object to Path" >&2
+    echo "  3. Save as Plain SVG" >&2
+    exit 1
+  fi
 fi
 
 exit 0
